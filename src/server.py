@@ -1,5 +1,5 @@
 import socket
-import my_json
+import src.my_json as my_json
 
 
 if __name__ == '__main__':

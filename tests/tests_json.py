@@ -1,6 +1,6 @@
 import unittest
 
-import my_json
+import src.my_json as my_json
 
 
 class MyTestCase(unittest.TestCase):
