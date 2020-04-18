@@ -5,7 +5,7 @@ import src.my_json as my_json
 
 class MyTestCase(unittest.TestCase):
     def test_json_to_dict(self):
-        json = '{"field1": "value1", "field2": 11}'
+        json = '{"field1": "value1", "field2": 11'
         expected_dict = {"field2": 11, "field1": "value1"}
 
         result = my_json.from_json(json)
