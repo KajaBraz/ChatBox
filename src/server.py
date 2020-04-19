@@ -1,6 +1,12 @@
 import socket
 import src.my_json as my_json
 
+
+def logged_in(user_name, clients):
+    if user_name not in all_clients:
+        clients.add(login)
+
+
 if __name__ == '__main__':
 
     all_clients = []
@@ -20,21 +26,15 @@ if __name__ == '__main__':
                 data_str = data.decode("utf-8")
                 data_json = my_json.to_json(data_str)
                 if my_json.is_proper_json(data_json):
-                    if data_json["message_type"]=="user"
+                    if data_json["message_type"] == "user":
                         login = data_json["message_value"]
-                        logged_in(login)
-                    if data_json["message_type"]=="get_all_logged":
+                        logged_in(login, all_clients)
+                    if data_json["message_type"] == "get_all_logged":
                         s.sendto(all_clients, login)
-                    if data_json["message_type"]=="message":
+                    if data_json["message_type"] == "message":
                         message = data_json["message_value"]
-                        s.sendto(message,data_json["message_receiver"])
+                        s.sendto(message, data_json["message_receiver"])
 
 
         finally:
             client_socket.close()
-
-def logged_in(login, all_clients):
-    if login not in all_clients:
-        all_clients.add(login)
-        # for c in clients:
-            #
