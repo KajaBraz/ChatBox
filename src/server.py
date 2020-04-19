@@ -1,6 +1,5 @@
 import socket
-import my_json
-
+import src.my_json as my_json
 
 if __name__ == '__main__':
 
@@ -10,7 +9,7 @@ if __name__ == '__main__':
     host = socket.gethostname()
     port = 9999
     s.bind((host, port))
-    s.listen(5) # queue up to 5 requests
+    s.listen(5)  # queue up to 5 requests
 
     while True:
         client_socket, client_address = s.accept()

@@ -12,6 +12,7 @@ def from_json(arg):
 def to_json(arg):
     return json.dumps(arg)
 
+
 def is_proper_json(arg):
     if "message_type" and "message_value" and "message_receiver" in arg:
         return True
