@@ -27,7 +27,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_is_proper_json(self):
         j1 = '{"message_type":"user", "message_value":"i am white", "message_receiver":"sheep"}'
-        j2 = '{"message_type":"message"}'
+        j2 = '{"type":""}'
         expected_res1 = True
         expected_res2 = False
         result1 = my_json.is_proper_json(j1)
