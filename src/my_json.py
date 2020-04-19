@@ -14,6 +14,6 @@ def to_json(arg):
 
 
 def is_proper_json(arg):
-    if "message_type" and "message_value" and "message_receiver" in arg:
+    if "message_type" in arg:
         return True
     return False
