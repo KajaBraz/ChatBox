@@ -1,47 +1,72 @@
 import socket
 # import src.my_json as my_json
+import threading
+
+from enums import JsonFields, MessageTypes
 import my_json
 
 
-def logged_in(user_name, clients):
-    if user_name not in clients:
-        clients.append(user_name)
-
-
-if __name__ == '__main__':
-
-    all_clients = []
-
+def run_server(host, port):
+    all_clients = {}
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = 'localhost'
-    port = 10000
     s.bind((host, port))
     s.listen(5)  # queue up to 5 requests
 
     while True:
         client_socket, client_address = s.accept()
-        client_socket2, client_address2 = s.accept()
+        t = threading.Thread(target=thread_function, args=[client_socket, client_address, all_clients])
+        t.start()
+
+
+def start_server(host, port, is_daemon=True):
+    t = threading.Thread(target=run_server, args=[host, port], daemon=is_daemon)
+    t.start()
+    return t
+
+
+def log_in(sock, address, user_name, clients):
+    # todo add lock/mutex to prevent thread race condition
+    if user_name not in clients:
+        clients[user_name] = (sock, address)
+        sock.sendall(my_json.to_json({JsonFields.MESSAGE_TYPE: MessageTypes.USER_NAME_RESPONSE,
+                                      JsonFields.MESSAGE_VALUE: MessageTypes.LOGIN_ACCEPTED}))
+        return False
+    else:
+        print(f'client ({address}) entered already existing login: {user_name}')
+        sock.sendall(my_json.to_json({JsonFields.MESSAGE_TYPE: MessageTypes.USER_NAME_RESPONSE,
+                                      JsonFields.MESSAGE_VALUE: MessageTypes.LOGIN_ALREADY_USED}))
+        return True
+
+
+def thread_function(sock, address, logged_users):
+    while True:
+        data = ''
         try:
-            while True:
-                data = client_socket.recv(1024)
-                data_str = data.decode("utf-8")
-                data_json = my_json.from_json(data_str)
-                print('data received', data_json)
-                if my_json.is_proper_json(data_json):
-                    if data_json["message_type"] == "user":
-                        login = data_json["message_value"]
-                        logged_in(login, all_clients)
-                        print(login)
-                    elif data_json["message_type"] == "get_all_logged":
-                        client_socket2.sendall(str(all_clients).encode())
-                        print('get all logged')
-                    elif data_json["message_type"] == "message":
-                        message = data_json["message_value"]
-                        client_socket2.sendall(message.encode())
-                        print(message)
+            data = sock.recv(1024)
+            message = my_json.from_json(data)
+            # todo change prints into log library
+            print('data received', message)
+            if message[JsonFields.MESSAGE_TYPE] == MessageTypes.USER_LOGIN:
+                login = message[JsonFields.MESSAGE_VALUE]
+                log_in(sock, address, login, logged_users)
+                print(login)
+            elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
+                logged_users_message = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS,
+                                        JsonFields.MESSAGE_VALUE: list(logged_users.keys())}
+                sock.sendall(my_json.to_json(logged_users_message))
+                print('get all logged')
+            elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
+                receiver_sock, receiver_addr = logged_users.get(message[JsonFields.MESSAGE_RECEIVER], (None, None))
+                if receiver_sock:
+                    receiver_sock.sendall(data)
                 else:
-                    print('else')
-                    break
-        finally:
-            print('closing server')
-            client_socket.close()
+                    print("socket not found")
+        except KeyError:
+            print("improper json", data)
+        # todo handle disconnecting user
+        # todo answer with an error json
+
+
+if __name__ == '__main__':
+    thread_server = start_server('localhost', 10000, False)
+    print(thread_server.isDaemon())

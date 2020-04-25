@@ -5,15 +5,18 @@ import src.my_json as my_json
 
 class MyTestCase(unittest.TestCase):
     def test_json_to_dict(self):
-        json = '{"field1": "value1", "field2": 11}'
+        # GIVEN
+        json = b'{"field1": "value1", "field2": 11}'
         expected_dict = {"field2": 11, "field1": "value1"}
 
+        # WHEN
         result = my_json.from_json(json)
 
+        # THEN
         self.assertEqual(expected_dict, result)
 
     def test_wrong_json_to_dict(self):
-        json = '{"fiels"'
+        json = b'{"fiels"'
         expected_dict = {}
         result = my_json.from_json(json)
         self.assertEqual(expected_dict, result)
@@ -21,6 +24,7 @@ class MyTestCase(unittest.TestCase):
     def test_dict_to_json(self):
         d = {"nested": {"a": "a", "b": 1}, "field": False}
         as_json = my_json.to_json(d)
+
         d_result = my_json.from_json(as_json)
 
         self.assertEqual(d, d_result)
