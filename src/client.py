@@ -1,4 +1,5 @@
 import socket
+import threading
 import time
 import my_json
 from enums import JsonFields, MessageTypes
@@ -19,6 +20,11 @@ class ChatBoxClient(object):
     def receive(self) -> str:
         d = self.wait_for_message()
         return d[JsonFields.MESSAGE_VALUE]
+
+    def receive_and_print(self):
+        while True:
+            received = self.receive()
+            print(received)
 
     def login(self, login_name):
         login_data = {JsonFields.MESSAGE_TYPE: MessageTypes.USER_LOGIN, JsonFields.MESSAGE_VALUE: login_name}
@@ -43,8 +49,25 @@ class ChatBoxClient(object):
     def close(self):
         self.sock.close()
 
+
 if __name__ == "__main__":
-    pass
+    client = ChatBoxClient()
+    my_address = 'localhost'
+    server_address = input('Welcome to ChatBox. What is your server address, sir? ')
+    port = 10000
+    client.connect(server_address, port)
+    login = input('What login would you like to use, sir? ')
+    client.login(login)
+    print('Nice to meet you', login)
+    print(client.get_users_list())
+    interlocutor_name = input('Here is the list of members who are present now. Who would you like to talk to? ')
+    print(f'Your conversation with {interlocutor_name} has been started.')
+    th = threading.Thread(target=client.receive_and_print, daemon=True)
+    th.start()
+    while True:
+        message = input()
+        client.send_message(message, interlocutor_name)
+
     # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # server_addresss = ('localhost', 10000)
     # s.connect(server_address)
