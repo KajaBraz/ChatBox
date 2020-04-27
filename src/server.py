@@ -30,26 +30,31 @@ def log_in(sock, address, user_name, clients):
         clients[user_name] = (sock, address)
         sock.sendall(my_json.to_json({JsonFields.MESSAGE_TYPE: MessageTypes.USER_NAME_RESPONSE,
                                       JsonFields.MESSAGE_VALUE: MessageTypes.LOGIN_ACCEPTED}))
-        return False
+        return True
     else:
         print(f'client ({address}) entered already existing login: {user_name}')
         sock.sendall(my_json.to_json({JsonFields.MESSAGE_TYPE: MessageTypes.USER_NAME_RESPONSE,
                                       JsonFields.MESSAGE_VALUE: MessageTypes.LOGIN_ALREADY_USED}))
-        return True
+        return False
 
 
 def thread_function(sock, address, logged_users):
+    present_user = ''
     while True:
         data = ''
         try:
             data = sock.recv(1024)
+            print('raw socket', data)
             message = my_json.from_json(data)
             # todo change prints into log library
             print('data received', message)
             if message[JsonFields.MESSAGE_TYPE] == MessageTypes.USER_LOGIN:
                 login = message[JsonFields.MESSAGE_VALUE]
-                log_in(sock, address, login, logged_users)
-                print(login)
+                log_in_done = log_in(sock, address, login, logged_users)
+                if log_in_done:
+                    present_user = message[JsonFields.MESSAGE_VALUE]
+                print('login', login)
+                print('present user', present_user)
             elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
                 logged_users_message = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS,
                                         JsonFields.MESSAGE_VALUE: list(logged_users.keys())}
@@ -63,6 +68,11 @@ def thread_function(sock, address, logged_users):
                     print("socket not found")
         except KeyError:
             print("improper json", data)
+        except ConnectionResetError:
+            print(present_user)
+            logged_users.pop(present_user, None)
+            print(f'exception ConnectionResetError, user {present_user} deleted')
+            break
         # todo handle disconnecting user
         # todo answer with an error json
 
