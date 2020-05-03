@@ -1,9 +1,8 @@
 import socket
-# import src.my_json as my_json
 import threading
 
-from enums import JsonFields, MessageTypes
 import my_json
+from enums import JsonFields, MessageTypes
 
 
 def run_server(host, port):

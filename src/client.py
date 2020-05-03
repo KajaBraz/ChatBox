@@ -1,6 +1,6 @@
 import socket
 import threading
-import time
+
 import my_json
 from enums import JsonFields, MessageTypes
 
@@ -27,24 +27,35 @@ class ChatBoxClient(object):
             print(received)
 
     def login(self, login_name):
+        # todo this method should be removed (is not asynchronous)
+        self.send_login(login_name)
+        self.receive()
+
+    def send_login(self, login_name):
         login_data = {JsonFields.MESSAGE_TYPE: MessageTypes.USER_LOGIN, JsonFields.MESSAGE_VALUE: login_name}
         login_data_json = my_json.to_json(login_data)
         self.sock.sendall(login_data_json)
-        self.receive()
 
-    def send_message(self, message: str, receiver: str):
+    def send_message(self, message: str, receiver: str, sender: str):
         data = {JsonFields.MESSAGE_TYPE: MessageTypes.MESSAGE, JsonFields.MESSAGE_VALUE: message,
-                JsonFields.MESSAGE_RECEIVER: receiver}
+                JsonFields.MESSAGE_RECEIVER: receiver,
+                JsonFields.MESSAGE_SENDER: sender}
         data_json = my_json.to_json(data)
         self.sock.sendall(data_json)
 
     def get_users_list(self) -> list:
-        request = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS}
-        request_json = my_json.to_json(request)
-        self.sock.sendall(request_json)
+        self.send_get_users_list()
+        # todo here is bug, if another users send us MESSAGE before we receive login response there will be crash
+        # todo asynchronous methods should be used, i.e. dont wait here for response! just send request
+        # todo (ALL KINDS of responses should be processed in 'receive method')
         users = self.wait_for_message()
         users_list = users[JsonFields.MESSAGE_VALUE]
         return users_list
+
+    def send_get_users_list(self):
+        request = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS}
+        request_json = my_json.to_json(request)
+        self.sock.sendall(request_json)
 
     def close(self):
         self.sock.close()
@@ -66,4 +77,4 @@ if __name__ == "__main__":
     th.start()
     while True:
         message = input()
-        client.send_message(message, interlocutor_name)
+        client.send_message(message, interlocutor_name, login)

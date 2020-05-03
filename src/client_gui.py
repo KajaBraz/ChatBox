@@ -1,58 +1,143 @@
+import threading
 import tkinter as tk
+
+import client
+from enums import JsonFields, MessageTypes
+
+
+class Message:
+    MAX_MESSAGES = 19
+
+    def __init__(self, master_element, text, author_me=True):
+        if author_me:
+            color = 'skyblue'
+            justice = tk.LEFT
+        else:
+            color = 'lightblue'
+            justice = tk.RIGHT
+
+        self.text = text
+        self.author_me = author_me
+        self.frame = tk.Frame(master=master_element, bg=color, bd=2)
+        self.pack()
+        self.label = tk.Label(master=self.frame, text=text, bg=color)
+        self.label.pack(side=justice)
+
+    def set_visible(self):
+        self.pack()
+
+    def set_invisible(self):
+        self.frame.pack_forget()
+
+    def pack(self):
+        self.frame.pack(fill=tk.X)
+
+    def destroy(self):
+        self.label.destroy()
+        self.frame.destroy()
 
 
 class Gui(tk.Frame):
     def __init__(self):
+        self.client_api = client.ChatBoxClient()
+        self.my_login = ""
+
+        # todo refactor init method, there is big mess
         self.window = tk.Tk()
+        self.window.geometry("500x500")
         super().__init__(self.window)
         self.v = 0
-        self.window.bind("<Return>", self.enter_action)
+        self.window.bind("<Return>", self.send_message)
         self.window.bind("<KeyPress-Escape>", self.exit_program)
-        self.label = tk.Label(text="my label", width=10, height=10, bg="red", fg="yellow")
-        self.label.pack()
-        self.button = tk.Button(text="button", bg="blue", fg="red", command=self.button_command)
-        self.button.pack()
 
-        # why width, height dont work in this situation?
-        # self.frm_users = tk.Frame(master=self.window, borderwidth=5, relief='ridge', width=1000, height=600)
         self.frm_users = tk.Frame(borderwidth=5, relief='ridge')
-        self.btn_refresh = tk.Button(text='refresh', master=self.frm_users)
-        print(str(self.btn_refresh.keys()))
-        print(str(self.frm_users.keys()))
+        self.btn_refresh = tk.Button(text='refresh', master=self.frm_users,
+                                     command=lambda: self.client_api.send_get_users_list())
         self.btn_refresh.pack()
-        self.users = self.create_users()
-        self.frm_users.pack()
-        f1 = tk.Frame(width=300, height=300, bg="#332211")
-        f1.pack(side=tk.LEFT)
-        f2 = tk.Frame(width=100, height=100, bg="#112233")
-        f2.pack()
-        f3 = tk.Frame(width=50, height=50, bg="#221133")
-        f3.pack()
+        self.btn_refresh.pack()
+        self.frm_users.pack(fill=tk.Y, side=tk.RIGHT)
+        self.frm_text = tk.Frame(borderwidth=5, relief='ridge')
+        self.frm_text.pack(fill=tk.BOTH, expand=True)
+        self.frm_send = tk.Frame(master=self.frm_text)
+        self.frm_send.pack(fill=tk.X, side=tk.BOTTOM)
+        self.frm_messages = tk.Frame(master=self.frm_text)
+        self.frm_messages.pack(fill=tk.X, side=tk.BOTTOM)
+        self.text_input = tk.Entry(master=self.frm_send, borderwidth=3)
+        self.text_input.focus()
+        self.text_input.pack(fill=tk.X, side=tk.LEFT, expand=True)
+        self.btn_send = tk.Button(master=self.frm_send, text="send", command=lambda: self.send_message(None))
+        self.btn_send.pack(side=tk.RIGHT)
+        self.messages = {}  # todo rethink message per user memoization
+        self.logged_users = {}
+        self.active_user = ""
 
-    def create_users(self):
-        users = ['user1', 'user2', 'tony_stark', 'iron man']
-        d = {}
-        for user in users:
-            b = tk.Button(text=user, master=self.frm_users, borderwidth=0)
-            d[user] = b
+    def refresh_logged(self, user_list):
+        for user_name, user_button in self.logged_users:
+            user_button.destroy()
+        self.logged_users = {}
+        for user in user_list:
+            b = tk.Button(text=user, master=self.frm_users, borderwidth=0,
+                          command=lambda u=user: self.change_active_user(u))
+            self.logged_users[user] = b
             b.pack()
-        return d
 
-    def button_command(self):
-        self.v = self.v + 1
-        self.label['text'] = self.v
+    def send_message(self, event):
+        text = self.text_input.get()
+        if text:
+            self.text_input.delete(0, tk.END)
+            msg_gui = Message(self.frm_messages, text, True)
+            self.client_api.send_message(text, self.active_user, self.my_login)
+            self.add_message(text, msg_gui)
 
-    def enter_action(self, event):
-        self.v = self.v + 2
-        self.label['text'] = self.v
+    def add_message(self, text, msg):
+        if text and self.active_user:
+            self.messages[self.active_user].append(msg)
+            if len(self.messages[self.active_user]) > Message.MAX_MESSAGES:
+                self.messages[self.active_user][0].destroy()
+                self.messages[self.active_user].pop(0)
+
+    def change_active_user(self, user):
+        # todo this should clear message list and show messages memoized for 'active user'
+        self.active_user = user
+        if user not in self.messages:
+            self.messages[user] = []
 
     def exit_program(self, event):
+        self.client_api.close()
         self.window.destroy()
 
-    def start(self):
+    def start(self, my_login, server_address, server_port):
+        self.client_api.connect(server_address, server_port)
+        self.client_api.send_login(my_login)
+        self.my_login = my_login
+
+        t = threading.Thread(target=self.thread_receive, daemon=True)
+        t.start()
+
         self.window.mainloop()
+
+    def receive(self, message, from_who):
+        # todo again the same, rethink memoization
+        if from_who not in self.messages:
+            self.messages[from_who] = []
+        self.add_message(message, Message(self.frm_messages, message, False))
+
+    def thread_receive(self):
+        while True:
+            try:
+                m = self.client_api.wait_for_message()
+                if m[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
+                    self.receive(m[JsonFields.MESSAGE_VALUE], m[JsonFields.MESSAGE_SENDER])
+                if m[JsonFields.MESSAGE_TYPE] == MessageTypes.USER_NAME_RESPONSE:
+                    print("login response: ", m)
+                if m[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
+                    users = m[JsonFields.MESSAGE_VALUE]
+                    self.refresh_logged(users)
+            except Exception as e:
+                print("Receive exception: ", e)
+                break
 
 
 if __name__ == '__main__':
     gui = Gui()
-    gui.start()
+    gui.start("iron_man", "localhost", 10000)
