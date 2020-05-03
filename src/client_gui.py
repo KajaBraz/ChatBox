@@ -125,6 +125,7 @@ class Gui(tk.Frame):
     def thread_receive(self):
         while True:
             try:
+                # todo somewhere here is bug, there is exception if we click 'refresh' button twice
                 m = self.client_api.wait_for_message()
                 if m[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
                     self.receive(m[JsonFields.MESSAGE_VALUE], m[JsonFields.MESSAGE_SENDER])
@@ -140,4 +141,5 @@ class Gui(tk.Frame):
 
 if __name__ == '__main__':
     gui = Gui()
-    gui.start("iron_man", "localhost", 10000)
+    # gui.start("iron_man", "localhost", 10000)
+    gui.start("iron_man", "192.168.1.10", 10000)
