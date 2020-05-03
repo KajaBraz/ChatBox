@@ -46,8 +46,8 @@ class ChatBoxClient(object):
     def get_users_list(self) -> list:
         self.send_get_users_list()
         # todo here is bug, if another users send us MESSAGE before we receive login response there will be crash
-        # todo asynchronous methods should be used, i.e. dont wait here for response! just send request
-        # todo (ALL KINDS of responses should be processed in 'receive method')
+        #  asynchronous methods should be used, i.e. dont wait here for response! just send request (ALL KINDS of
+        #  responses should be processed in 'receive method')
         users = self.wait_for_message()
         users_list = users[JsonFields.MESSAGE_VALUE]
         return users_list
