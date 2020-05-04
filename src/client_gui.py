@@ -72,7 +72,7 @@ class Gui(tk.Frame):
         self.active_user = ""
 
     def refresh_logged(self, user_list):
-        for user_name, user_button in self.logged_users:
+        for user_name, user_button in self.logged_users.items():
             user_button.destroy()
         self.logged_users = {}
         for user in user_list:
@@ -124,22 +124,17 @@ class Gui(tk.Frame):
 
     def thread_receive(self):
         while True:
-            try:
-                # todo somewhere here is bug, there is exception if we click 'refresh' button twice
-                m = self.client_api.wait_for_message()
-                if m[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
-                    self.receive(m[JsonFields.MESSAGE_VALUE], m[JsonFields.MESSAGE_SENDER])
-                if m[JsonFields.MESSAGE_TYPE] == MessageTypes.USER_NAME_RESPONSE:
-                    print("login response: ", m)
-                if m[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
-                    users = m[JsonFields.MESSAGE_VALUE]
-                    self.refresh_logged(users)
-            except Exception as e:
-                print("Receive exception: ", e)
-                break
+            m = self.client_api.wait_for_message()
+            if m[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
+                self.receive(m[JsonFields.MESSAGE_VALUE], m[JsonFields.MESSAGE_SENDER])
+            if m[JsonFields.MESSAGE_TYPE] == MessageTypes.USER_NAME_RESPONSE:
+                print("login response: ", m)
+            if m[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
+                users = m[JsonFields.MESSAGE_VALUE]
+                self.refresh_logged(users)
 
 
 if __name__ == '__main__':
     gui = Gui()
-    # gui.start("iron_man", "localhost", 10000)
-    gui.start("iron_man", "192.168.1.10", 10000)
+    gui.start("iron_man", "localhost", 10000)
+    # gui.start("iron_man", "192.168.1.10", 10000)
