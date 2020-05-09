@@ -9,13 +9,16 @@ class ChatBoxClient(object):
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def connect(self, server_address='localhost', server_port=10000):
-        self.sock.connect((server_address, server_port))
+    def connect(self, server_addr='localhost', server_port=10000):
+        self.sock.connect((server_addr, server_port))
 
     def wait_for_message(self) -> dict:
         bytes_message = self.sock.recv(1024)
         dict_message = my_json.from_json(bytes_message)
         return dict_message
+
+    # todo fix the error which occures when closing the client window using Esc button instead of clicking 'x' in the
+    #  right corner, an error occures
 
     def receive(self) -> str:
         d = self.wait_for_message()
@@ -36,8 +39,8 @@ class ChatBoxClient(object):
         login_data_json = my_json.to_json(login_data)
         self.sock.sendall(login_data_json)
 
-    def send_message(self, message: str, receiver: str, sender: str):
-        data = {JsonFields.MESSAGE_TYPE: MessageTypes.MESSAGE, JsonFields.MESSAGE_VALUE: message,
+    def send_message(self, mess: str, receiver: str, sender: str):
+        data = {JsonFields.MESSAGE_TYPE: MessageTypes.MESSAGE, JsonFields.MESSAGE_VALUE: mess,
                 JsonFields.MESSAGE_RECEIVER: receiver,
                 JsonFields.MESSAGE_SENDER: sender}
         data_json = my_json.to_json(data)

@@ -6,7 +6,7 @@ from enums import JsonFields, MessageTypes
 
 
 class Message:
-    MAX_MESSAGES = 19
+    MAX_MESSAGES = 15
 
     def __init__(self, master_element, text, author_me=True):
         if author_me:
@@ -53,7 +53,6 @@ class Gui(tk.Frame):
         self.frm_users = tk.Frame(borderwidth=5, relief='ridge')
         self.btn_refresh = tk.Button(text='refresh', master=self.frm_users,
                                      command=lambda: self.client_api.send_get_users_list())
-        self.btn_refresh.pack()
         self.btn_refresh.pack()
         self.frm_users.pack(fill=tk.Y, side=tk.RIGHT)
         self.frm_text = tk.Frame(borderwidth=5, relief='ridge')
@@ -114,7 +113,9 @@ class Gui(tk.Frame):
         t = threading.Thread(target=self.thread_receive, daemon=True)
         t.start()
 
+        self.client_api.send_get_users_list()
         self.window.mainloop()
+
 
     def receive(self, message, from_who):
         # todo again the same, rethink memoization
