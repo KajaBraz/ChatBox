@@ -21,10 +21,10 @@ class MyTestCase(unittest.TestCase):
         users = client2.get_users_list()
         self.assertEqual([name1], users, 'wrong users list')
         client2.login(name2)
-        client1.send_message(message1, name2)
+        client1.send_message(message1, name2, name1)
         read_message1 = client2.receive()
         self.assertEqual(message1, read_message1, 'wrong message received')
-        client2.send_message('baubaubau', name1)
+        client2.send_message('baubaubau', name1, name2)
         client1.close()
         client2.close()
 
