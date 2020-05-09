@@ -1,7 +1,7 @@
 import unittest
 
 import src.my_json as my_json
-from enums import MessageTypes, JsonFields
+from src.enums import MessageTypes, JsonFields
 
 
 class MyTestCase(unittest.TestCase):

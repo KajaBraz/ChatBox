@@ -1,6 +1,6 @@
 import json
 
-from enums import JsonFields, MessageTypes
+from src.enums import JsonFields
 
 
 def from_json(arg: bytes) -> dict:
