@@ -1,8 +1,7 @@
-import time
 import unittest
 
-import client
-import server
+import src.client as client
+import src.server as server
 
 
 class MyTestCase(unittest.TestCase):
