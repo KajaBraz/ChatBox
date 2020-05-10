@@ -1,8 +1,8 @@
 import threading
 import tkinter as tk
 
-import client
-from enums import JsonFields, MessageTypes
+import src.client as client
+from src.enums import JsonFields, MessageTypes
 
 
 class Message:
