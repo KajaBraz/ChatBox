@@ -139,7 +139,7 @@ class Gui(tk.Frame):
 if __name__ == '__main__':
     gui = Gui()
     if len(argv) > 1:
-        gui.start(arg[3], argv[1], int(argv[2]))
+        gui.start(argv[3], argv[1], int(argv[2]))
     else:
         gui.start("iron_man", "localhost", 10000)
     # gui.start("iron_man", "192.168.1.10", 10000)
