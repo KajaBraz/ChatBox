@@ -1,3 +1,4 @@
+from sys import argv
 import socket
 import threading
 
@@ -77,5 +78,8 @@ def thread_function(sock, address, logged_users):
 
 
 if __name__ == '__main__':
-    thread_server = start_server('localhost', 10000, False)
-    print(thread_server.isDaemon())
+    if len(argv) > 1:
+        thread_server = start_server(argv[1], int(argv[2]), False)
+    else:
+        thread_server = start_server('localhost', 10000, False)
+        print(thread_server.isDaemon())

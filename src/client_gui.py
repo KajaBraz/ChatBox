@@ -1,3 +1,4 @@
+from sys import argv
 import threading
 import tkinter as tk
 
@@ -137,5 +138,8 @@ class Gui(tk.Frame):
 
 if __name__ == '__main__':
     gui = Gui()
-    gui.start("iron_man", "localhost", 10000)
+    if len(argv) > 1:
+        gui.start("iron_man", argv[1], int(argv[2]))
+    else:
+        gui.start("iron_man", "localhost", 10000)
     # gui.start("iron_man", "192.168.1.10", 10000)
