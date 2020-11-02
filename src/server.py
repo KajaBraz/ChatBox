@@ -45,6 +45,9 @@ def thread_function(sock, address, logged_users):
         try:
             data = sock.recv(1024)
             print('raw socket', data)
+            if not data:
+                print("Empty data, connection is probably lost, break")
+                break
             message = my_json.from_json(data)
             # todo change prints into log library
             print('data received', message)
