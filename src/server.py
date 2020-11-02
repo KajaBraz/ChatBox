@@ -47,6 +47,7 @@ def thread_function(sock, address, logged_users):
             print('raw socket', data)
             if not data:
                 print("Empty data, connection is probably lost, break")
+                logged_users.pop(present_user, None)
                 break
             message = my_json.from_json(data)
             # todo change prints into log library
