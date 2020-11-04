@@ -1,6 +1,7 @@
 from sys import argv
 import socket
 import threading
+import logging
 
 import src.my_json as my_json
 from src.enums import JsonFields, MessageTypes
@@ -32,7 +33,7 @@ def log_in(sock, address, user_name, clients):
                                       JsonFields.MESSAGE_VALUE: MessageTypes.LOGIN_ACCEPTED}))
         return True
     else:
-        print(f'client ({address}) entered already existing login: {user_name}')
+        logging.info(f'client ({address}) entered already existing login: {user_name}')
         sock.sendall(my_json.to_json({JsonFields.MESSAGE_TYPE: MessageTypes.USER_NAME_RESPONSE,
                                       JsonFields.MESSAGE_VALUE: MessageTypes.LOGIN_ALREADY_USED}))
         return False
@@ -44,46 +45,46 @@ def thread_function(sock, address, logged_users):
         data = ''
         try:
             data = sock.recv(1024)
-            print('raw socket', data)
+            logging.info('raw socket', data)
             if not data:
-                print("Empty data, connection is probably lost, break")
+                logging.warning('Empty data, connection is probably lost, break')
                 logged_users.pop(present_user, None)
                 break
             message = my_json.from_json(data)
-            # todo change prints into log library
-            print('data received', message)
+            logging.info('data received', message)
             if message[JsonFields.MESSAGE_TYPE] == MessageTypes.USER_LOGIN:
                 login = message[JsonFields.MESSAGE_VALUE]
                 log_in_done = log_in(sock, address, login, logged_users)
                 if log_in_done:
                     present_user = message[JsonFields.MESSAGE_VALUE]
-                print('login', login)
-                print('present user', present_user)
+                logging.info('login', login)
+                logging.info('present user', present_user)
             elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
                 logged_users_message = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS,
                                         JsonFields.MESSAGE_VALUE: list(logged_users.keys())}
                 sock.sendall(my_json.to_json(logged_users_message))
-                print('get all logged')
+                logging.info('get all logged')
             elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
                 receiver_sock, receiver_addr = logged_users.get(message[JsonFields.MESSAGE_RECEIVER], (None, None))
                 if receiver_sock:
                     receiver_sock.sendall(data)
                 else:
-                    print("socket not found")
+                    logging.warning('socket not found')
         except KeyError:
-            print("improper json", data)
+            logging.error('KeyError; improper json', data)
         except ConnectionResetError:
-            print(present_user)
             logged_users.pop(present_user, None)
-            print(f'exception ConnectionResetError, user {present_user} deleted')
+            logging.error(f'exception ConnectionResetError, user {present_user} deleted')
             break
         # todo handle disconnecting user
         # todo answer with an error json
 
 
 if __name__ == '__main__':
+    logging.basicConfig(filename='logs', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%H:%M:%S', level=logging.DEBUG)
     if len(argv) > 1:
         thread_server = start_server(argv[1], int(argv[2]), False)
     else:
         thread_server = start_server('localhost', 10000, False)
-        print(thread_server.isDaemon())
+    logging.info(thread_server.isDaemon())
