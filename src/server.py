@@ -81,7 +81,7 @@ def thread_function(sock, address, logged_users):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename='logs', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s',
+    logging.basicConfig(filename='logs.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%H:%M:%S', level=logging.DEBUG)
     if len(argv) > 1:
         thread_server = start_server(argv[1], int(argv[2]), False)
