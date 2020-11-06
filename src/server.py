@@ -45,20 +45,21 @@ def thread_function(sock, address, logged_users):
         data = ''
         try:
             data = sock.recv(1024)
-            logging.info('raw socket', data)
+            logging.info(f'raw socket: {data}')
             if not data:
                 logging.warning('Empty data, connection is probably lost, break')
                 logged_users.pop(present_user, None)
                 break
             message = my_json.from_json(data)
-            logging.info('data received', message)
+            logging.info(f'data received: {message}')
             if message[JsonFields.MESSAGE_TYPE] == MessageTypes.USER_LOGIN:
                 login = message[JsonFields.MESSAGE_VALUE]
                 log_in_done = log_in(sock, address, login, logged_users)
                 if log_in_done:
                     present_user = message[JsonFields.MESSAGE_VALUE]
-                logging.info('login', login)
-                logging.info('present user', present_user)
+                logging.info(f'login: {login}')
+                logging.info(f'present user: {present_user}')
+
             elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
                 logged_users_message = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS,
                                         JsonFields.MESSAGE_VALUE: list(logged_users.keys())}
@@ -71,7 +72,7 @@ def thread_function(sock, address, logged_users):
                 else:
                     logging.warning('socket not found')
         except KeyError:
-            logging.error('KeyError; improper json', data)
+            logging.error(f'KeyError; improper json: {data}')
         except ConnectionResetError:
             logged_users.pop(present_user, None)
             logging.error(f'exception ConnectionResetError, user {present_user} deleted')
@@ -81,8 +82,8 @@ def thread_function(sock, address, logged_users):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename='logs.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%H:%M:%S', level=logging.DEBUG)
+    f = '%(asctime)s - %(levelname)s - %(thread)d - %(threadName)s - %(filename)s - %(lineno)d. - %(message)s'
+    logging.basicConfig(filename='logs.log', filemode='a', format=f, level=logging.DEBUG)
     if len(argv) > 1:
         thread_server = start_server(argv[1], int(argv[2]), False)
     else:
