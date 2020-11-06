@@ -2,6 +2,7 @@ import unittest
 
 import src.client as client
 import src.server as server
+import time
 
 
 class MyTestCase(unittest.TestCase):
@@ -14,6 +15,8 @@ class MyTestCase(unittest.TestCase):
         message1 = 'baubau'
 
         server.start_server(server_name, port)
+        # sleep a while to make sure server is running
+        time.sleep(0.2)
         client1.connect(server_name, port)
         client2.connect(server_name, port)
         client1.login(name1)
