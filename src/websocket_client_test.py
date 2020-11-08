@@ -5,6 +5,7 @@ import websockets
 async def ws_client():
     uri = "ws://localhost:8877/"
     async with websockets.connect(uri) as ws:
+        await asyncio.sleep(10)
         await ws.send("test1")
         print("sent")
         r = await ws.recv()
