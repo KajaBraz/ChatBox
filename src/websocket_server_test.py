@@ -18,6 +18,7 @@ async def print_and_wait(t):
 
 async def main():
     print(0)
+    asyncio.get_event_loop().create_task(print_and_wait(4))
     await asyncio.gather(print_and_wait(3), print_and_wait(2), print_and_wait(1))
     print(1)
     server = await websockets.serve(websocket_server, "localhost", 8877)
