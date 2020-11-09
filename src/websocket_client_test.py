@@ -4,7 +4,7 @@ import websockets
 
 async def ws_client1():
     print("client 1")
-    uri = "ws://localhost:8877/"
+    uri = "ws://localhost:8877/path1/path2"
     async with websockets.connect(uri) as ws:
         await asyncio.sleep(10)
         await ws.send("test1")
@@ -14,7 +14,7 @@ async def ws_client1():
 
 async def ws_client2():
     print("client 2")
-    uri = "ws://localhost:8877/"
+    uri = "ws://localhost:8877/path1/path2"
     wsc = await websockets.connect(uri)
     await asyncio.sleep(10)
     await wsc.send("test1")
