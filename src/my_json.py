@@ -5,7 +5,7 @@ from src.enums import JsonFields
 
 def from_json(arg: bytes) -> dict:
     try:
-        decoded = arg.decode("utf-8")
+        decoded = arg.decode("utf-8") if type(arg)==bytes else arg
         return json.loads(decoded)
     except json.decoder.JSONDecodeError:
         return {}

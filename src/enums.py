@@ -1,6 +1,6 @@
 class JsonFields(object):
     MESSAGE_TYPE = "message_type"
-    MESSAGE_VALUE = "mesage_value"
+    MESSAGE_VALUE = "message_value"
     MESSAGE_RECEIVER = "message_receiver"
     MESSAGE_SENDER = "message_sender"
 
