@@ -37,5 +37,6 @@ def drop_my_database(db_name):
 
 
 if __name__ == '__main__':
-# create_my_database('chatbox_test_1')
-# drop_my_database('chatbox_test_4')
+    pass
+    # create_my_database('chatbox_test_1')
+    # drop_my_database('chatbox_test_4')
