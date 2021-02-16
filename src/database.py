@@ -11,32 +11,35 @@ def my_database(name, action):
             query = text(f'{action} DATABASE {name}')
             connection.execute(query)
 
-            metadata = MetaData(bind=connection)
+    with create_engine(f'postgresql://postgres:000@localhost/{name}',
+                       isolation_level='AUTOCOMMIT').connect() as connection:
+        metadata = MetaData(bind=connection)
 
-            # connection.execute(text("""
-            # CREATE TABLE users(
-            # id INTEGER PRIMARY KEY,
-            # login TEXT,
-            # encoded_password TEXT,
-            # salt TEXT
-            # )"""))
+        # RAW SQL QUERIES
+        # connection.execute(text("""
+        # CREATE TABLE users(
+        # id INTEGER PRIMARY KEY,
+        # login TEXT,
+        # encoded_password TEXT,
+        # salt TEXT
+        # )"""))
 
-            users_table = Table('users', metadata,
-                                Column('id', Integer, primary_key=True),
-                                Column('login', String(40)),
-                                Column('encoded_password', String),
-                                Column('salt', String(3)),
-                                Column('registration_date', DateTime),
-                                )
+        users_table = Table('users', metadata,
+                            Column('id', Integer, primary_key=True),
+                            Column('login', String(40)),
+                            Column('encoded_password', String),
+                            Column('salt', String(3)),
+                            Column('registration_date', DateTime),
+                            )
 
-            messages_table = Table('messages', metadata,
-                                   Column('id', Integer, primary_key=True),
-                                   Column('sender_id', None, ForeignKey('users.id')),
-                                   Column('recipient', String),
-                                   Column('message', String),
-                                   # Column('date_time', DateTime),
-                                   )
-            metadata.create_all()
+        messages_table = Table('messages', metadata,
+                               Column('id', Integer, primary_key=True),
+                               Column('sender_id', None, ForeignKey('users.id')),
+                               Column('recipient', String),
+                               Column('message', String),
+                               # Column('date_time', DateTime),
+                               )
+        metadata.create_all()
 
         if action == 'INSERT':
 
@@ -44,10 +47,14 @@ def my_database(name, action):
             print(query.fetchall())
             print()
             data_users = (
-            {'login': 'user1', 'encoded_password': '111', 'salt': 'aaa', 'registration_date': datetime(2020, 4, 15)},
-            {'login': 'user2', 'encoded_password': '222', 'salt': 'bbb', 'registration_date': datetime(2020, 4, 15)},
-            {'login': 'user3', 'encoded_password': '333', 'salt': 'ccc', 'registration_date': datetime(2020, 4, 15)},
-            {'login': 'user4', 'encoded_password': '444', 'salt': 'ddd', 'registration_date': datetime(2020, 4, 15)},
+                {'login': 'user1', 'encoded_password': '111', 'salt': 'aaa',
+                 'registration_date': datetime(2020, 4, 15)},
+                {'login': 'user2', 'encoded_password': '222', 'salt': 'bbb',
+                 'registration_date': datetime(2020, 4, 15)},
+                {'login': 'user3', 'encoded_password': '333', 'salt': 'ccc',
+                 'registration_date': datetime(2020, 4, 15)},
+                {'login': 'user4', 'encoded_password': '444', 'salt': 'ddd',
+                 'registration_date': datetime(2020, 4, 15)},
             )
             data_messages = ({'sender_id': 1, 'recipient': 'user2', 'message': 'hello user1 here'},
                              {'sender_id': 4, 'recipient': 'user3', 'message': 'hello user4 here'})
@@ -55,11 +62,11 @@ def my_database(name, action):
             for line in data_users:
                 connection.execute(text(
                     f'{action} INTO users(login, encoded_password, salt, registration_date) VALUES(:login, :encoded_password, :salt, :registration_date)'),
-                                   **line)
+                    **line)
             for line in data_messages:
                 connection.execute(text(
                     f'{action} INTO messages(sender_id, recipient, message) VALUES(:sender_id, :recipient, :message)'),
-                                   **line)
+                    **line)
 
 
 def create_my_database(db_name):
@@ -76,6 +83,6 @@ def fill_with_examples(db_name):
 
 if __name__ == '__main__':
     pass
-    # create_my_database('chatbox_test_1')
+    # create_my_database('chatbox_test_5')
     # drop_my_database('chatbox_test_1')
-    # fill_with_examples('chatbox_test_1')
+    # fill_with_examples('chatbox_test_5')
