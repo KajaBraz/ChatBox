@@ -2,15 +2,16 @@ from sqlalchemy import *
 from datetime import datetime
 
 
-def my_database(name, action):
+def my_database(name, action, login, password):
     """action - parameter that may be one of the following two strings: 'CREATE', 'DROP', or 'INSERT'"""
 
-    with create_engine('postgresql://postgres:000@localhost', isolation_level='AUTOCOMMIT').connect() as connection:
+    with create_engine(f'postgresql://{login}:{password}@localhost',
+                       isolation_level='AUTOCOMMIT').connect() as connection:
         if action in ['CREATE', 'DROP']:
             query = text(f'{action} DATABASE {name}')
             connection.execute(query)
 
-    with create_engine(f'postgresql://postgres:000@localhost/{name}',
+    with create_engine(f'postgresql://{login}:{password}@localhost/{name}',
                        isolation_level='AUTOCOMMIT').connect() as connection:
         metadata = MetaData(bind=connection)
 
@@ -67,20 +68,22 @@ def my_database(name, action):
                     **line)
 
 
-def create_my_database(db_name):
-    my_database(db_name, 'CREATE')
+def create_my_database(db_name, login, password):
+    my_database(db_name, 'CREATE', login, password)
 
 
-def drop_my_database(db_name):
-    my_database(db_name, 'DROP')
+def drop_my_database(db_name, login, password):
+    my_database(db_name, 'DROP', login, password)
 
 
-def fill_with_examples(db_name):
-    my_database(db_name, 'INSERT')
+def fill_with_examples(db_name, login, password):
+    my_database(db_name, 'INSERT', login, password)
 
 
 if __name__ == '__main__':
-    # drop_my_database('chatbox_test_8')
-    # create_my_database('chatbox_test_12')
-    # fill_with_examples('chatbox_test_12')
+    login = "postgres"
+    password = "000"
+    # drop_my_database('chatbox_test_12', login, password)
+    # create_my_database('chatbox_test_12', login, password)
+    # fill_with_examples('chatbox_test_12', login, password)
     pass
