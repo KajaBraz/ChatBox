@@ -7,6 +7,8 @@ import websockets
 import src.my_json as my_json
 from src.enums import JsonFields, MessageTypes
 
+logged_users = {}
+chat_participants = {} # 'example_chat_name':[logged_users['user1'],logged_users['user2'],logged_users['userN']]
 
 async def log_in(websocket, user_name, clients):
     # todo add lock/mutex to prevent thread race condition
@@ -22,28 +24,43 @@ async def log_in(websocket, user_name, clients):
         return False
 
 
+async def join_chat(user_name, chat_name):
+    print('joining')
+    global logged_users
+    global chat_participants
+    user_websocket = logged_users[user_name]
+    print('user_werbsocket')
+    print(chat_participants)
+    if chat_name in chat_participants:
+        chat_participants[chat_name].append(user_websocket)
+    else:
+        chat_participants[chat_name] = [user_websocket]
+    print(chat_participants)
+
 async def receive(websocket, path):
     print("start")
     global logged_users
+    global chat_participants
     print("czekam")
     data = await websocket.recv()
     print("data ", data)
     try:
         print("try")
         logging.info(f'raw socket: {data}')
-        # if not data:
-        #     logging.warning('Empty data, connection is probably lost, break')
-        #     logged_users.pop(present_user, None)
-        #     break
         print("message")
         message = my_json.from_json(data)
         logging.info(f'data received: {message}')
         print("if")
+
         if message[JsonFields.MESSAGE_TYPE] == MessageTypes.USER_LOGIN:
             print("przed loguje")
+            print(JsonFields.MESSAGE_VALUE)
             login = message[JsonFields.MESSAGE_VALUE]
+            print(login)
+            print(path[1:])
+            await log_in(websocket, login, logged_users)
             print("loguje")
-            log_in_done = await log_in(websocket, login, logged_users)
+            await join_chat(login,path[1:])
             print("po logowaniu")
             logging.info(f'login: {login}')
 
@@ -53,13 +70,12 @@ async def receive(websocket, path):
             # sock.sendall(my_json.to_json(logged_users_message))
             await websocket.send(my_json.to_json(logged_users_message))
             logging.info('get all logged')
+
         elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
-            receiver_sock = logged_users.get(message[JsonFields.MESSAGE_RECEIVER], None)
-            if receiver_sock:
-                await receiver_sock.send(data)
-            else:
-                logging.warning('socket not found')
-        print("tu?")
+            destination_chat_participants = chat_participants.get(message[JsonFields.MESSAGE_DESTINATION],[])
+            for participant_sock in destination_chat_participants:
+                await participant_sock.send(data)
+
         await receive(websocket, path)
     except KeyError:
         print("error 1")
@@ -69,9 +85,6 @@ async def receive(websocket, path):
         logging.error(f"Unexpected error: {e}")
     # todo handle disconnecting user
     # todo answer with an error json
-
-
-logged_users = {}
 
 
 async def main(address, port):

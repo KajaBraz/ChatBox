@@ -1,8 +1,9 @@
 class JsonFields(object):
     MESSAGE_TYPE = "message_type"
     MESSAGE_VALUE = "message_value"
-    MESSAGE_RECEIVER = "message_receiver"
+    MESSAGE_RECEIVER = "message_receiver" # to drop; changed to receiver chat name
     MESSAGE_SENDER = "message_sender"
+    MESSAGE_DESTINATION = "message_destination"
 
 
 class MessageTypes(object):
