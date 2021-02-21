@@ -72,8 +72,11 @@ button_element.onclick = () => {
 };
 
 connect_button_element.onclick = () => {
-    var url = `ws://${server_address_element.value}/psiaki`;
+    login = my_name_element.value;
+    chat_name = chat_destination_element.value;
+    var url = `ws://${server_address_element.value}/${chat_name}/${login}`;
     console.log("url", url);
+    console.log(login, chat_name)
     webSocket = new WebSocket(url);
     webSocket.onopen = () => {
         console.log('opening');

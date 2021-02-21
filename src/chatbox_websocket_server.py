@@ -49,11 +49,16 @@ async def receive(websocket, path):
         logging.info(f'message: {message}')
 
         if message[JsonFields.MESSAGE_TYPE] == MessageTypes.USER_LOGIN:
-            login = message[JsonFields.MESSAGE_VALUE]
+            # login = message[JsonFields.MESSAGE_VALUE]
+            logging.info(f'PATH {path}')
+
+            path_items = path.split('/')
+            login, chat_name = path_items[-1], path_items[-2]
+
             await log_in(websocket, login, logged_users)
             logging.info(f'logging {login}')
-            await join_chat(login, path[1:])
-            logging.info(f'{login} joined chat {path[1:]}')
+            await join_chat(login, chat_name)
+            logging.info(f'{login} joined chat {chat_name}')
 
         elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
             logged_users_message = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS,
