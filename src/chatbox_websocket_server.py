@@ -7,79 +7,56 @@ import websockets
 import src.my_json as my_json
 from src.enums import JsonFields, MessageTypes
 
-logged_users = {}
-chat_participants = {}  # 'example_chat_name':[logged_users['user1'],logged_users['user2'],logged_users['userN']]
+chat_participants = {}  # 'example_chat_name':[("user1", websocket_object1), ("user2", websocket_object2), ("userN", websocket_object_N)]
 
 
-async def log_in(websocket, user_name, clients):
-    # todo add lock/mutex to prevent thread race condition
-    if user_name not in clients:
-        clients[user_name] = websocket
-        await websocket.send(my_json.to_json({JsonFields.MESSAGE_TYPE: MessageTypes.USER_NAME_RESPONSE,
-                                              JsonFields.MESSAGE_VALUE: MessageTypes.LOGIN_ACCEPTED}))
-        return True
-    else:
-        logging.info(f'client ({websocket}) entered already existing login: {user_name}')
-        await websocket.send(my_json.to_json({JsonFields.MESSAGE_TYPE: MessageTypes.USER_NAME_RESPONSE,
-                                              JsonFields.MESSAGE_VALUE: MessageTypes.LOGIN_ALREADY_USED}))
-        return False
-
-
-async def join_chat(user_name, chat_name):
+async def join_chat(user_name, chat_name, user_websocket):
     logging.info('joining')
-    global logged_users
     global chat_participants
-    user_websocket = logged_users[user_name]
     if chat_name in chat_participants:
-        chat_participants[chat_name].append(user_websocket)
+        chat_participants[chat_name].append((user_name, user_websocket))
     else:
-        chat_participants[chat_name] = [user_websocket]
+        chat_participants[chat_name] = [(user_name, user_websocket)]
     logging.info(f'chat participants {chat_participants}')
 
 
-async def receive(websocket, path):
+async def receive(websocket: websockets.WebSocketServerProtocol, path: str):
     logging.info('waiting for messages')
     global logged_users
     global chat_participants
-    data = await websocket.recv()
 
-    try:
-        message = my_json.from_json(data)
-        logging.info(f'raw data received: {data}')
-        logging.info(f'message: {message}')
+    logging.info(f'PATH {path}')
 
-        if message[JsonFields.MESSAGE_TYPE] == MessageTypes.USER_LOGIN:
-            # login = message[JsonFields.MESSAGE_VALUE]
-            logging.info(f'PATH {path}')
+    path_items = path.split('/')
+    login, chat_name = path_items[-1], path_items[-2]
 
-            path_items = path.split('/')
-            login, chat_name = path_items[-1], path_items[-2]
+    logging.info(f'connecting {login}')
+    await join_chat(login, chat_name, websocket)
+    logging.info(f'{login} joined chat {chat_name}')
 
-            await log_in(websocket, login, logged_users)
-            logging.info(f'logging {login}')
-            await join_chat(login, chat_name)
-            logging.info(f'{login} joined chat {chat_name}')
+    async for data in websocket:
+        try:
+            message = my_json.from_json(data)
+            logging.info(f'raw data received: {data}')
+            logging.info(f'message: {message}')
 
-        elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
-            logged_users_message = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS,
-                                    JsonFields.MESSAGE_VALUE: list(logged_users.keys())}
-            await websocket.send(my_json.to_json(logged_users_message))
-            logging.info(f'get all logged: {logged_users.keys()}')
+            if message[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
+                logged_users_message = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS,
+                                        JsonFields.MESSAGE_VALUE: list(logged_users.keys())}
+                await websocket.send(my_json.to_json(logged_users_message))
+                logging.info(f'get all logged: {logged_users.keys()}')
 
+            elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
+                destination_chat_participants = chat_participants.get(message[JsonFields.MESSAGE_DESTINATION], [])
+                for participant_sock in destination_chat_participants:
+                    await participant_sock[1].send(data)
 
-        elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
-            destination_chat_participants = chat_participants.get(message[JsonFields.MESSAGE_DESTINATION], [])
-            for participant_sock in destination_chat_participants:
-                await participant_sock.send(data)
-
-        await receive(websocket, path)
-
-    except KeyError:
-        logging.error(f'KeyError; improper json: {data}')
-    except Exception as e:
-        logging.error(f"Unexpected error: {e}")
-    # todo handle disconnecting user
-    # todo answer with an error json
+        except KeyError:
+            logging.error(f'KeyError; improper json: {data}')
+        except Exception as e:
+            logging.error(f"Unexpected error: {e}")
+        # todo handle disconnecting user
+        # todo answer with an error json
 
 
 async def main(address, port):

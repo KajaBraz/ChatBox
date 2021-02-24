@@ -5,15 +5,14 @@ from src.enums import JsonFields
 
 def from_json(arg: bytes) -> dict:
     try:
-        decoded = arg.decode("utf-8") if type(arg)==bytes else arg
+        decoded = arg.decode("utf-8") if type(arg) == bytes else arg
         return json.loads(decoded)
     except json.decoder.JSONDecodeError:
         return {}
 
 
-def to_json(arg: dict) -> bytes:
-    pack = json.dumps(arg)
-    return pack.encode("utf-8")
+def to_json(arg: dict) -> str:
+    return json.dumps(arg)
 
 
 def is_proper_json(arg):

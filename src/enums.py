@@ -8,7 +8,6 @@ class JsonFields(object):
 
 class MessageTypes(object):
     MESSAGE = "message"
-    USER_LOGIN = "user_login"
     ALL_USERS = "all_users"
     USER_NAME_RESPONSE = "user_name_response"
     LOGIN_ACCEPTED = "login_accepted"

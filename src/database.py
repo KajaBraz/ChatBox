@@ -3,16 +3,14 @@ from datetime import datetime
 import random
 
 
-def my_database(name, action, login, password):
-    """action - parameter that may be one of the following two strings: 'CREATE', 'DROP', or 'INSERT'"""
-
+def create_my_database(db_name, login, password):
+    action = 'CREATE'
     with create_engine(f'postgresql://{login}:{password}@localhost',
                        isolation_level='AUTOCOMMIT').connect() as connection:
         if action in ['CREATE', 'DROP']:
-            query = text(f'{action} DATABASE {name}')
+            query = text(f'{action} DATABASE {db_name}')
             connection.execute(query)
-
-    with create_engine(f'postgresql://{login}:{password}@localhost/{name}',
+    with create_engine(f'postgresql://{login}:{password}@localhost/{db_name}',
                        isolation_level='AUTOCOMMIT').connect() as connection:
         metadata = MetaData(bind=connection)
 
@@ -42,43 +40,44 @@ def my_database(name, action, login, password):
                                )
         metadata.create_all()
 
-        if action == 'INSERT':
-            data_users = (
-                {'login': 'user1', 'encoded_password': '111', 'salt': 'aaa',
-                 'registration_date': datetime.now()},
-                {'login': 'user2', 'encoded_password': '222', 'salt': 'bbb',
-                 'registration_date': datetime.now()},
-                {'login': 'user3', 'encoded_password': '333', 'salt': 'ccc',
-                 'registration_date': datetime.now()},
-                {'login': 'user4', 'encoded_password': '444', 'salt': 'ddd',
-                 'registration_date': datetime.now()},
-            )
-            data_messages = (
-                {'sender_id': 1, 'recipient': 'user2', 'message': 'hello user1 here', 'date_time': datetime.now()},
-                {'sender_id': 4, 'recipient': 'user3', 'message': 'hello user4 here', 'date_time': datetime.now()})
-
-            for line in data_users:
-                connection.execute(text(
-                    f'{action} INTO users(login, encoded_password, salt, registration_date) VALUES(:login,'
-                    f':encoded_password, :salt, :registration_date)'),
-                    **line)
-            for line in data_messages:
-                connection.execute(text(
-                    f'{action} INTO messages(sender_id, recipient, message, date_time) VALUES(:sender_id, :recipient,'
-                    f':message, :date_time)'),
-                    **line)
-
-
-def create_my_database(db_name, login, password):
-    my_database(db_name, 'CREATE', login, password)
-
 
 def drop_my_database(db_name, login, password):
-    my_database(db_name, 'DROP', login, password)
+    action = 'DROP'
+    with create_engine(f'postgresql://{login}:{password}@localhost',
+                       isolation_level='AUTOCOMMIT').connect() as connection:
+        if action in ['CREATE', 'DROP']:
+            query = text(f'{action} DATABASE {db_name}')
+            connection.execute(query)
 
 
 def fill_with_examples(db_name, login, password):
-    my_database(db_name, 'INSERT', login, password)
+    action = 'INSERT'
+    with create_engine(f'postgresql://{login}:{password}@localhost/{db_name}',
+                       isolation_level='AUTOCOMMIT').connect() as connection:
+        data_users = (
+            {'login': 'user1', 'encoded_password': '111', 'salt': 'aaa',
+             'registration_date': datetime.now()},
+            {'login': 'user2', 'encoded_password': '222', 'salt': 'bbb',
+             'registration_date': datetime.now()},
+            {'login': 'user3', 'encoded_password': '333', 'salt': 'ccc',
+             'registration_date': datetime.now()},
+            {'login': 'user4', 'encoded_password': '444', 'salt': 'ddd',
+             'registration_date': datetime.now()},
+        )
+        data_messages = (
+            {'sender_id': 1, 'recipient': 'user2', 'message': 'hello user1 here', 'date_time': datetime.now()},
+            {'sender_id': 4, 'recipient': 'user3', 'message': 'hello user4 here', 'date_time': datetime.now()})
+
+        for line in data_users:
+            connection.execute(text(
+                f'{action} INTO users(login, encoded_password, salt, registration_date) VALUES(:login,'
+                f':encoded_password, :salt, :registration_date)'),
+                **line)
+        for line in data_messages:
+            connection.execute(text(
+                f'{action} INTO messages(sender_id, recipient, message, date_time) VALUES(:sender_id, :recipient,'
+                f':message, :date_time)'),
+                **line)
 
 
 def add_user(db,table_name, username, my_password, new_login, new_password):
