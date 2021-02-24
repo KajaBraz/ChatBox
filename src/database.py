@@ -2,6 +2,10 @@ from sqlalchemy import *
 from datetime import datetime
 import random
 
+db_login = "postgres"
+db_password = 000
+db_name = 'chatbox'
+
 
 def create_my_database(db_name, login, password):
     action = 'CREATE'
@@ -95,10 +99,8 @@ def add_user(db, username, my_password, new_login, new_password):
 
 
 if __name__ == '__main__':
-    login = "postgres"
-    password = 000
     # drop_my_database('chatbox_test_12', login, password)
-    # create_my_database('chatbox_test_17', login, password)
+    # create_my_database(db_name, login, password)
     # fill_with_examples('chatbox_test_16', login, password)
-    add_user('chatbox_test_16', login, password, 'anna_magnani', 'roma_citta_aperta')
+    # add_user(db_name, login, password, 'anna_magnani', 'roma_citta_aperta')
     pass
