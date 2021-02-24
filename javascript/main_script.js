@@ -40,16 +40,6 @@ function send_button(message_element, message_box_element, my_name, chat_name, w
     console.log('done');
 }
 
-function log_in(websocket, my_login) {
-    console.log("begin login");
-    var login_json = {
-        message_type: "user_login",
-        message_value: my_login
-    };
-    websocket.send(JSON.stringify(login_json));
-    console.log("login request sent");
-}
-
 var button_element = document.getElementById("send_button_id");
 var message_element = document.getElementById("message_id");
 var all_messages_element = document.getElementById("all_messages_id");
@@ -79,7 +69,6 @@ connect_button_element.onclick = () => {
     webSocket = new WebSocket(url);
     webSocket.onopen = () => {
         console.log('opening');
-        log_in(webSocket, my_name_element.value);
     };
     webSocket.onmessage = (event) => {
         console.log("received");
