@@ -3,7 +3,7 @@ from datetime import datetime
 import random
 
 db_login = "postgres"
-db_password = 000
+db_password = 1861
 db_name = 'chatbox'
 
 
@@ -54,34 +54,26 @@ def drop_my_database(db_name, login, password):
             connection.execute(query)
 
 
-def fill_with_examples(db_name, login, password):
-    action = 'INSERT'
-    with create_engine(f'postgresql://{login}:{password}@localhost/{db_name}',
-                       isolation_level='AUTOCOMMIT').connect() as connection:
-        data_users = (
-            {'login': 'user1', 'encoded_password': '111', 'salt': 'aaa',
-             'registration_date': datetime.now()},
-            {'login': 'user2', 'encoded_password': '222', 'salt': 'bbb',
-             'registration_date': datetime.now()},
-            {'login': 'user3', 'encoded_password': '333', 'salt': 'ccc',
-             'registration_date': datetime.now()},
-            {'login': 'user4', 'encoded_password': '444', 'salt': 'ddd',
-             'registration_date': datetime.now()},
-        )
-        data_messages = (
-            {'sender_id': 1, 'recipient': 'user2', 'message': 'hello user1 here', 'date_time': datetime.now()},
-            {'sender_id': 4, 'recipient': 'user3', 'message': 'hello user4 here', 'date_time': datetime.now()})
+def fill_with_examples(db, login, password):
+    users = [
+        ("anna_magnani", "roma_citta_aperta"),
+        ("luciano_pavarotti", "nessun_dorma"),
+        ("giordano_bruno", "campo_de'_fiori"),
+        ("giulietta_masina", "la_strada"),
+        ("toto'", "napule_non_si_scorda_mai"),
+        ("sophia_loren", "la_ciociara"),
+        ("al_bano", "felicità"),
+        ("maria_montessori", "motivazione"),
+        ("federico_fellini", "la_dolce_vita"),
+        ("vittorio_de_sica", "ladri_di_biciclette"),
+        ("gianluigi_buffon", "juventus_campioni"),
+        ("alessandro_volta", "scossa_elettrica")
+    ]
 
-        for line in data_users:
-            connection.execute(text(
-                f'{action} INTO users(login, encoded_password, salt, registration_date) VALUES(:login,'
-                f':encoded_password, :salt, :registration_date)'),
-                **line)
-        for line in data_messages:
-            connection.execute(text(
-                f'{action} INTO messages(sender_id, recipient, message, date_time) VALUES(:sender_id, :recipient,'
-                f':message, :date_time)'),
-                **line)
+    for user in users:
+        user_name = user[0]
+        user_pass = user[1]
+        add_user(db, login, password, user_name, user_pass)
 
 
 def add_user(db, username, my_password, new_login, new_password):
@@ -92,15 +84,15 @@ def add_user(db, username, my_password, new_login, new_password):
                        isolation_level='AUTOCOMMIT').connect() as connection:
         metedata = MetaData(bind=connection, reflect=True)
         users_table = metedata.tables['users']
-        stm = users_table.insert().values(login=new_login, encoded_password=new_password, salt=new_salt,
+        stm = users_table.insert().values(login=new_login, encoded_password=hash(new_password), salt=new_salt,
                                           registration_date=datetime.now())
 
         connection.execute(stm)
 
 
 if __name__ == '__main__':
-    # drop_my_database('chatbox_test_12', login, password)
-    # create_my_database(db_name, login, password)
-    # fill_with_examples('chatbox_test_16', login, password)
+    # drop_my_database(db_name, db_login, db_password)
+    # create_my_database(db_name,db_login, db_password)
+    # fill_with_examples(db_name, db_login, db_password)
     # add_user(db_name, login, password, 'anna_magnani', 'roma_citta_aperta')
     pass
