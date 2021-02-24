@@ -35,7 +35,6 @@ function handle_receive(message, message_box_element) {
 function send_button(message_element, message_box_element, my_name, chat_name, websocket) {
     var message = message_element.value;
     console.log(message);
-    append_div_messages(my_name, message, message_box_element);
     send_websocket(message, my_name, chat_name, websocket);
     message_element.value = "";
     console.log('done');
