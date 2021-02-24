@@ -41,45 +41,43 @@ async def receive(websocket, path):
     logging.info('waiting for messages')
     global logged_users
     global chat_participants
-    data = await websocket.recv()
 
-    try:
-        message = my_json.from_json(data)
-        logging.info(f'raw data received: {data}')
-        logging.info(f'message: {message}')
+    async for data in websocket:
+        try:
+            message = my_json.from_json(data)
+            logging.info(f'raw data received: {data}')
+            logging.info(f'message: {message}')
 
-        if message[JsonFields.MESSAGE_TYPE] == MessageTypes.USER_LOGIN:
-            # login = message[JsonFields.MESSAGE_VALUE]
-            logging.info(f'PATH {path}')
+            if message[JsonFields.MESSAGE_TYPE] == MessageTypes.USER_LOGIN:
+                # login = message[JsonFields.MESSAGE_VALUE]
+                logging.info(f'PATH {path}')
 
-            path_items = path.split('/')
-            login, chat_name = path_items[-1], path_items[-2]
+                path_items = path.split('/')
+                login, chat_name = path_items[-1], path_items[-2]
 
-            await log_in(websocket, login, logged_users)
-            logging.info(f'logging {login}')
-            await join_chat(login, chat_name)
-            logging.info(f'{login} joined chat {chat_name}')
+                await log_in(websocket, login, logged_users)
+                logging.info(f'logging {login}')
+                await join_chat(login, chat_name)
+                logging.info(f'{login} joined chat {chat_name}')
 
-        elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
-            logged_users_message = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS,
-                                    JsonFields.MESSAGE_VALUE: list(logged_users.keys())}
-            await websocket.send(my_json.to_json(logged_users_message))
-            logging.info(f'get all logged: {logged_users.keys()}')
+            elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
+                logged_users_message = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS,
+                                        JsonFields.MESSAGE_VALUE: list(logged_users.keys())}
+                await websocket.send(my_json.to_json(logged_users_message))
+                logging.info(f'get all logged: {logged_users.keys()}')
 
 
-        elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
-            destination_chat_participants = chat_participants.get(message[JsonFields.MESSAGE_DESTINATION], [])
-            for participant_sock in destination_chat_participants:
-                await participant_sock.send(data)
+            elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
+                destination_chat_participants = chat_participants.get(message[JsonFields.MESSAGE_DESTINATION], [])
+                for participant_sock in destination_chat_participants:
+                    await participant_sock.send(data)
 
-        await receive(websocket, path)
-
-    except KeyError:
-        logging.error(f'KeyError; improper json: {data}')
-    except Exception as e:
-        logging.error(f"Unexpected error: {e}")
-    # todo handle disconnecting user
-    # todo answer with an error json
+        except KeyError:
+            logging.error(f'KeyError; improper json: {data}')
+        except Exception as e:
+            logging.error(f"Unexpected error: {e}")
+        # todo handle disconnecting user
+        # todo answer with an error json
 
 
 async def main(address, port):
