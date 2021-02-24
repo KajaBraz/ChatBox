@@ -1,5 +1,6 @@
 from sqlalchemy import *
 from datetime import datetime
+import random
 
 
 def my_database(name, action, login, password):
@@ -80,10 +81,26 @@ def fill_with_examples(db_name, login, password):
     my_database(db_name, 'INSERT', login, password)
 
 
+def add_user(db,table_name, username, my_password, new_login, new_password):
+    chrs_ranges = list(range(48,58))+list(range(65,91))+list(range(97,123))
+    new_salt = ''.join([chr(random.choice(chrs_ranges)) for i in range(3)])
+    reg_date = datetime.now()
+    # new_user = {'login': login, 'encoded_password': password, 'salt':chr(random.choices(chrs_ranges, 3)),
+    #      'registration_date': datetime.now()}
+
+    with create_engine(f'postgresql://{username}:{my_password}@localhost/{db}', isolation_level='AUTOCOMMIT').connect() as connection:
+        # stm = f'INSERT INTO users(login, encoded_password, salt, registration_date) VALUES ({new_login}, {new_password}, {new_salt}, {reg_date})'
+
+        stm = table_name.insert().values(login=new_login, encoded_password=new_password, salt=new_salt,
+                                          registration_date=datetime.now())
+        connection.execute(stm)
+
+
 if __name__ == '__main__':
     login = "postgres"
-    password = "000"
+    password = 1861
     # drop_my_database('chatbox_test_12', login, password)
-    # create_my_database('chatbox_test_12', login, password)
+    users, messages = create_my_database('chatbox_test_17', login, password)
     # fill_with_examples('chatbox_test_12', login, password)
+    add_user('chatbox_test_16',Table('users'), login,password,'new_user','new_password')
     pass
