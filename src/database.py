@@ -3,55 +3,44 @@ from datetime import datetime
 import random
 
 db_login = "postgres"
-db_password = 1861
+db_password = 000
 db_name = 'chatbox'
 
 
 def create_my_database(db_name, login, password):
-    action = 'CREATE'
     with create_engine(f'postgresql://{login}:{password}@localhost',
                        isolation_level='AUTOCOMMIT').connect() as connection:
-        if action in ['CREATE', 'DROP']:
-            query = text(f'{action} DATABASE {db_name}')
-            connection.execute(query)
+        query = text(f'CREATE DATABASE {db_name}')
+        connection.execute(query)
+
     with create_engine(f'postgresql://{login}:{password}@localhost/{db_name}',
                        isolation_level='AUTOCOMMIT').connect() as connection:
         metadata = MetaData(bind=connection)
 
-        # RAW SQL QUERIES
-        # connection.execute(text("""
-        # CREATE TABLE users(
-        # id INTEGER PRIMARY KEY,
-        # login TEXT,
-        # encoded_password TEXT,
-        # salt TEXT
-        # )"""))
+        Table('users', metadata,
+              Column('id', Integer, primary_key=True),
+              Column('login', String(40)),
+              Column('encoded_password', String),
+              Column('salt', String(3)),
+              Column('registration_date', DateTime),
+              )
 
-        users_table = Table('users', metadata,
-                            Column('id', Integer, primary_key=True),
-                            Column('login', String(40)),
-                            Column('encoded_password', String),
-                            Column('salt', String(3)),
-                            Column('registration_date', DateTime),
-                            )
+        Table('messages', metadata,
+              Column('id', Integer, primary_key=True),
+              Column('sender_id', None, ForeignKey('users.id')),
+              Column('recipient', String),
+              Column('message', String),
+              Column('date_time', DateTime),
+              )
 
-        messages_table = Table('messages', metadata,
-                               Column('id', Integer, primary_key=True),
-                               Column('sender_id', None, ForeignKey('users.id')),
-                               Column('recipient', String),
-                               Column('message', String),
-                               Column('date_time', DateTime),
-                               )
         metadata.create_all()
 
 
 def drop_my_database(db_name, login, password):
-    action = 'DROP'
     with create_engine(f'postgresql://{login}:{password}@localhost',
                        isolation_level='AUTOCOMMIT').connect() as connection:
-        if action in ['CREATE', 'DROP']:
-            query = text(f'{action} DATABASE {db_name}')
-            connection.execute(query)
+        query = text(f'DROP DATABASE {db_name}')
+        connection.execute(query)
 
 
 def fill_with_examples(db, login, password):
@@ -92,7 +81,7 @@ def add_user(db, username, my_password, new_login, new_password):
 
 if __name__ == '__main__':
     # drop_my_database(db_name, db_login, db_password)
-    # create_my_database(db_name,db_login, db_password)
+    # create_my_database(db_name, db_login, db_password)
     # fill_with_examples(db_name, db_login, db_password)
     # add_user(db_name, login, password, 'anna_magnani', 'roma_citta_aperta')
     pass
