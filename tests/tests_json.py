@@ -7,7 +7,7 @@ from src.enums import MessageTypes, JsonFields
 class MyTestCase(unittest.TestCase):
     def test_json_to_dict(self):
         # GIVEN
-        json = b'{"field1": "value1", "field2": 11}'
+        json = '{"field1": "value1", "field2": 11}'
         expected_dict = {"field2": 11, "field1": "value1"}
 
         # WHEN
@@ -17,7 +17,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(expected_dict, result)
 
     def test_wrong_json_to_dict(self):
-        json = b'{"fiels"'
+        json = '{"fiels"'
         expected_dict = {}
         result = my_json.from_json(json)
         self.assertEqual(expected_dict, result)
@@ -40,28 +40,6 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(expected_res1, result1)
         self.assertEqual(expected_res2, result2)
-
-    def test_join_json_len(self):
-        j = {JsonFields.MESSAGE_TYPE: MessageTypes.MESSAGE, JsonFields.MESSAGE_VALUE: 'abcdef'}
-        j_b = my_json.to_json(j)
-        j_with_len = my_json.join_json_len(j_b)
-        j_len = int.from_bytes(j_with_len[:2], 'big')
-        exp_res = len(j_b)
-
-        self.assertEqual(j_len, exp_res)
-
-    def test_count_jsons(self):
-        j1 = my_json.to_json({'a': 1})
-        j2 = my_json.to_json({'b': 2})
-
-        j1_len = len(j1).to_bytes(2, 'big')
-        j2_len = len(j2).to_bytes(2, 'big')
-        jj = j1_len + j1 + j2_len + j2
-
-        exp_res = [j1, j2]
-        res = my_json.count_jsons(jj)
-
-        self.assertEqual(res, exp_res)
 
 
 if __name__ == '__main__':
