@@ -1,13 +1,13 @@
 import asyncio
 import logging
-from sys import argv, stdout
-
 import websockets
-
 import src.my_json as my_json
 from src.enums import JsonFields, MessageTypes
+from sys import argv
 
-chat_participants = {}  # 'example_chat_name':[("user1", websocket_object1), ("user2", websocket_object2), ("userN", websocket_object_N)]
+
+chat_participants = {}
+# 'example_chat_name':[("user1", websocket_object1), ("user2", websocket_object2), ("userN", websocket_object_N)]
 
 
 async def join_chat(user_name, chat_name, user_websocket):

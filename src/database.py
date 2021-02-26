@@ -1,6 +1,7 @@
-from sqlalchemy import *
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, DateTime, ForeignKey, text
 from datetime import datetime
 import random
+
 
 db_login = "postgres"
 db_password = 000
@@ -73,8 +74,8 @@ def add_user(db, username, my_password, new_login, new_password):
                        isolation_level='AUTOCOMMIT').connect() as connection:
         metedata = MetaData(bind=connection, reflect=True)
         users_table = metedata.tables['users']
-        stm = users_table.insert().values(login=new_login, encoded_password=hash(new_password), salt=new_salt,
-                                          registration_date=datetime.now())
+        stm = users_table.insert().values(login=new_login, encoded_password=hash(new_password + new_salt),
+                                          salt=new_salt, registration_date=datetime.now())
 
         connection.execute(stm)
 
