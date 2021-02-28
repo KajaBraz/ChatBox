@@ -2,13 +2,12 @@ from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, 
 from datetime import datetime
 import random
 
-
 db_login = "postgres"
 db_password = 000
 db_name = 'chatbox'
 
 
-def create_my_database(db_name, login, password):
+def create_my_database(login, password):
     with create_engine(f'postgresql://{login}:{password}@localhost',
                        isolation_level='AUTOCOMMIT').connect() as connection:
         query = text(f'CREATE DATABASE {db_name}')
@@ -37,14 +36,18 @@ def create_my_database(db_name, login, password):
         metadata.create_all()
 
 
-def drop_my_database(db_name, login, password):
+def connect(db, login, password):
+    return create_engine(f'postgresql://{login}:{password}@localhost/{db}').connect()
+
+
+def drop_my_database(db, login, password):
     with create_engine(f'postgresql://{login}:{password}@localhost',
                        isolation_level='AUTOCOMMIT').connect() as connection:
-        query = text(f'DROP DATABASE {db_name}')
+        query = text(f'DROP DATABASE {db}')
         connection.execute(query)
 
 
-def fill_with_examples(db, login, password):
+def fill_with_examples(db_connection):
     users = [
         ("anna_magnani", "roma_citta_aperta"),
         ("luciano_pavarotti", "nessun_dorma"),
@@ -63,26 +66,24 @@ def fill_with_examples(db, login, password):
     for user in users:
         user_name = user[0]
         user_pass = user[1]
-        add_user(db, login, password, user_name, user_pass)
+        add_user(user_name, user_pass, db_connection)
 
 
-def add_user(db, username, my_password, new_login, new_password):
+def add_user(new_login, new_password, connection):
     chrs_ranges = list(range(48, 58)) + list(range(65, 91)) + list(range(97, 123))
     new_salt = ''.join([chr(random.choice(chrs_ranges)) for i in range(3)])
 
-    with create_engine(f'postgresql://{username}:{my_password}@localhost/{db}',
-                       isolation_level='AUTOCOMMIT').connect() as connection:
-        metedata = MetaData(bind=connection, reflect=True)
-        users_table = metedata.tables['users']
-        stm = users_table.insert().values(login=new_login, encoded_password=hash(new_password + new_salt),
-                                          salt=new_salt, registration_date=datetime.now())
-
-        connection.execute(stm)
+    metedata = MetaData(bind=connection, reflect=True)
+    users_table = metedata.tables['users']
+    stm = users_table.insert().values(login=new_login, encoded_password=hash(new_password + new_salt),
+                                      salt=new_salt, registration_date=datetime.now())
+    connection.execute(stm)
 
 
 if __name__ == '__main__':
+    # create_my_database(db_login, db_password)
     # drop_my_database(db_name, db_login, db_password)
-    # create_my_database(db_name, db_login, db_password)
-    # fill_with_examples(db_name, db_login, db_password)
-    # add_user(db_name, login, password, 'anna_magnani', 'roma_citta_aperta')
+    # conn = connect(db_name,db_login,db_password)
+    # fill_with_examples(conn)
+    # add_user('anna_magnani', 'roma_citta_aperta', conn)
     pass
