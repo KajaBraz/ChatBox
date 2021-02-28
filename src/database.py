@@ -4,7 +4,7 @@ import random
 
 db_login = "postgres"
 db_password = 000
-db_name = 'chatbox'
+db_name = 'chatbox2'
 
 
 def create_my_database(login, password):
@@ -27,8 +27,9 @@ def create_my_database(login, password):
 
         Table('messages', metadata,
               Column('id', Integer, primary_key=True),
-              Column('sender_id', None, ForeignKey('users.id')),
-              Column('recipient', String),
+              # Column('sender_id', None, ForeignKey('users.id')),
+              Column('sender_login', String),
+              Column('chat_name', String),
               Column('message', String),
               Column('date_time', DateTime),
               )
@@ -80,10 +81,28 @@ def add_user(new_login, new_password, connection):
     connection.execute(stm)
 
 
+def add_message(login, chat, message, db_connection):
+    metadata = MetaData(bind=db_connection, reflect=True)
+    messages = metadata.tables['messages']
+    stm = messages.insert().values(sender_login=login, chat_name=chat, message=message, date_time=datetime.now())
+    db_connection.execute(stm)
+
+
+def show_entries(table_name, db_connection):
+    metadata = MetaData(bind=db_connection, reflect=True)
+    table = metadata.tables[table_name]
+    stm = table.select()
+    entries = db_connection.execute(stm)
+    for entry in entries:
+        print(entry)
+
+
 if __name__ == '__main__':
     # create_my_database(db_login, db_password)
     # drop_my_database(db_name, db_login, db_password)
-    # conn = connect(db_name,db_login,db_password)
+    # conn = connect(db_name, db_login, db_password)
     # fill_with_examples(conn)
     # add_user('anna_magnani', 'roma_citta_aperta', conn)
+    # add_message('giordano_bruno', 'sapienza', "il sapere e' il potere", conn)
+    # show_entries('users',conn)
     pass
