@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, DateTime, ForeignKey, text
 from datetime import datetime
 import random
+import pandas as pd
+
 
 db_login = "postgres"
 db_password = 000
@@ -88,13 +90,17 @@ def add_message(login, chat, message, db_connection):
     db_connection.execute(stm)
 
 
-def show_entries(table_name, db_connection):
+def show_entries(table_name, db_connection, with_pandas=True):
     metadata = MetaData(bind=db_connection, reflect=True)
     table = metadata.tables[table_name]
     stm = table.select()
     entries = db_connection.execute(stm)
-    for entry in entries:
-        print(entry)
+    if with_pandas == True:
+        df = pd.DataFrame(entries)
+        print(df)
+    else:
+        for entry in entries:
+            print(entry)
 
 
 if __name__ == '__main__':
@@ -104,5 +110,5 @@ if __name__ == '__main__':
     # fill_with_examples(conn)
     # add_user('anna_magnani', 'roma_citta_aperta', conn)
     # add_message('giordano_bruno', 'sapienza', "il sapere e' il potere", conn)
-    # show_entries('users',conn)
+    # show_entries('users', conn)
     pass
