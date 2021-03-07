@@ -11,7 +11,11 @@ class Server():
         self.chat_participants = {}
         self.logged_users = {}
 
-    async def join_chat(self, user_name, chat_name, user_websocket):
+    def remove_from_chat(self, chat, user_name, user_websocket):
+        users = self.chat_participants[chat]
+        self.chat_participants[chat] = [user for user in users if user != (user_name, user_websocket)]
+
+    def join_chat(self, user_name, chat_name, user_websocket):
         logging.info(f'{user_websocket} - joining')
         if chat_name in self.chat_participants:
             self.chat_participants[chat_name].append((user_name, user_websocket))
@@ -27,7 +31,7 @@ class Server():
         login, chat_name = path_items[-1], path_items[-2]
 
         logging.info(f'{websocket} - connecting {login}')
-        await self.join_chat(login, chat_name, websocket)
+        self.join_chat(login, chat_name, websocket)
         logging.info(f'{websocket} - {login} joined chat {chat_name}')
 
         async for data in websocket:
@@ -46,14 +50,17 @@ class Server():
                     destination_chat_participants = self.chat_participants.get(message[JsonFields.MESSAGE_DESTINATION],
                                                                                [])
                     for participant_sock in destination_chat_participants:
+                        logging.info(
+                            f'{websocket} - sending message to {participant_sock} in '
+                            f'{message[JsonFields.MESSAGE_DESTINATION]}')
                         await participant_sock[1].send(data)
 
             except KeyError:
                 logging.error(f'{websocket} - KeyError; improper json: {data}')
             except Exception as e:
                 logging.error(f"{websocket} - Unexpected error: {e}")
-        logging.info(f'{websocket} - after for')
-        # todo handle disconnecting user
+        self.remove_from_chat(chat_name, login, websocket)
+        logging.info(f'{websocket} - {login} left chat {chat_name}')
         # todo answer with an error json
 
 
