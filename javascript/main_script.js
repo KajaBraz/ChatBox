@@ -49,6 +49,7 @@ var connect_button_element = document.getElementById("connect_button_id");
 var server_address_element = document.getElementById("server_address_id");
 
 var webSocket = null;
+my_name_element.value = "alpaczino" + Math.ceil(Math.random() * 1000);
 
 button_element.onclick = () => {
     send_button(
