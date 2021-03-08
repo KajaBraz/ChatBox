@@ -10,6 +10,7 @@ class Server():
     def __init__(self):
         self.chat_participants = {}
         self.logged_users = {}
+        self.server = None
 
     async def join_chat(self, user_name, chat_name, user_websocket):
         logging.info(f'{user_websocket} - joining')
@@ -56,14 +57,20 @@ class Server():
         # todo handle disconnecting user
         # todo answer with an error json
 
+    async def start(self, address, port):
+        self.server = await websockets.serve(self.receive, address, port)
+        logging.info('started')
+        # todo set webosckets.serve logger
+
+    async def stop(self):
+        await self.server.wait_closed()
+        logging.info('closed')
+
 
 async def main(address, port):
-    my_server = Server()
-    server = await websockets.serve(my_server.receive, address, port)
-    logging.info('awaiting')
-    # todo set webosckets.serve logger
-    await server.wait_closed()
-    logging.info('closed')
+    server = Server()
+    await server.start(address, port)
+    await server.stop()
 
 
 if __name__ == '__main__':
