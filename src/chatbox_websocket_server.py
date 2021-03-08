@@ -4,6 +4,7 @@ import websockets
 import src.my_json as my_json
 from src.enums import JsonFields, MessageTypes
 from sys import argv
+from src.database import connect, add_message, db_name, db_login, db_password
 
 
 class Server():
@@ -12,7 +13,11 @@ class Server():
         self.logged_users = {}
         self.server = None
 
-    async def join_chat(self, user_name, chat_name, user_websocket):
+    def remove_from_chat(self, chat, user_name, user_websocket):
+        users = self.chat_participants[chat]
+        self.chat_participants[chat] = [user for user in users if user != (user_name, user_websocket)]
+
+    def join_chat(self, user_name, chat_name, user_websocket):
         logging.info(f'{user_websocket} - joining')
         if chat_name in self.chat_participants:
             self.chat_participants[chat_name].append((user_name, user_websocket))
@@ -27,8 +32,10 @@ class Server():
         path_items = path.split('/')
         login, chat_name = path_items[-1], path_items[-2]
 
+        conn = connect(db_name, db_login, db_password)
+
         logging.info(f'{websocket} - connecting {login}')
-        await self.join_chat(login, chat_name, websocket)
+        self.join_chat(login, chat_name, websocket)
         logging.info(f'{websocket} - {login} joined chat {chat_name}')
 
         async for data in websocket:
@@ -46,15 +53,21 @@ class Server():
                 elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
                     destination_chat_participants = self.chat_participants.get(message[JsonFields.MESSAGE_DESTINATION],
                                                                                [])
+                    add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], conn)
+                    logging.info(f'{websocket} - adding message "{message[JsonFields.MESSAGE_VALUE]}" to the database; '
+                                 f'sent by {login} in chat {chat_name}')
+
                     for participant_sock in destination_chat_participants:
+                        logging.info(f'{websocket} - sending message to {participant_sock} in '
+                                     f'{message[JsonFields.MESSAGE_DESTINATION]}')
                         await participant_sock[1].send(data)
 
             except KeyError:
                 logging.error(f'{websocket} - KeyError; improper json: {data}')
             except Exception as e:
                 logging.error(f"{websocket} - Unexpected error: {e}")
-        logging.info(f'{websocket} - after for')
-        # todo handle disconnecting user
+        self.remove_from_chat(chat_name, login, websocket)
+        logging.info(f'{websocket} - {login} left chat {chat_name}')
         # todo answer with an error json
 
     async def start(self, address, port):
