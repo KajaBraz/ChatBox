@@ -2,7 +2,7 @@ import asyncio
 import unittest
 
 from src.chatbox_websocket_server import Server
-from tests.integration.virtual_websocket_client import VirtualClient
+from chatbox_tests.integration.virtual_websocket_client import VirtualClient
 
 
 class MyTestCase(unittest.TestCase):
