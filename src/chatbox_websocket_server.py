@@ -7,7 +7,7 @@ from sys import argv
 from src.database import connect, add_message, db_name, db_login, db_password
 
 
-class Server():
+class Server:
     def __init__(self):
         self.chat_participants = {}
         self.logged_users = {}
@@ -32,7 +32,8 @@ class Server():
         path_items = path.split('/')
         login, chat_name = path_items[-1], path_items[-2]
 
-        conn = connect(db_name, db_login, db_password)
+        # todo make server operational when database is unreachable
+        # conn = connect(db_name, db_login, db_password)
 
         logging.info(f'{websocket} - connecting {login}')
         self.join_chat(login, chat_name, websocket)
@@ -53,9 +54,10 @@ class Server():
                 elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
                     destination_chat_participants = self.chat_participants.get(message[JsonFields.MESSAGE_DESTINATION],
                                                                                [])
-                    add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], conn)
-                    logging.info(f'{websocket} - adding message "{message[JsonFields.MESSAGE_VALUE]}" to the database; '
-                                 f'sent by {login} in chat {chat_name}')
+                    # todo make server operational when database is unreachable
+                    # add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], conn)
+                    # logging.info(f'{websocket} - adding message "{message[JsonFields.MESSAGE_VALUE]}" to the database; '
+                    #              f'sent by {login} in chat {chat_name}')
 
                     for participant_sock in destination_chat_participants:
                         logging.info(f'{websocket} - sending message to {participant_sock} in '

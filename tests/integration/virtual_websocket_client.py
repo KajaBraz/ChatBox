@@ -4,7 +4,7 @@ from src.enums import JsonFields, MessageTypes
 from src.my_json import to_json, from_json
 
 
-class VirtualClient():
+class VirtualClient:
     def __init__(self, address, port, chat_name, user_name):
         self.ws = None
         self.sent_messages = []
