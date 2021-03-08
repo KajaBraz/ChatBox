@@ -49,17 +49,29 @@ var connect_button_element = document.getElementById("connect_button_id");
 var server_address_element = document.getElementById("server_address_id");
 
 var webSocket = null;
-my_name_element.value = "alpaczino" + Math.ceil(Math.random() * 1000);
+my_name_element.value = "alpaca" + Math.ceil(Math.random() * 1000);
 
 button_element.onclick = () => {
-    send_button(
-        message_element,
-        all_messages_element,
-        my_name_element.value,
-        chat_destination_element.value,
-        webSocket
-    );
+   send_button(
+       message_element,
+       all_messages_element,
+       my_name_element.value,
+       chat_destination_element.value,
+       webSocket
+   );
 };
+
+message_element.addEventListener("keypress", function(event) {
+    if (event.code === 'Enter') {
+        send_button(
+            message_element,
+            all_messages_element,
+            my_name_element.value,
+            chat_destination_element.value,
+            webSocket
+        );
+    };
+});
 
 connect_button_element.onclick = () => {
     login = my_name_element.value;
