@@ -1,11 +1,15 @@
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, DateTime, ForeignKey, text
-from datetime import datetime
+import logging
 import random
+from datetime import datetime
+
 import pandas as pd
+import sqlalchemy
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, DateTime, text
 
 db_login = "postgres"
-db_password = 000
+db_password = "000"
 db_name = 'chatbox2'
+log = logging.getLogger("chatbox_logger")
 
 
 def create_my_database(login, password):
@@ -38,8 +42,11 @@ def create_my_database(login, password):
         metadata.create_all()
 
 
-def connect(db, login, password):
-    return create_engine(f'postgresql://{login}:{password}@localhost/{db}').connect()
+def connect(db: str, login: str, password: str) -> sqlalchemy.engine.Engine:
+    try:
+        return create_engine(f'postgresql://{login}:{password}@localhost/{db}').connect()
+    except Exception as e:
+        log.exception(f'Database connection error: {e}')
 
 
 def drop_my_database(db, login, password):
@@ -83,10 +90,14 @@ def add_user(new_login, new_password, connection):
 
 
 def add_message(login, chat, message, db_connection):
-    metadata = MetaData(bind=db_connection, reflect=True)
-    messages = metadata.tables['messages']
-    stm = messages.insert().values(sender_login=login, chat_name=chat, message=message, date_time=datetime.now())
-    db_connection.execute(stm)
+    if db_connection:
+        metadata = MetaData(bind=db_connection, reflect=True)
+        messages = metadata.tables['messages']
+        stm = messages.insert().values(sender_login=login, chat_name=chat, message=message, date_time=datetime.now())
+        db_connection.execute(stm)
+        log.debug(f'adding message "{message}" to the database, sent by {login} in chat {chat}')
+    else:
+        log.error('cannot add message to database')
 
 
 def show_entries(table_name, db_connection, with_pandas=True):

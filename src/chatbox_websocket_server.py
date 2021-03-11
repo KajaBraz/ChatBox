@@ -18,68 +18,65 @@ class Server:
         self.chat_participants[chat] = [user for user in users if user != (user_name, user_websocket)]
 
     def join_chat(self, user_name, chat_name, user_websocket):
-        logging.info(f'{user_websocket} - joining')
+        log.info(f'{user_websocket} - joining')
         if chat_name in self.chat_participants:
             self.chat_participants[chat_name].append((user_name, user_websocket))
         else:
             self.chat_participants[chat_name] = [(user_name, user_websocket)]
-        logging.info(f'{user_websocket} - chat participants {self.chat_participants}')
+        log.info(f'{user_websocket} - chat participants {self.chat_participants}')
 
     async def receive(self, websocket: websockets.WebSocketServerProtocol, path: str):
-        logging.info(f'{websocket} - waiting for messages')
-        logging.info(f'{websocket} - PATH {path}')
+        log.info(f'{websocket} - waiting for messages')
+        log.info(f'{websocket} - PATH {path}')
 
         path_items = path.split('/')
         login, chat_name = path_items[-1], path_items[-2]
 
-        # todo make server operational when database is unreachable
-        # conn = connect(db_name, db_login, db_password)
+        conn = connect(db_name, db_login, db_password)
 
-        logging.info(f'{websocket} - connecting {login}')
+        log.info(f'{websocket} - connecting {login}')
         self.join_chat(login, chat_name, websocket)
-        logging.info(f'{websocket} - {login} joined chat {chat_name}')
+        log.info(f'{websocket} - {login} joined chat {chat_name}')
 
         async for data in websocket:
             try:
                 message = my_json.from_json(data)
-                logging.info(f'{websocket} - raw data received: {data}')
-                logging.info(f'{websocket} - message: {message}')
+                log.info(f'{websocket} - raw data received: {data}')
+                log.info(f'{websocket} - message: {message}')
 
                 if message[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
                     logged_users_message = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS,
                                             JsonFields.MESSAGE_VALUE: list(self.logged_users.keys())}
                     await websocket.send(my_json.to_json(logged_users_message))
-                    logging.info(f'{websocket} - get all logged: {self.logged_users.keys()}')
+                    log.info(f'{websocket} - get all logged: {self.logged_users.keys()}')
 
                 elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
                     destination_chat_participants = self.chat_participants.get(message[JsonFields.MESSAGE_DESTINATION],
                                                                                [])
-                    # todo make server operational when database is unreachable
-                    # add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], conn)
-                    # logging.info(f'{websocket} - adding message "{message[JsonFields.MESSAGE_VALUE]}" to the database; '
-                    #              f'sent by {login} in chat {chat_name}')
 
                     for participant_sock in destination_chat_participants:
-                        logging.info(f'{websocket} - sending message to {participant_sock} in '
-                                     f'{message[JsonFields.MESSAGE_DESTINATION]}')
+                        log.info(f'{websocket} - sending message to {participant_sock} in '
+                                 f'{message[JsonFields.MESSAGE_DESTINATION]}')
                         await participant_sock[1].send(data)
+                    # todo add test, when database connection is down, message is sent anyway (that is why this must be after sending)
+                    add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], conn)
 
             except KeyError:
-                logging.error(f'{websocket} - KeyError; improper json: {data}')
+                log.error(f'{websocket} - KeyError; improper json: {data}')
             except Exception as e:
-                logging.error(f"{websocket} - Unexpected error: {e}")
+                log.exception(f"{websocket} - Unexpected error: {e}")
         self.remove_from_chat(chat_name, login, websocket)
-        logging.info(f'{websocket} - {login} left chat {chat_name}')
+        log.info(f'{websocket} - {login} left chat {chat_name}')
         # todo answer with an error json
 
     async def start(self, address, port):
         self.server = await websockets.serve(self.receive, address, port)
-        logging.info('started')
+        log.info('chatbox started')
         # todo set webosckets.serve logger
 
     async def stop(self):
         await self.server.wait_closed()
-        logging.info('closed')
+        log.info('closed')
 
 
 async def main(address, port):
@@ -93,6 +90,7 @@ if __name__ == '__main__':
     logging.basicConfig(format=formatter, level=logging.INFO)
 
     # logging.basicConfig(filename='logs.log', filemode='a', format=formatter, level=logging.DEBUG)
+    log = logging.getLogger("chatbox_logger")
 
     if len(argv) > 1:
         asyncio.run(main(argv[1], int(argv[2])))
