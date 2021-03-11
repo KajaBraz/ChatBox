@@ -1,11 +1,32 @@
 import asyncio
 import logging
-import websockets
-import src.my_json as my_json
-from src.enums import JsonFields, MessageTypes
 from sys import argv
-from src.database import connect, add_message, db_name, db_login, db_password
 
+import websockets
+
+import src.my_json as my_json
+from src.database import connect, add_message, db_name, db_login, db_password
+from src.enums import JsonFields, MessageTypes
+
+formatter = '%(asctime)s ; %(levelname)s ; %(filename)s ; %(lineno)d. ; %(message)s '
+logging.basicConfig(format=formatter, level=logging.INFO)
+
+log = logging.getLogger("chatbox_logger")
+
+
+# logging.basicConfig(filename='logs.log', filemode='a', format=formatter, level=logging.DEBUG)
+# TODO reconsider logging handlers
+# logger = logging.getLogger()
+# logger.setLevel(logging.DEBUG)
+#
+# output_file_handler = logging.FileHandler('logs.log')
+# stdout_handler = logging.StreamHandler(stdout)
+#
+# output_file_handler.setFormatter(formatter)
+# stdout_handler.setFormatter(formatter)
+#
+# logger.addHandler(output_file_handler)
+# logger.addHandler(stdout_handler)
 
 class Server:
     def __init__(self):
@@ -86,25 +107,7 @@ async def main(address, port):
 
 
 if __name__ == '__main__':
-    formatter = '%(asctime)s ; %(levelname)s ; %(filename)s ; %(lineno)d. ; %(message)s '
-    logging.basicConfig(format=formatter, level=logging.INFO)
-
-    # logging.basicConfig(filename='logs.log', filemode='a', format=formatter, level=logging.DEBUG)
-    log = logging.getLogger("chatbox_logger")
-
     if len(argv) > 1:
         asyncio.run(main(argv[1], int(argv[2])))
     else:
         asyncio.run(main('localhost', 11000))
-    # TODO reconsider logging handlers
-    # logger = logging.getLogger()
-    # logger.setLevel(logging.DEBUG)
-    #
-    # output_file_handler = logging.FileHandler('logs.log')
-    # stdout_handler = logging.StreamHandler(stdout)
-    #
-    # output_file_handler.setFormatter(formatter)
-    # stdout_handler.setFormatter(formatter)
-    #
-    # logger.addHandler(output_file_handler)
-    # logger.addHandler(stdout_handler)
