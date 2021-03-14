@@ -33,6 +33,11 @@ class Server:
         self.chat_participants = {}
         self.logged_users = {}
         self.server = None
+        self.conn = None
+
+    def connect_to_db(self, db_name, db_login, db_password):
+        self.conn = connect(db_name, db_login, db_password)
+        log.info(f'server created connection to database {db_name}')
 
     def remove_from_chat(self, chat, user_name, user_websocket):
         users = self.chat_participants[chat]
@@ -53,9 +58,6 @@ class Server:
         path_items = path.split('/')
         login, chat_name = path_items[-1], path_items[-2]
 
-        conn = connect(db_name, db_login, db_password)
-
-        log.info(f'{websocket} - connecting {login}')
         self.join_chat(login, chat_name, websocket)
         log.info(f'{websocket} - {login} joined chat {chat_name}')
 
@@ -79,9 +81,9 @@ class Server:
                         log.info(f'{websocket} - sending message to {participant_sock} in '
                                  f'{message[JsonFields.MESSAGE_DESTINATION]}')
                         await participant_sock[1].send(data)
-                    # todo add test, when database connection is down, message is sent anyway (that is why this must be after sending)
-                    add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], conn)
-
+                        # todo add test, when database connection is down, message is sent anyway (that is why this must be after sending)
+                        add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], self.conn)
+                        log.info(f'{websocket} - message {message} added to db, room {chat_name}')
             except KeyError:
                 log.error(f'{websocket} - KeyError; improper json: {data}')
             except Exception as e:
@@ -102,6 +104,7 @@ class Server:
 
 async def main(address, port):
     server = Server()
+    server.conn = connect(db_name, db_login, db_password)
     await server.start(address, port)
     await server.stop()
 
