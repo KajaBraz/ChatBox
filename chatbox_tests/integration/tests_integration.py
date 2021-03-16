@@ -48,6 +48,7 @@ class MyTestCase(unittest.TestCase):
 
         # THEN
         self.assertEqual(self.client.sent_messages, client2.received_messages)
+        await self.server_obj.stop()
 
     def test_when_client_sends_message_is_added_to_database(self):
         asyncio.run(self.database_message())
@@ -65,3 +66,4 @@ class MyTestCase(unittest.TestCase):
 
         # THEN
         add_message_mock.assert_called_once_with(self.client.user_name, self.client.chat_name, message, ANY)
+        await self.server_obj.stop()

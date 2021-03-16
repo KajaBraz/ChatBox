@@ -32,7 +32,7 @@ class Server:
     def __init__(self):
         self.chat_participants = {}
         self.logged_users = {}
-        self.server = None
+        self.server: websockets.WebSocketServerProtocol = None
         self.conn = None
 
     def connect_to_db(self, db_name, db_login, db_password):
@@ -97,16 +97,21 @@ class Server:
         log.info('chatbox started')
         # todo set webosckets.serve logger
 
-    async def stop(self):
+    async def wait_stop(self):
         await self.server.wait_closed()
         log.info('closed')
+
+    async def stop(self):
+        log.info("closing chatbox")
+        # await self.server.close()
+        self.server.close()
 
 
 async def main(address, port):
     server = Server()
     server.conn = connect(db_name, db_login, db_password)
     await server.start(address, port)
-    await server.stop()
+    await server.wait_stop()
 
 
 if __name__ == '__main__':
