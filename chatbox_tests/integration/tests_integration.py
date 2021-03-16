@@ -1,8 +1,9 @@
 import asyncio
 import unittest
+from unittest.mock import patch, MagicMock, ANY
 
-from src.chatbox_websocket_server import Server
 from chatbox_tests.integration.virtual_websocket_client import VirtualClient
+from src.chatbox_websocket_server import Server
 
 
 class MyTestCase(unittest.TestCase):
@@ -51,3 +52,26 @@ class MyTestCase(unittest.TestCase):
 
         # THEN
         self.assertEqual(client1.sent_messages, client2.received_messages)
+
+    def test_when_client_sends_message_is_added_to_database(self):
+        asyncio.run(self.database_message())
+
+    @patch('src.chatbox_websocket_server.add_message')
+    async def database_message(self, add_message_mock: MagicMock):
+        # GIVEN
+        address = 'localhost'
+        port = 11000
+        room = 'room1'
+        message = "hello darkness, my old friend"
+        from src import chatbox_websocket_server
+        server_obj = chatbox_websocket_server.Server()
+        client = VirtualClient(address, port, room, 'user1')
+        await server_obj.start(address, port)
+        await client.connect()
+
+        # WHEN
+        await client.sent(message)
+        await asyncio.sleep(0.5)
+
+        # THEN
+        add_message_mock.assert_called_once_with(client.user_name, client.chat_name, message, ANY)
