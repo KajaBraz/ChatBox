@@ -32,7 +32,7 @@ class Server:
     def __init__(self):
         self.chat_participants = {}
         self.logged_users = {}
-        self.server: websockets.WebSocketServerProtocol = None
+        self.server: websockets.WebSocketServer = None
         self.conn = None
 
     def connect_to_db(self, db_name, db_login, db_password):
@@ -101,9 +101,8 @@ class Server:
         await self.server.wait_closed()
         log.info('closed')
 
-    async def stop(self):
+    def stop(self):
         log.info("closing chatbox")
-        # await self.server.close()
         self.server.close()
 
 
