@@ -82,8 +82,9 @@ def add_user(new_login, new_password, connection):
     chrs_ranges = list(range(48, 58)) + list(range(65, 91)) + list(range(97, 123))
     new_salt = ''.join([chr(random.choice(chrs_ranges)) for i in range(3)])
 
-    metedata = MetaData(bind=connection, reflect=True)
-    users_table = metedata.tables['users']
+    metadata = MetaData()
+    metadata.reflect(bind=connection)
+    users_table = metadata.tables['users']
     stm = users_table.insert().values(login=new_login, encoded_password=hash(new_password + new_salt),
                                       salt=new_salt, registration_date=datetime.now())
     connection.execute(stm)
@@ -91,7 +92,8 @@ def add_user(new_login, new_password, connection):
 
 def add_message(login, chat, message, db_connection):
     if db_connection:
-        metadata = MetaData(bind=db_connection, reflect=True)
+        metadata = MetaData()
+        metadata.reflect(bind=db_connection)
         messages = metadata.tables['messages']
         stm = messages.insert().values(sender_login=login, chat_name=chat, message=message, date_time=datetime.now())
         db_connection.execute(stm)
@@ -101,7 +103,8 @@ def add_message(login, chat, message, db_connection):
 
 
 def show_entries(table_name, db_connection, with_pandas=True):
-    metadata = MetaData(bind=db_connection, reflect=True)
+    metadata = MetaData()
+    metadata.reflect(bind=db_connection)
     table = metadata.tables[table_name]
     stm = table.select()
     entries = db_connection.execute(stm)
@@ -122,8 +125,8 @@ def get_historic_messages(start_period: str, end_period: str, str_to_search: str
     :param conn:
     :return:
     """
-    
-    metadata = MetaData(bind=conn, reflect=True)
+    metadata = MetaData()
+    metadata.reflect(bind=conn)
     message_table = metadata.tables['messages']
     date_from = datetime.strptime(start_period, '%d/%m/%y %H:%M:%S')
     date_to = datetime.strptime(end_period, '%d/%m/%y %H:%M:%S')
