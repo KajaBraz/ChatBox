@@ -114,6 +114,24 @@ def show_entries(table_name, db_connection, with_pandas=True):
             print(entry)
 
 
+def get_historic_messages(start_period: str, end_period: str, str_to_search: str, conn):
+    """
+    :param start_period: '%d/%m/%y' ex. '01/03/21 00:00:00'
+    :param end_period: '%d/%m/%y' ex. '01/03/21 23:59:59'
+    :param str_to_search: substring that must be present in messages
+    :param conn:
+    :return:
+    """
+    
+    metadata = MetaData(bind=conn, reflect=True)
+    message_table = metadata.tables['messages']
+    date_from = datetime.strptime(start_period, '%d/%m/%y %H:%M:%S')
+    date_to = datetime.strptime(end_period, '%d/%m/%y %H:%M:%S')
+    entries = conn.execute(message_table.select().where(message_table.c.date_time >= date_from).where(
+        message_table.c.date_time <= date_to).where(message_table.c.message.contains(str_to_search)))
+    return [entry for entry in entries]
+
+
 if __name__ == '__main__':
     # create_my_database(db_login, db_password)
     # drop_my_database(db_name, db_login, db_password)
@@ -123,4 +141,6 @@ if __name__ == '__main__':
     # add_message('giordano_bruno', 'sapienza', "il sapere e' il potere", conn)
     # show_entries('users', conn)
     # show_entries('messages', conn)
+    # mess = get_historic_messages('07/03/21 00:00:00','08/03/21 23:59:59', 'bolo', conn)
+    # print(mess)
     pass
