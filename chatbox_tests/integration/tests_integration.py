@@ -41,7 +41,7 @@ class MyTestCase(unittest.TestCase):
 
         # WHEN
         asyncio.create_task(client2.start_receiving())
-        sent_task = asyncio.create_task(self.client.sent("message 1"))
+        sent_task = asyncio.create_task(self.client.send("message 1"))
         wait_task = asyncio.create_task(asyncio.sleep(0.5))
         await sent_task
         await wait_task
@@ -61,9 +61,26 @@ class MyTestCase(unittest.TestCase):
         await self.client.connect()
 
         # WHEN
-        await self.client.sent(message)
+        await self.client.send(message)
         await asyncio.sleep(0.5)
 
         # THEN
         add_message_mock.assert_called_once_with(self.client.user_name, self.client.chat_name, message, ANY)
         self.server_obj.stop()
+
+    def test_clients_join_chat_check_participants_num(self):
+        asyncio.run(self.clients_join_chat_check_participants_num())
+
+    async def clients_join_chat_check_participants_num(self):
+        # GIVEN
+        await self.server_obj.start(self.address, self.port)
+        client2 = VirtualClient(self.address, self.port, self.room, 'user2')
+        client3 = VirtualClient(self.address, self.port, self.room, 'user3')
+
+        # WHEN
+        await self.client.connect()
+        await client2.connect()
+        await client3.connect()
+
+        # THEN
+        self.assertEqual(3, len(self.server_obj.chat_participants[self.room]))
