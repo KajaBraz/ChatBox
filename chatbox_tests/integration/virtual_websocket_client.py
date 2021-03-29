@@ -19,7 +19,7 @@ class VirtualClient:
         self.ws = await websockets.connect(url)
         # self.ws = websockets.connect(url)
 
-    async def sent(self, message):
+    async def send(self, message):
         json_mess = {JsonFields.MESSAGE_TYPE: MessageTypes.MESSAGE,
                      JsonFields.MESSAGE_VALUE: message,
                      JsonFields.MESSAGE_DESTINATION: self.chat_name,
