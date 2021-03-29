@@ -21,6 +21,7 @@
             border: 1px solid black;
             border-radius: 5px;
             resize: none;
+            width: 100%;
         }
 
         .gridContainer {
@@ -41,7 +42,7 @@
             border-radius: 5px;
         }
 
-        .message{
+        .message {
             float: left;
             margin: 1.5%;
             width: 40%;
@@ -82,42 +83,41 @@
             width: 8%;
         }
 
-        #findChat {
-            width: 100%;
-        }
-
     </style>
 
     <body>
         <div class="gridContainer">
 
-            <section class="sideMenu">
+            <section class="leftSideMenu">
+                <div class="gridItem">
+                    Choose Your Login:
+                    <input id="login">
+                    <button id="chooseLoginButton">Send</button>
+                </div>
 
                 <div class="gridItem">
                     Enter Chat Name:
                     <input id="findChat">
-                    <button>Send</button>
+                    <button id="findChatButton">Send</button>
                 </div>
 
-                <div class="gridItem">
+                <div class="gridItem" id="publicChats">
                     <h3>Public Chats</h3>
                     <div class="availableChat">1</div>
                     <div class="availableChat">2</div>
                 </div>
 
-                <div class="gridItem">
+                <div class="gridItem" id="privateChats">
                     <h3>Private Chats</h3>
                     <div class="availableChat">a</div>
                     <div class="availableChat">b</div>
                 </div>
-
             </section>
 
             <section class="gridItem" id="mainBox">
-
-                <h1>Your Chat</h1>
+                <h1 id="chatNameHeader">Your Chat</h1>
                 <div id="receivedMessages">
-                    <div class="message">This is an example message 1</div>
+                    <div class="message" id="messageId">This is an example message 1</div>
                     <div class="message">This is an example message 2</div>
                     <div class="message">This is an example message 3</div>
                     <div class="message">This is an example message 4</div>
@@ -131,13 +131,14 @@
                     <div class="message">This is an example message</div>
                     <div class="message">This is an example message</div>
                 </div>
-
                 <div>
-                    <textarea id="newMessage" type="submit" placeholder="Type your message" autofocus></textarea>
+                    <textarea id="newMessage" type="submit" placeholder="Type your message" autofocus>
+                    </textarea>
                     <button id="sendMessageButton">Send</button>
                 </div>
-
             </section>
+
         </div>
+        <script src="main_script2.js"></script>
     </body>
 </html>
