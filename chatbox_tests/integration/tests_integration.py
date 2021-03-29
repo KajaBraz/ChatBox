@@ -84,3 +84,4 @@ class MyTestCase(unittest.TestCase):
 
         # THEN
         self.assertEqual(3, len(self.server_obj.chat_participants[self.room]))
+        self.server_obj.stop()
