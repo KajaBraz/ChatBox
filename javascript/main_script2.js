@@ -20,6 +20,7 @@ function handle_receive(message, message_box_element, class_name) {
         var val = m["message_value"];
         // var formatted = format_sent_message(name, val);
         append_div_messages(name, val, message_box_element, class_name);
+        message_box_element.scrollTo(0, message_box_element.scrollHeight);
     };
 }
 
