@@ -14,40 +14,40 @@ class MyTestCase(unittest.TestCase):
         self.server_obj = chatbox_websocket_server.Server()
         self.client = VirtualClient(self.address, self.port, self.room, 'user1')
 
-    def test_dla_Kai_zeby_zoabczyla1(self):
-        self.assertEqual(1, 1)
-        self.assertNotEqual(1, 2)
+    def test_client1_sends_participants_receive(self):
+        asyncio.run(self.clients_send_all_participants_receive())
 
-    def test_dla_Kai_zeby_zoabczyla2(self):
+    async def clients_send_all_participants_receive(self):
         # GIVEN
-        arg = 2
-        tab = [1, 3]
-
-        # WHEN
-        tab.append(arg)
-
-        # THEN
-        self.assertIn(arg, tab)
-
-    def test_client1_sends_client2_receives(self):
-        asyncio.run(self.client1_sends_client2_receives())
-
-    async def client1_sends_client2_receives(self):
-        # GIVEN
+        m1 = 'message 1'
+        m2 = 'message 2'
+        m3 = 'message 3'
         client2 = VirtualClient(self.address, self.port, self.room, 'user2')
         await self.server_obj.start(self.address, self.port)
         await self.client.connect()
         await client2.connect()
 
         # WHEN
+        asyncio.create_task(self.client.start_receiving())
         asyncio.create_task(client2.start_receiving())
-        sent_task = asyncio.create_task(self.client.send("message 1"))
+        sent_task1 = asyncio.create_task(self.client.send(m1))
+        sent_task2 = asyncio.create_task(client2.send(m2))
+        sent_task3 = asyncio.create_task(client2.send(m3))
         wait_task = asyncio.create_task(asyncio.sleep(0.5))
-        await sent_task
+        await sent_task1
+        await sent_task2
+        await sent_task3
         await wait_task
 
         # THEN
-        self.assertEqual(self.client.sent_messages, client2.received_messages)
+        self.assertEqual(len(self.client.sent_messages + client2.sent_messages), len(client2.received_messages))
+        self.assertEqual(len(self.client.sent_messages + client2.sent_messages), len(self.client.received_messages))
+        self.assertIn(m1, self.client.received_messages)
+        self.assertIn(m2, self.client.received_messages)
+        self.assertIn(m3, self.client.received_messages)
+        self.assertIn(m1, client2.received_messages)
+        self.assertIn(m2, client2.received_messages)
+        self.assertIn(m3, client2.received_messages)
         self.server_obj.stop()
 
     def test_when_client_sends_message_is_added_to_database(self):
