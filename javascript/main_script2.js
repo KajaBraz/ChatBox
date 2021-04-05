@@ -8,6 +8,9 @@ function append_div_messages(my_name, message, message_box_element, class_name) 
     var node = document.createTextNode(m);
     var div = document.createElement("div");
     div.className = class_name;
+    if (my_name === login) {
+        div.style.float = "right";
+    };
     div.appendChild(node);
     message_box_element.appendChild(div);
 }
@@ -18,7 +21,6 @@ function handle_receive(message, message_box_element, class_name) {
     if (m["message_type"] == "message") {
         var name = m["message_sender"];
         var val = m["message_value"];
-        // var formatted = format_sent_message(name, val);
         append_div_messages(name, val, message_box_element, class_name);
         message_box_element.scrollTo(0, message_box_element.scrollHeight);
     };
