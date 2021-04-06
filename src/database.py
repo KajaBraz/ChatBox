@@ -4,7 +4,7 @@ from datetime import datetime
 
 import pandas as pd
 import sqlalchemy
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, DateTime, text
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, DateTime, text, select
 
 db_login = "postgres"
 db_password = "000"
@@ -132,7 +132,16 @@ def get_historic_messages(start_period: str, end_period: str, str_to_search: str
     date_to = datetime.strptime(end_period, '%d/%m/%y %H:%M:%S')
     entries = conn.execute(message_table.select().where(message_table.c.date_time >= date_from).where(
         message_table.c.date_time <= date_to).where(message_table.c.message.contains(str_to_search)))
-    return [entry for entry in entries]
+    return entries.fetchall()
+
+
+def fetch_last_messages(chat_name, conn, n=100):
+    metadata = MetaData()
+    metadata.reflect(bind=conn)
+    message_table = metadata.tables['messages']
+    cls_to_select = [message_table.c.sender_login, message_table.c.message, message_table.c.date_time]
+    n_entries = conn.execute(select(cls_to_select, message_table.c.chat_name == chat_name).limit(n))
+    return n_entries.fetchall()
 
 
 if __name__ == '__main__':
@@ -146,4 +155,6 @@ if __name__ == '__main__':
     # show_entries('messages', conn)
     # mess = get_historic_messages('07/03/21 00:00:00','08/03/21 23:59:59', 'bolo', conn)
     # print(mess)
+    # n_mess = fetch_last_messages('psiaki', conn, 3)
+    # print(n_mess)
     pass
