@@ -1,11 +1,11 @@
-function format_sent_message(id_lenght, my_login, value) {
-    var name = my_login.slice(0, -id_lenght)
+function format_sent_message(id_length, my_login, value) {
+    var name = my_login.slice(0, -id_length)
     return `${name}: ${value}`;
 }
 
 
-function append_div_messages(my_name, message, message_box_element, class_name, id_lenght) {
-    var m = format_sent_message(id_lenght, my_name, message);
+function append_div_messages(my_name, message, message_box_element, class_name, id_length) {
+    var m = format_sent_message(id_length, my_name, message);
     var node = document.createTextNode(m);
     var div = document.createElement("div");
     div.className = class_name;
@@ -17,13 +17,13 @@ function append_div_messages(my_name, message, message_box_element, class_name, 
 }
 
 
-function handle_receive(message, message_box_element, class_name, id_lenght) {
+function handle_receive(message, message_box_element, class_name, id_length) {
     console.log('receiving');
     var m = JSON.parse(message);
     if (m["message_type"] == "message") {
         var name = m["message_sender"];
         var val = m["message_value"];
-        append_div_messages(name, val, message_box_element, class_name, id_lenght);
+        append_div_messages(name, val, message_box_element, class_name, id_length);
         message_box_element.scrollTo(0, message_box_element.scrollHeight);
     };
 }
@@ -62,11 +62,9 @@ function generate_unique_id(n) {
 }
 
 
-function connect(user_name, chat_name, id_lenght) {
+function connect(user_name, chat_name, id_length) {
     if (user_name != "" && chat_name != "") {
-        var id = generate_unique_id(id_lenght);
-        login = user_name + id;
-        var url = `ws://${server_address}/${chat_name}/${login}`;
+        var url = `ws://${server_address}/${chat_name}/${user_name}`;
         console.log("url", url);
         webSocket = new WebSocket(url);
         webSocket.onopen = () => {
@@ -76,7 +74,7 @@ function connect(user_name, chat_name, id_lenght) {
             console.log("received");
             console.log(event);
             console.log(event.data);
-            handle_receive(event.data, all_messages_element, "message", id_lenght);
+            handle_receive(event.data, all_messages_element, "message", id_length);
         };
     };
 }
@@ -106,6 +104,12 @@ function add_chat(new_chat, public_chat = true) {
 }
 
 
+function retrieve_messages() {
+    send_websocket("history", "previous_messages", login, chat, websocket);
+    console.log("retrieving old messages");
+}
+
+
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
 var all_messages_element = document.getElementById("receivedMessages");
@@ -120,24 +124,40 @@ var private_chats = document.getElementById("privateChats");
 var login = "";
 var chat = "";
 var websocket;
-var id_lenght = 20;
+var id_length = 20;
 var server_address = "localhost:11000";
 var active_public_chats = [];
 var active_private_chats = [];
 
 
+window.onload = function () {
+    console.log("onload");
+    login = localStorage.getItem("active_user");
+    chat = localStorage.getItem("active_chat");
+    console.log('user storage', login);
+    console.log('chat storage', chat);
+    if (chat != null) {
+        add_chat(chat);
+    };
+    connect(login, chat, id_length);
+    // retrieve_messages();
+}
+
 choose_name_button.onclick = () => {
-    login = my_name_element.value;
+    var id = generate_unique_id(id_length);
+    login = my_name_element.value + id;
+    localStorage.setItem("active_user", login);
     console.log(login);
-    connect(login, chat, id_lenght);
+    connect(login, chat, id_length);
 };
 
 
 choose_chat_button.onclick = () => {
     chat_name_header.innerHTML = chat_destination_element.value;
     chat = chat_destination_element.value;
+    localStorage.setItem("active_chat", chat);
     console.log(chat);
-    connect(login, chat, id_lenght);
+    connect(login, chat, id_length);
     add_chat(chat);
 };
 
@@ -147,7 +167,7 @@ button_element.onclick = () => {
         "message",
         message_element,
         login,
-        chat_destination_element.value,
+        chat,
         webSocket
     );
 };
@@ -158,8 +178,8 @@ message_element.addEventListener("keypress", function (event) {
         send_button(
             "message",
             message_element,
-            my_name_element.value,
-            chat_destination_element.value,
+            login,
+            chat,
             webSocket
         );
     };
