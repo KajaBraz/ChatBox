@@ -5,7 +5,7 @@ from sys import argv
 import websockets
 
 import src.my_json as my_json
-from src.database import connect, add_message, db_name, db_login, db_password
+from src.database import connect, add_message, db_name, db_login, db_password, fetch_last_messages
 from src.enums import JsonFields, MessageTypes
 
 formatter = '%(asctime)s ; %(levelname)s ; %(filename)s ; %(lineno)d. ; %(message)s '
@@ -72,6 +72,20 @@ class Server:
                                             JsonFields.MESSAGE_VALUE: list(self.logged_users.keys())}
                     await websocket.send(my_json.to_json(logged_users_message))
                     log.info(f'{websocket} - get all logged: {self.logged_users.keys()}')
+
+                elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES:
+                    chat = message[JsonFields.MESSAGE_DESTINATION]
+                    past_messages = (fetch_last_messages(chat, self.conn))
+                    # past_json_messages =[]
+                    for message in past_messages:
+                        json_messsage = {}
+                        json_messsage[JsonFields.MESSAGE_TYPE] = MessageTypes.MESSAGE
+                        json_messsage[JsonFields.MESSAGE_SENDER]=message[0]
+                        json_messsage[JsonFields.MESSAGE_VALUE]=message[1]
+                        json_messsage[JsonFields.MESSAGE_DESTINATION]=message[2]
+                        # past_json_messages.append(my_json.to_json(json_messsage))
+                        await websocket.send(my_json.to_json(json_messsage))
+                    log.info(f'{websocket} - past messages sent')
 
                 elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
                     destination_chat_participants = self.chat_participants.get(message[JsonFields.MESSAGE_DESTINATION],

@@ -139,10 +139,14 @@ def fetch_last_messages(chat_name, conn, n=100):
     metadata = MetaData()
     metadata.reflect(bind=conn)
     message_table = metadata.tables['messages']
-    cls_to_select = [message_table.c.sender_login, message_table.c.message, message_table.c.date_time]
+    cls_to_select = [message_table.c.sender_login, message_table.c.message, message_table.c.chat_name, message_table.c.date_time]
     n_entries = conn.execute(select(cls_to_select, message_table.c.chat_name == chat_name).limit(n))
     return n_entries.fetchall()
 
+def print_df(data_list,column_names):
+    df = pd.DataFrame(data_list, columns=column_names)
+    pd.set_option('max_columns', None)
+    print(df)
 
 if __name__ == '__main__':
     # create_my_database(db_login, db_password)
@@ -155,6 +159,6 @@ if __name__ == '__main__':
     # show_entries('messages', conn)
     # mess = get_historic_messages('07/03/21 00:00:00','08/03/21 23:59:59', 'bolo', conn)
     # print(mess)
-    # n_mess = fetch_last_messages('psiaki', conn, 3)
-    # print(n_mess)
+    # past_mess = fetch_last_messages('zwierzogrod', conn)
+    # print_df(past_mess, ['login','message','chat','data_time'])
     pass

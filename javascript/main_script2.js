@@ -63,6 +63,9 @@ function generate_unique_id(n) {
 
 
 function connect(user_name, chat_name, id_length) {
+    if (webSocket!=null){
+        webSocket.close();
+    }
     if (user_name != "" && chat_name != "") {
         var url = `ws://${server_address}/${chat_name}/${user_name}`;
         console.log("url", url);
@@ -104,8 +107,8 @@ function add_chat(new_chat, public_chat = true) {
 }
 
 
-function retrieve_messages() {
-    send_websocket("history", "previous_messages", login, chat, websocket);
+function retrieve_messages(user_name, chat_name, ws) {
+    send_websocket("previous_messages", "history", user_name, chat_name, ws);
     console.log("retrieving old messages");
 }
 
@@ -123,7 +126,7 @@ var private_chats = document.getElementById("privateChats");
 
 var login = "";
 var chat = "";
-var websocket;
+var webSocket = null;
 var id_length = 20;
 var server_address = "localhost:11000";
 var active_public_chats = [];
@@ -138,10 +141,17 @@ window.onload = function () {
     console.log('chat storage', chat);
     if (chat != null) {
         add_chat(chat);
+        chat_name_header.innerHTML = chat;
     };
     connect(login, chat, id_length);
-    // retrieve_messages();
+    console.log("connecting onload");
+    webSocket.onopen = () => {
+        retrieve_messages(login, chat, webSocket);
+    }
+    // retrieve_messages(login, chat, webSocket);
+    // send_websocket("previous_messages", "history", login, chat, webSocket);
 }
+
 
 choose_name_button.onclick = () => {
     var id = generate_unique_id(id_length);
