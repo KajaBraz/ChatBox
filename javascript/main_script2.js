@@ -185,6 +185,7 @@ button_element.onclick = () => {
 
 message_element.addEventListener("keypress", function (event) {
     if (event.code === 'Enter') {
+        event.preventDefault();
         send_button(
             "message",
             message_element,
