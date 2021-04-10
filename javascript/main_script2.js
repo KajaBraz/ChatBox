@@ -18,7 +18,6 @@ function append_div_messages(my_name, message, message_box_element, class_name, 
 
 
 function handle_receive(message, message_box_element, class_name, id_length) {
-    console.log('receiving');
     var m = JSON.parse(message);
     if (m["message_type"] == "message") {
         var name = m["message_sender"];
@@ -31,7 +30,6 @@ function handle_receive(message, message_box_element, class_name, id_length) {
 
 function send_button(message_type, message_element, my_name, chat_name, websocket) {
     var message = message_element.value;
-    console.log(message);
     send_websocket(message_type, message, my_name, chat_name, websocket);
     message_element.value = "";
     console.log('websocket sent');
@@ -39,7 +37,6 @@ function send_button(message_type, message_element, my_name, chat_name, websocke
 
 
 function send_websocket(message_type, message, sender, chat_destination, websocket) {
-    console.log('sending websocket');
     var json_message = {
         message_type: message_type,
         message_value: message,
@@ -63,22 +60,28 @@ function generate_unique_id(n) {
 
 
 function connect(user_name, chat_name, id_length) {
-    if (webSocket!=null){
+    if (webSocket != null) {
+        console.log('not nnull');
         webSocket.close();
     }
     if (user_name != "" && chat_name != "") {
         var url = `ws://${server_address}/${chat_name}/${user_name}`;
         console.log("url", url);
         webSocket = new WebSocket(url);
+
         webSocket.onopen = () => {
-            console.log('opening');
+            retrieve_messages(login, chat, webSocket);
         };
         webSocket.onmessage = (event) => {
-            console.log("received");
-            console.log(event);
-            console.log(event.data);
+            console.log("message received");
             handle_receive(event.data, all_messages_element, "message", id_length);
         };
+        webSocket.onclose = (e) => {
+            console.log('closing ws');
+        };
+        webSocket.onerror = (e) => {
+            console.log('ws error');
+        }
     };
 }
 
@@ -144,12 +147,9 @@ window.onload = function () {
         chat_name_header.innerHTML = chat;
     };
     connect(login, chat, id_length);
-    console.log("connecting onload");
     webSocket.onopen = () => {
         retrieve_messages(login, chat, webSocket);
-    }
-    // retrieve_messages(login, chat, webSocket);
-    // send_websocket("previous_messages", "history", login, chat, webSocket);
+    };
 }
 
 

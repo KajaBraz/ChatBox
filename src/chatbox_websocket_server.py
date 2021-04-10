@@ -40,8 +40,10 @@ class Server:
         log.info(f'server created connection to database {db_name}')
 
     def remove_from_chat(self, chat, user_name, user_websocket):
+        log.info(f'number of participants in chat {len(self.chat_participants[chat])} before removing')
         users = self.chat_participants[chat]
         self.chat_participants[chat] = [user for user in users if user != (user_name, user_websocket)]
+        log.info(f'number of participants in chat {len(self.chat_participants[chat])} after removing')
 
     def join_chat(self, user_name, chat_name, user_websocket):
         log.info(f'{user_websocket} - joining')
@@ -49,7 +51,9 @@ class Server:
             self.chat_participants[chat_name].append((user_name, user_websocket))
         else:
             self.chat_participants[chat_name] = [(user_name, user_websocket)]
-        log.info(f'{user_websocket} - chat participants {self.chat_participants}')
+        log.info(
+            f'number of participants in chat {chat_name} - {len(self.chat_participants[chat_name])}:'
+            f'{self.chat_participants[chat_name]}')
 
     async def receive(self, websocket: websockets.WebSocketServerProtocol, path: str):
         log.info(f'{websocket} - waiting for messages')
@@ -76,14 +80,12 @@ class Server:
                 elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES:
                     chat = message[JsonFields.MESSAGE_DESTINATION]
                     past_messages = (fetch_last_messages(chat, self.conn))
-                    # past_json_messages =[]
                     for message in past_messages:
                         json_messsage = {}
                         json_messsage[JsonFields.MESSAGE_TYPE] = MessageTypes.MESSAGE
-                        json_messsage[JsonFields.MESSAGE_SENDER]=message[0]
-                        json_messsage[JsonFields.MESSAGE_VALUE]=message[1]
-                        json_messsage[JsonFields.MESSAGE_DESTINATION]=message[2]
-                        # past_json_messages.append(my_json.to_json(json_messsage))
+                        json_messsage[JsonFields.MESSAGE_SENDER] = message[0]
+                        json_messsage[JsonFields.MESSAGE_VALUE] = message[1]
+                        json_messsage[JsonFields.MESSAGE_DESTINATION] = message[2]
                         await websocket.send(my_json.to_json(json_messsage))
                     log.info(f'{websocket} - past messages sent')
 
@@ -91,12 +93,12 @@ class Server:
                     destination_chat_participants = self.chat_participants.get(message[JsonFields.MESSAGE_DESTINATION],
                                                                                [])
 
+                    add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], self.conn)
                     for participant_sock in destination_chat_participants:
                         log.info(f'{websocket} - sending message to {participant_sock} in '
                                  f'{message[JsonFields.MESSAGE_DESTINATION]}')
                         await participant_sock[1].send(data)
                         # todo add test, when database connection is down, message is sent anyway (that is why this must be after sending)
-                        add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], self.conn)
                         log.info(f'{websocket} - message {message} added to db, room {chat_name}')
             except KeyError:
                 log.error(f'{websocket} - KeyError; improper json: {data}')
