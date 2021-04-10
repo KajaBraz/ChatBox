@@ -13,6 +13,8 @@ class MyTestCase(unittest.TestCase):
         self.room = "room1"
         self.server_obj = chatbox_websocket_server.Server()
         self.client = VirtualClient(self.address, self.port, self.room, 'user1')
+        self.client2 = VirtualClient(self.address, self.port, self.room, 'user2')
+        self.client3 = VirtualClient(self.address, self.port, self.room, 'user3')
 
     def test_client1_sends_participants_receive(self):
         asyncio.run(self.clients_send_all_participants_receive())
@@ -22,17 +24,16 @@ class MyTestCase(unittest.TestCase):
         m1 = 'message 1'
         m2 = 'message 2'
         m3 = 'message 3'
-        client2 = VirtualClient(self.address, self.port, self.room, 'user2')
         await self.server_obj.start(self.address, self.port)
         await self.client.connect()
-        await client2.connect()
+        await self.client2.connect()
 
         # WHEN
         asyncio.create_task(self.client.start_receiving())
-        asyncio.create_task(client2.start_receiving())
+        asyncio.create_task(self.client2.start_receiving())
         sent_task1 = asyncio.create_task(self.client.send(m1))
-        sent_task2 = asyncio.create_task(client2.send(m2))
-        sent_task3 = asyncio.create_task(client2.send(m3))
+        sent_task2 = asyncio.create_task(self.client2.send(m2))
+        sent_task3 = asyncio.create_task(self.client2.send(m3))
         wait_task = asyncio.create_task(asyncio.sleep(0.5))
         await sent_task1
         await sent_task2
@@ -40,14 +41,16 @@ class MyTestCase(unittest.TestCase):
         await wait_task
 
         # THEN
-        self.assertEqual(len(self.client.sent_messages + client2.sent_messages), len(client2.received_messages))
-        self.assertEqual(len(self.client.sent_messages + client2.sent_messages), len(self.client.received_messages))
+        self.assertEqual(len(self.client.sent_messages + self.client2.sent_messages),
+                         len(self.client2.received_messages))
+        self.assertEqual(len(self.client.sent_messages + self.client2.sent_messages),
+                         len(self.client.received_messages))
         self.assertIn(m1, self.client.received_messages)
         self.assertIn(m2, self.client.received_messages)
         self.assertIn(m3, self.client.received_messages)
-        self.assertIn(m1, client2.received_messages)
-        self.assertIn(m2, client2.received_messages)
-        self.assertIn(m3, client2.received_messages)
+        self.assertIn(m1, self.client2.received_messages)
+        self.assertIn(m2, self.client2.received_messages)
+        self.assertIn(m3, self.client2.received_messages)
         self.server_obj.stop()
 
     def test_when_client_sends_message_is_added_to_database(self):
@@ -59,6 +62,7 @@ class MyTestCase(unittest.TestCase):
         message = "hello darkness, my old friend"
         await self.server_obj.start(self.address, self.port)
         await self.client.connect()
+        await self.client2.connect()
 
         # WHEN
         await self.client.send(message)
@@ -74,13 +78,11 @@ class MyTestCase(unittest.TestCase):
     async def clients_join_chat_check_participants_num(self):
         # GIVEN
         await self.server_obj.start(self.address, self.port)
-        client2 = VirtualClient(self.address, self.port, self.room, 'user2')
-        client3 = VirtualClient(self.address, self.port, self.room, 'user3')
 
         # WHEN
         await self.client.connect()
-        await client2.connect()
-        await client3.connect()
+        await self.client2.connect()
+        await self.client3.connect()
 
         # THEN
         self.assertEqual(3, len(self.server_obj.chat_participants[self.room]))
