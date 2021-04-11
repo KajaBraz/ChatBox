@@ -109,7 +109,6 @@ function add_chat(new_chat, public_chat = true) {
             new_div.id = new_chat;
             remove_redundant_chat(active_public_chats, 5);
         };
-
     }
     else {
         if (!active_private_chats.includes(new_chat)) {
@@ -126,6 +125,14 @@ function add_chat(new_chat, public_chat = true) {
 function retrieve_messages(user_name, chat_name, ws) {
     send_websocket("previous_messages", "history", user_name, chat_name, ws);
     console.log("retrieving old messages");
+}
+
+function retrieve_recent_chats(){
+    recently_used_chats = localStorage.getItem("recent_chats").split(",");
+    console.log(recently_used_chats);
+    for (let i=0;i<recently_used_chats.length;i++){
+        add_chat(recently_used_chats[i]);
+    }
 }
 
 
@@ -155,13 +162,13 @@ window.onload = function () {
     console.log('user storage', login);
     console.log('chat storage', chat);
     if (chat != null) {
-        add_chat(chat);
         chat_name_header.innerHTML = chat;
     };
     connect(login, chat, id_length);
     webSocket.onopen = () => {
         retrieve_messages(login, chat, webSocket);
     };
+    retrieve_recent_chats();
 }
 
 
@@ -176,6 +183,7 @@ connect_button.onclick = () => {
     console.log(login, chat);
     connect(login, chat, id_length);
     add_chat(chat);
+    localStorage.setItem("recent_chats", active_public_chats);
 };
 
 
