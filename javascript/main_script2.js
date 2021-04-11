@@ -9,8 +9,9 @@ function append_div_messages(my_name, message, message_box_element, class_name, 
     var div = append_div(m, message_box_element, class_name);
     if (my_name === login) {
         div.style.float = "right";
-    };
+    }
 }
+
 
 function append_div(child, parent, class_name) {
     var node = document.createTextNode(child);
@@ -21,6 +22,7 @@ function append_div(child, parent, class_name) {
     return div;
 }
 
+
 function handle_receive(message, message_box_element, class_name, id_length) {
     var m = JSON.parse(message);
     if (m["message_type"] == "message") {
@@ -28,7 +30,7 @@ function handle_receive(message, message_box_element, class_name, id_length) {
         var val = m["message_value"];
         append_div_messages(name, val, message_box_element, class_name, id_length);
         message_box_element.scrollTo(0, message_box_element.scrollHeight);
-    };
+    }
 }
 
 
@@ -57,7 +59,7 @@ function generate_unique_id(n) {
     var id = '';
     for (let i = 0; i < n; i++) {
         id += s[Math.floor(Math.random() * s.length)];
-    };
+    }
     console.log(id);
     return id;
 }
@@ -67,7 +69,7 @@ function connect(user_name, chat_name, id_length) {
     if (webSocket != null) {
         console.log('not nnull');
         webSocket.close();
-    };
+    }
     if (user_name != "" && chat_name != "") {
         var url = `ws://${server_address}/${chat_name}/${user_name}`;
         console.log("url", url);
@@ -86,7 +88,7 @@ function connect(user_name, chat_name, id_length) {
         webSocket.onerror = (e) => {
             console.log('ws error');
         };
-    };
+    }
 }
 
 
@@ -96,29 +98,18 @@ function remove_redundant_chat(chat_array, max_num) {
         to_remove.remove();
         chat_array.shift();
         console.log("removed");
-    };
+    }
 }
 
 
-function add_chat(new_chat, public_chat = true) {
+function add_chat(new_chat) {
     console.log("adding");
-    if (public_chat === true) {
-        if (!active_public_chats.includes(new_chat)) {
-            active_public_chats.push(new_chat);
-            var new_div = append_div(new_chat, public_chats, "availableChat");
-            new_div.id = new_chat;
-            remove_redundant_chat(active_public_chats, 5);
-        };
+    if (!active_recent_chats.includes(new_chat)) {
+        active_recent_chats.push(new_chat);
+        var new_div = append_div(new_chat, recent_chats, "availableChat");
+        new_div.id = new_chat;
+        remove_redundant_chat(active_recent_chats, 5);
     }
-    else {
-        if (!active_private_chats.includes(new_chat)) {
-            active_private_chats.push(new_chat);
-            var new_div = append_div(new_chat, private_chats, "availableChat");
-            var node = document.createTextNode(new_chat);
-            new_div.id = new_chat;
-            remove_redundant_chat(active_private_chats, 5);
-        };
-    };
 }
 
 
@@ -127,10 +118,11 @@ function retrieve_messages(user_name, chat_name, ws) {
     console.log("retrieving old messages");
 }
 
-function retrieve_recent_chats(){
+
+function retrieve_recent_chats() {
     recently_used_chats = localStorage.getItem("recent_chats").split(",");
     console.log(recently_used_chats);
-    for (let i=0;i<recently_used_chats.length;i++){
+    for (let i = 0; i < recently_used_chats.length; i++) {
         add_chat(recently_used_chats[i]);
     }
 }
@@ -143,17 +135,16 @@ var my_name_element = document.getElementById("login");
 var connect_button = document.getElementById("connectButton");
 var chat_destination_element = document.getElementById("findChat");
 var chat_name_header = document.getElementById("chatNameHeader");
-var public_chats = document.getElementById("publicChats");
-var private_chats = document.getElementById("privateChats");
+var recent_chats = document.getElementById("recentlyUsedChats");
 
 var login = "";
 var chat = "";
 var webSocket = null;
 var id_length = 20;
 var server_address = "localhost:11000";
-var active_public_chats = [];
-var active_private_chats = [];
+var active_recent_chats = [];
 var recently_used_chats = [];
+
 
 window.onload = function () {
     console.log("onload");
@@ -163,7 +154,7 @@ window.onload = function () {
     console.log('chat storage', chat);
     if (chat != null) {
         chat_name_header.innerHTML = chat;
-    };
+    }
     connect(login, chat, id_length);
     webSocket.onopen = () => {
         retrieve_messages(login, chat, webSocket);
@@ -183,8 +174,8 @@ connect_button.onclick = () => {
     console.log(login, chat);
     connect(login, chat, id_length);
     add_chat(chat);
-    localStorage.setItem("recent_chats", active_public_chats);
-};
+    localStorage.setItem("recent_chats", active_recent_chats);
+}
 
 
 button_element.onclick = () => {
@@ -208,5 +199,5 @@ message_element.addEventListener("keypress", function (event) {
             chat,
             webSocket
         );
-    };
+    }
 });

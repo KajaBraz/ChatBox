@@ -31,9 +31,9 @@
             grid-template-areas:
                 "..................  header-area    header-area"
                 "..................  search-area    search-button-area"
-                "connect-area          messages-area  messages-area"
-                "public-chats-area   messages-area  messages-area"
-                "private-chats-area  messages-area  messages-area"
+                "connect-area        messages-area  messages-area"
+                "recent-chats-area   messages-area  messages-area"
+                "recent-chats-area   messages-area  messages-area"
                 "..................  messages-area  messages-area"
                 "..................  send-area      send-button-area";
             padding-left: 5%;
@@ -72,12 +72,8 @@
             grid-area: chat-name-area;
         }
 
-        .publicChatsGrid {
-            grid-area: public-chats-area;
-        }
-
-        .privateChatsGrid {
-            grid-area: private-chats-area;
+        .recentlyUsedChatsGrid {
+            grid-area: recent-chats-area;
         }
 
         .sendGrid {
@@ -122,12 +118,8 @@
                 <button id="connectButton">Connect</button>
             </div>
 
-            <div id="publicChats" class="publicChatsGrid">
-                <h3>Public Chats</h3>
-            </div>
-
-            <div class="privateChatsGrid">
-                <h3>Private Chats</h3>
+            <div id="recentlyUsedChats" class="recentlyUsedChatsGrid">
+                <h3>Recent Chats</h3>
             </div>
 
             <h1 id="chatNameHeader" class="chatNameHeaderGrid">Your Chat</h1>
