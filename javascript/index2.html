@@ -29,12 +29,12 @@
             grid-template-columns: 1fr 2.5fr 0.5fr;
             grid-gap: 10px;
             grid-template-areas:
-                ".................   header-area    header-area"
+                "..................  header-area    header-area"
                 "..................  search-area    search-button-area"
-                "login-area          messages-area  messages-area"
-                "chat-name-area      messages-area  messages-area"
+                "connect-area          messages-area  messages-area"
                 "public-chats-area   messages-area  messages-area"
                 "private-chats-area  messages-area  messages-area"
+                "..................  messages-area  messages-area"
                 "..................  send-area      send-button-area";
             padding-left: 5%;
             padding-right: 5%;
@@ -49,12 +49,12 @@
             grid-area: search-area;
         }
 
-        .searchButtonGrid {
-            grid-area: search-button-area;
+        .connectGrid {
+            grid-area: connect-area;
         }
 
-        .loginGrid {
-            grid-area: login-area;
+        .searchButtonGrid {
+            grid-area: search-button-area;
         }
 
         .messagesGrid {
@@ -91,7 +91,6 @@
             grid-area: send-button-area;
         }
 
-
         .availableChat {
             background-color: rgba(87, 87, 87, 0.445);
             border: 1px solid rgba(0, 0, 0, 0.8);
@@ -114,17 +113,13 @@
 
     <body>
         <div class="gridContainer">
-
-            <div class="loginGrid">
-                Choose Your Login:
+            
+            <div class="connectGrid">
+                Your Name:
                 <input id="login">
-                <button id="chooseLoginButton">Send</button>
-            </div>
-
-            <div class="chatNameGrid">
-                Enter Chat Name:
+                Chat Name:
                 <input id="findChat">
-                <button id="findChatButton">Send</button>
+                <button id="connectButton">Connect</button>
             </div>
 
             <div id="publicChats" class="publicChatsGrid">

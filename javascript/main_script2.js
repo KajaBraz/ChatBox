@@ -120,9 +120,8 @@ var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
 var all_messages_element = document.getElementById("receivedMessages");
 var my_name_element = document.getElementById("login");
-var choose_name_button = document.getElementById("chooseLoginButton");
+var connect_button = document.getElementById("connectButton");
 var chat_destination_element = document.getElementById("findChat");
-var choose_chat_button = document.getElementById("findChatButton");
 var chat_name_header = document.getElementById("chatNameHeader");
 var public_chats = document.getElementById("publicChats");
 var private_chats = document.getElementById("privateChats");
@@ -153,20 +152,14 @@ window.onload = function () {
 }
 
 
-choose_name_button.onclick = () => {
+connect_button.onclick = () => {
     var id = generate_unique_id(id_length);
     login = my_name_element.value + id;
-    localStorage.setItem("active_user", login);
-    console.log(login);
-    connect(login, chat, id_length);
-};
-
-
-choose_chat_button.onclick = () => {
-    chat_name_header.innerHTML = chat_destination_element.value;
     chat = chat_destination_element.value;
+    chat_name_header.innerHTML = chat_destination_element.value;
+    localStorage.setItem("active_user", login);
     localStorage.setItem("active_chat", chat);
-    console.log(chat);
+    console.log(login, chat);
     connect(login, chat, id_length);
     add_chat(chat);
 };
