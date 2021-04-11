@@ -6,16 +6,20 @@ function format_sent_message(id_length, my_login, value) {
 
 function append_div_messages(my_name, message, message_box_element, class_name, id_length) {
     var m = format_sent_message(id_length, my_name, message);
-    var node = document.createTextNode(m);
-    var div = document.createElement("div");
-    div.className = class_name;
+    var div = append_div(m, message_box_element, class_name);
     if (my_name === login) {
         div.style.float = "right";
     };
-    div.appendChild(node);
-    message_box_element.appendChild(div);
 }
 
+function append_div(child, parent, class_name) {
+    var node = document.createTextNode(child);
+    var div = document.createElement("div");
+    div.className = class_name;
+    div.appendChild(node);
+    parent.appendChild(div);
+    return div;
+}
 
 function handle_receive(message, message_box_element, class_name, id_length) {
     var m = JSON.parse(message);
@@ -63,7 +67,7 @@ function connect(user_name, chat_name, id_length) {
     if (webSocket != null) {
         console.log('not nnull');
         webSocket.close();
-    }
+    };
     if (user_name != "" && chat_name != "") {
         var url = `ws://${server_address}/${chat_name}/${user_name}`;
         console.log("url", url);
@@ -81,30 +85,39 @@ function connect(user_name, chat_name, id_length) {
         };
         webSocket.onerror = (e) => {
             console.log('ws error');
-        }
+        };
+    };
+}
+
+
+function remove_redundant_chat(chat_array, max_num) {
+    if (chat_array.length > max_num) {
+        var to_remove = document.getElementById(chat_array[0]);
+        to_remove.remove();
+        chat_array.shift();
+        console.log("removed");
     };
 }
 
 
 function add_chat(new_chat, public_chat = true) {
+    console.log("adding");
     if (public_chat === true) {
         if (!active_public_chats.includes(new_chat)) {
             active_public_chats.push(new_chat);
-            node = document.createTextNode(new_chat);
-            new_div = document.createElement("DIV");
-            new_div.className = "availableChat";
-            new_div.appendChild(node);
-            public_chats.appendChild(new_div);
+            var new_div = append_div(new_chat, public_chats, "availableChat");
+            new_div.id = new_chat;
+            remove_redundant_chat(active_public_chats, 5);
         };
+
     }
     else {
         if (!active_private_chats.includes(new_chat)) {
             active_private_chats.push(new_chat);
-            node = document.createTextNode(new_chat);
-            new_div = document.createElement("DIV");
-            new_div.className = "availableChat";
-            new_div.appendChild(node);
-            private_chats.appendChild(new_div);
+            var new_div = append_div(new_chat, private_chats, "availableChat");
+            var node = document.createTextNode(new_chat);
+            new_div.id = new_chat;
+            remove_redundant_chat(active_private_chats, 5);
         };
     };
 }
@@ -133,7 +146,7 @@ var id_length = 20;
 var server_address = "localhost:11000";
 var active_public_chats = [];
 var active_private_chats = [];
-
+var recently_used_chats = [];
 
 window.onload = function () {
     console.log("onload");
@@ -159,6 +172,7 @@ connect_button.onclick = () => {
     chat_name_header.innerHTML = chat_destination_element.value;
     localStorage.setItem("active_user", login);
     localStorage.setItem("active_chat", chat);
+
     console.log(login, chat);
     connect(login, chat, id_length);
     add_chat(chat);
