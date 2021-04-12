@@ -73,9 +73,9 @@ class MyTestCase(unittest.TestCase):
         self.server_obj.stop()
 
     def test_clients_join_chat_check_participants_num(self):
-        asyncio.run(self.clients_join_chat_check_participants_num())
+        asyncio.run(self.clients_join_and_leave_chat_check_participants_num())
 
-    async def clients_join_chat_check_participants_num(self):
+    async def clients_join_and_leave_chat_check_participants_num(self):
         # GIVEN
         await self.server_obj.start(self.address, self.port)
 
@@ -83,7 +83,51 @@ class MyTestCase(unittest.TestCase):
         await self.client.connect()
         await self.client2.connect()
         await self.client3.connect()
+        await self.client2.disconnect()
+        await asyncio.sleep(0.5)
 
         # THEN
-        self.assertEqual(3, len(self.server_obj.chat_participants[self.room]))
+        self.assertEqual(2, len(self.server_obj.chat_participants[self.room]))
+        self.server_obj.stop()
+
+    def test_server_receives_and_handles_wrong_message_then_serves_correctly_proper_messages(self):
+        asyncio.run(self.server_receives_and_handles_wrong_message_then_serves_correctly_proper_messages())
+
+    async def server_receives_and_handles_wrong_message_then_serves_correctly_proper_messages(self):
+        # GIVEN
+        await self.server_obj.start(self.address, self.port)
+        await self.client.connect()
+        await self.client2.connect()
+        await self.client3.connect()
+        m1 = 'message 1'
+        m2 = 'message 2'
+        m3 = 'message 3'
+
+        # WHEN
+        asyncio.create_task(self.client.start_receiving())
+        asyncio.create_task(self.client2.start_receiving())
+        asyncio.create_task(self.client3.start_receiving())
+        sent_task1 = asyncio.create_task(self.client.send(m1))
+        sent_task2 = asyncio.create_task(self.client2.send_wrong_message(m2))
+        sent_task3 = asyncio.create_task(self.client3.send(m3))
+        wait_task = asyncio.create_task(asyncio.sleep(0.5))
+        await sent_task1
+        await sent_task2
+        await sent_task3
+        await wait_task
+
+        # THEN
+        self.assertEqual(2, len(self.client.received_messages))
+        self.assertEqual(2, len(self.client2.received_messages))
+        self.assertEqual(2, len(self.client3.received_messages))
+        self.assertIn(m1, self.client.received_messages)
+        self.assertIn(m1, self.client2.received_messages)
+        self.assertIn(m1, self.client3.received_messages)
+        self.assertNotIn(m2, self.client.received_messages)
+        self.assertNotIn(m2, self.client2.received_messages)
+        self.assertNotIn(m2, self.client3.received_messages)
+        self.assertIn(m3, self.client.received_messages)
+        self.assertIn(m3, self.client2.received_messages)
+        self.assertIn(m3, self.client3.received_messages)
+
         self.server_obj.stop()

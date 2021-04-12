@@ -29,6 +29,13 @@ class VirtualClient:
         await self.ws.send(to_json(json_mess))
         # self.ws.send(to_json(json_mess))
 
+    async def send_wrong_message(self, message):
+        json_mess = {JsonFields.MESSAGE_TYPE: MessageTypes.MESSAGE,
+                     JsonFields.MESSAGE_VALUE: message,
+                     JsonFields.MESSAGE_SENDER: self.user_name}
+        self.sent_messages.append(message)
+        await self.ws.send(to_json(json_mess))
+
     async def start_receiving(self):
         async for data in self.ws:
             print('received', data)
