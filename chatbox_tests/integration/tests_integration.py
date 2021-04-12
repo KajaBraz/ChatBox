@@ -72,7 +72,7 @@ class MyTestCase(unittest.TestCase):
         add_message_mock.assert_called_once_with(self.client.user_name, self.client.chat_name, message, ANY)
         self.server_obj.stop()
 
-    def test_clients_join_chat_check_participants_num(self):
+    def test_clients_join_and_leave_chat_check_participants_num(self):
         asyncio.run(self.clients_join_and_leave_chat_check_participants_num())
 
     async def clients_join_and_leave_chat_check_participants_num(self):
@@ -87,7 +87,11 @@ class MyTestCase(unittest.TestCase):
         await asyncio.sleep(0.5)
 
         # THEN
+        logins = [user[0] for user in self.server_obj.chat_participants[self.room]]
         self.assertEqual(2, len(self.server_obj.chat_participants[self.room]))
+        self.assertIn(self.client.user_name, logins)
+        self.assertNotIn(self.client2.user_name, logins)
+        self.assertIn(self.client3.user_name, logins)
         self.server_obj.stop()
 
     def test_server_receives_and_handles_wrong_message_then_serves_correctly_proper_messages(self):
