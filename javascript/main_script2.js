@@ -88,6 +88,9 @@ function connect(user_name, chat_name, id_length) {
         webSocket.onerror = (e) => {
             console.log('ws error');
         };
+        webSocket.onopen = () => {
+            retrieve_messages(login, chat, webSocket);
+        };
     }
 }
 
@@ -128,6 +131,13 @@ function retrieve_recent_chats() {
 }
 
 
+function clear_message_element(message_box) {
+    while (message_box.firstChild) {
+        message_box.removeChild(message_box.firstChild);
+    }
+}
+
+
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
 var all_messages_element = document.getElementById("receivedMessages");
@@ -148,30 +158,29 @@ var recently_used_chats = [];
 
 window.onload = function () {
     console.log("onload");
-    login = localStorage.getItem("active_user");
-    chat = localStorage.getItem("active_chat");
-    console.log('user storage', login);
-    console.log('chat storage', chat);
-    if (chat != null) {
-        chat_name_header.innerHTML = chat;
-    }
-    connect(login, chat, id_length);
-    webSocket.onopen = () => {
-        retrieve_messages(login, chat, webSocket);
-    };
+    my_name_element.value = localStorage.getItem("active_user").slice(0, -id_length);
+    chat_destination_element.value = localStorage.getItem("active_chat");
     retrieve_recent_chats();
 }
 
 
 connect_button.onclick = () => {
-    var id = generate_unique_id(id_length);
-    login = my_name_element.value + id;
+    clear_message_element(all_messages_element);
+    if (my_name_element.value === localStorage.getItem("active_user").slice(0, -id_length)) {
+        login = localStorage.getItem("active_user");
+        console.log('equal logins')
+    } else {
+        var id = generate_unique_id(id_length);
+        login = my_name_element.value + id;
+    }
     chat = chat_destination_element.value;
     chat_name_header.innerHTML = chat_destination_element.value;
+
     localStorage.setItem("active_user", login);
     localStorage.setItem("active_chat", chat);
 
     console.log(login, chat);
+
     connect(login, chat, id_length);
     add_chat(chat);
     localStorage.setItem("recent_chats", active_recent_chats);
