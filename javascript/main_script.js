@@ -68,7 +68,7 @@ function generate_unique_id(n) {
 function connect(user_name, chat_name, id_length) {
     if (webSocket != null) {
         console.log('not nnull');
-        webSocket.close();
+        webSocket.close(1000);
     }
     if (user_name != "" && chat_name != "") {
         var url = `ws://${server_address}/${chat_name}/${user_name}`;
