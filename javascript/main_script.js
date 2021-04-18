@@ -84,8 +84,11 @@ function connect(user_name, chat_name, id_length) {
             handle_receive(event.data, all_messages_element, "message", id_length);
         };
         webSocket.onclose = (e) => {
-            console.log('ws closed', user_name, chat_name);
+            console.log(`ws closed (${user_name}, ${chat_name}), code: ${e.code}, reason: ${e.reason}`);
             console.log(webSocket.readyState);
+            if (e.code === 4000) {
+                window.alert(e.reason);
+            }
         };
         webSocket.onerror = (e) => {
             console.log('ws error');
