@@ -177,7 +177,7 @@ window.onload = function () {
 
 
 connect_button.onclick = () => {
-    if (my_name_element.value === localStorage.getItem("active_user").slice(0, -id_length)) {
+    if (localStorage.getItem("active_user") && my_name_element.value === localStorage.getItem("active_user").slice(0, -id_length)) {
         login = localStorage.getItem("active_user");
         console.log('equal logins');
     } else {
