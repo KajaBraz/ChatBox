@@ -5,6 +5,7 @@ from sys import argv
 import websockets
 
 import src.my_json as my_json
+from src import helper_functions
 from src.database import connect, add_message, db_name, db_login, db_password, fetch_last_messages
 from src.enums import JsonFields, MessageTypes
 
@@ -60,6 +61,10 @@ class Server:
         try:
             log.info(f'{websocket} - waiting for messages')
             log.info(f'{websocket} - PATH {path}')
+            if not helper_functions.check_url(path):
+                await websocket.close(code=4000, reason='wrong login or chat name')
+                log.info(f'websocket closed, wrong login or chat name')
+                return
 
             path_items = path.split('/')
             login, chat_name = path_items[-1], path_items[-2]
