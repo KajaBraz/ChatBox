@@ -68,46 +68,49 @@ class Server:
             log.info(f'{websocket} - {login} joined chat {chat_name}')
 
             async for data in websocket:
-                message = my_json.from_json(data)
-                log.info(f'{websocket} - raw data received: {data}')
-                log.info(f'{websocket} - message: {message}')
+                try:
+                    message = my_json.from_json(data)
+                    log.info(f'{websocket} - raw data received: {data}')
+                    log.info(f'{websocket} - message: {message}')
 
-                if message[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
-                    logged_users_message = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS,
-                                            JsonFields.MESSAGE_VALUE: list(self.logged_users.keys())}
-                    await websocket.send(my_json.to_json(logged_users_message))
-                    log.info(f'{websocket} - get all logged: {self.logged_users.keys()}')
+                    if message[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
+                        logged_users_message = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS,
+                                                JsonFields.MESSAGE_VALUE: list(self.logged_users.keys())}
+                        await websocket.send(my_json.to_json(logged_users_message))
+                        log.info(f'{websocket} - get all logged: {self.logged_users.keys()}')
 
-                elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES:
-                    chat = message[JsonFields.MESSAGE_DESTINATION]
-                    past_messages = (fetch_last_messages(chat, self.conn))
-                    for message in past_messages:
-                        json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.MESSAGE,
-                                        JsonFields.MESSAGE_SENDER: message[0],
-                                        JsonFields.MESSAGE_VALUE: message[1],
-                                        JsonFields.MESSAGE_DESTINATION: message[2]}
-                        await websocket.send(my_json.to_json(json_message))
-                    log.info(f'{websocket} - past messages sent')
+                    elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES:
+                        chat = message[JsonFields.MESSAGE_DESTINATION]
+                        past_messages = (fetch_last_messages(chat, self.conn))
+                        for message in past_messages:
+                            json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.MESSAGE,
+                                            JsonFields.MESSAGE_SENDER: message[0],
+                                            JsonFields.MESSAGE_VALUE: message[1],
+                                            JsonFields.MESSAGE_DESTINATION: message[2]}
+                            await websocket.send(my_json.to_json(json_message))
+                        log.info(f'{websocket} - past messages sent')
 
-                elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
-                    destination_chat_participants = self.chat_participants.get(message[JsonFields.MESSAGE_DESTINATION],
-                                                                               [])
+                    elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
+                        destination_chat_participants = self.chat_participants.get(
+                            message[JsonFields.MESSAGE_DESTINATION], [])
 
-                    add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], self.conn)
-                    log.info(f'{websocket} - message {message} added to db, room {chat_name}')
-                    for participant_sock in destination_chat_participants:
-                        log.info(f'{websocket} - sending message to {participant_sock} in '
-                                 f'{message[JsonFields.MESSAGE_DESTINATION]}')
-                        await participant_sock[1].send(data)
-                        # todo add test, when database connection is down, message is sent anyway (that is why this must be after sending)
-        except KeyError:
-            log.error(f'{websocket} - KeyError; improper json: {data}')
+                        add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], self.conn)
+                        log.info(f'{websocket} - message {message} added to db, room {chat_name}')
+                        for participant_sock in destination_chat_participants:
+                            log.info(f'{websocket} - sending message to {participant_sock} in '
+                                     f'{message[JsonFields.MESSAGE_DESTINATION]}')
+                            await participant_sock[1].send(data)
+                            # todo add test, when database connection is down, message is sent anyway (that is why this must be after sending)
+                except KeyError:
+                    log.error(f'{websocket} - KeyError; improper json: {data}')
+                except Exception as e:
+                    log.exception(f"{websocket} - Unexpected error: {e}")
+                # todo answer with an error json
         except Exception as e:
-            log.exception(f"{websocket} - Unexpected error: {e}")
+            log.exception(f"{websocket} - Unexpected error 2: {e}")
         if chat_name and login:
             self.remove_from_chat(chat_name, login, websocket)
             log.info(f'{websocket} - {login} left chat {chat_name}')
-        # todo answer with an error json
 
     async def start(self, address, port):
         self.server = await websockets.serve(self.receive, address, port)

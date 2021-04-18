@@ -110,8 +110,21 @@ function add_chat(new_chat) {
         active_recent_chats.push(new_chat);
         var new_div = append_div(new_chat, recent_chats, "availableChat");
         new_div.id = new_chat;
+        new_div.onclick = () => {
+            chat_change(new_chat);
+        }
         remove_redundant_chat(active_recent_chats, 5);
     }
+}
+
+function chat_change(chat_name) {
+    clear_message_element(all_messages_element);
+    chat = chat_name;
+    chat_name_header.innerHTML = chat;
+    chat_destination_element.value = chat;
+    localStorage.setItem("active_chat", chat);
+    connect(login, chat, id_length);
+    localStorage.setItem("recent_chats", active_recent_chats);
 }
 
 
@@ -164,25 +177,18 @@ window.onload = function () {
 
 
 connect_button.onclick = () => {
-    clear_message_element(all_messages_element);
     if (localStorage.getItem("active_user") && my_name_element.value === localStorage.getItem("active_user").slice(0, -id_length)) {
         login = localStorage.getItem("active_user");
-        console.log('equal logins')
+        console.log('equal logins');
     } else {
         var id = generate_unique_id(id_length);
         login = my_name_element.value + id;
+        localStorage.setItem("active_user", login);
     }
-    chat = chat_destination_element.value;
-    chat_name_header.innerHTML = chat_destination_element.value;
 
-    localStorage.setItem("active_user", login);
-    localStorage.setItem("active_chat", chat);
-
-    console.log(login, chat);
-    connect(login, chat, id_length);
-
+    chat_change(chat_destination_element.value);
     add_chat(chat);
-    localStorage.setItem("recent_chats", active_recent_chats);
+    console.log(login, chat);
 }
 
 

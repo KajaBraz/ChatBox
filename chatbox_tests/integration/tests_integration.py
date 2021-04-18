@@ -70,6 +70,10 @@ class MyTestCase(unittest.TestCase):
 
         # THEN
         add_message_mock.assert_called_once_with(self.client.user_name, self.client.chat_name, message, ANY)
+        await self.client.send_not_a_json(message)
+        await asyncio.sleep(0.5)
+        add_message_mock.reset_mock()
+        add_message_mock.assert_not_called()
         self.server_obj.stop()
 
     def test_clients_join_and_leave_chat_check_participants_num(self):
@@ -106,24 +110,30 @@ class MyTestCase(unittest.TestCase):
         m1 = 'message 1'
         m2 = 'message 2'
         m3 = 'message 3'
+        m4 = 'message 4'
+        m5 = 'message 5'
 
         # WHEN
         asyncio.create_task(self.client.start_receiving())
         asyncio.create_task(self.client2.start_receiving())
         asyncio.create_task(self.client3.start_receiving())
-        sent_task1 = asyncio.create_task(self.client.send(m1))
-        sent_task2 = asyncio.create_task(self.client2.send_wrong_message(m2))
-        sent_task3 = asyncio.create_task(self.client3.send(m3))
+        send_task1 = asyncio.create_task(self.client.send(m1))
+        send_task2 = asyncio.create_task(self.client2.send_wrong_message(m2))
+        send_task3 = asyncio.create_task(self.client3.send(m3))
+        send_task4 = asyncio.create_task(self.client2.send_not_a_json(m4))
+        send_task5 = asyncio.create_task(self.client2.send(m5))
         wait_task = asyncio.create_task(asyncio.sleep(0.5))
-        await sent_task1
-        await sent_task2
-        await sent_task3
+        await send_task1
+        await send_task2
+        await send_task3
+        await send_task4
+        await send_task5
         await wait_task
 
         # THEN
-        self.assertEqual(2, len(self.client.received_messages))
-        self.assertEqual(2, len(self.client2.received_messages))
-        self.assertEqual(2, len(self.client3.received_messages))
+        self.assertEqual(3, len(self.client.received_messages))
+        self.assertEqual(3, len(self.client2.received_messages))
+        self.assertEqual(3, len(self.client3.received_messages))
         self.assertIn(m1, self.client.received_messages)
         self.assertIn(m1, self.client2.received_messages)
         self.assertIn(m1, self.client3.received_messages)
@@ -133,5 +143,8 @@ class MyTestCase(unittest.TestCase):
         self.assertIn(m3, self.client.received_messages)
         self.assertIn(m3, self.client2.received_messages)
         self.assertIn(m3, self.client3.received_messages)
-
+        self.assertIn(m5, self.client.received_messages)
+        self.assertIn(m5, self.client2.received_messages)
+        self.assertIn(m5, self.client3.received_messages)
         self.server_obj.stop()
+
