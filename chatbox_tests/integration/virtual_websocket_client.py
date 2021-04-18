@@ -36,6 +36,9 @@ class VirtualClient:
         self.sent_messages.append(message)
         await self.ws.send(to_json(json_mess))
 
+    async def send_not_a_json(self,message):
+        await self.ws.send(message)
+
     async def start_receiving(self):
         async for data in self.ws:
             print('received', data)
