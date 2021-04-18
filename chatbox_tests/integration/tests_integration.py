@@ -70,10 +70,17 @@ class MyTestCase(unittest.TestCase):
 
         # THEN
         add_message_mock.assert_called_once_with(self.client.user_name, self.client.chat_name, message, ANY)
+        add_message_mock.reset_mock()
+
         await self.client.send_not_a_json(message)
         await asyncio.sleep(0.5)
-        add_message_mock.reset_mock()
         add_message_mock.assert_not_called()
+        add_message_mock.reset_mock()
+        
+        await self.client.send_wrong_message(message)
+        await asyncio.sleep(0.5)
+        add_message_mock.assert_not_called()
+
         self.server_obj.stop()
 
     def test_clients_join_and_leave_chat_check_participants_num(self):
