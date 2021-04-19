@@ -5,7 +5,8 @@ from src.helper_functions import check_url
 
 class MyTestCase(unittest.TestCase):
     def test_check_url(self):
-        correct_urls = ['/mychat/mylogin0olCnoRHyfTxvAh3TD0q', '/MyChat/MyLogin0olCnoRHyfTxvAh3TD0q']
+        correct_urls = ['/mychat/myloginqwertyuioplkjhgfdsaz', '/MyChat/MyLoginxcvbnm0987654321',
+                        '/MyChat/MyLogin0olCnoRHyfTxvAh3TD09']
         wrong_urls = ['/mychat/¯\_(ツ)_/¯/0olCnoRHyfTxvAh3TD0q', '/my_chat/my_login0olCnoRHyfTxvAh3TD0q',
                       '/chat_name/Login:)0olCnoRHyfTxvAh3TD0q', '/chat_name/MyLogin!0olCnoRHyfTxvAh3TD0q',
                       '/chatname/MyLogin@0olCnoRHyfTxvAh3TD0q', '/chatname?/MyLogin0olCnoRHyfTxvAh3TD0q',
