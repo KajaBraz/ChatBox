@@ -1,15 +1,14 @@
-function format_sent_message(id_length, my_login, value) {
-    var name = my_login.slice(0, -id_length)
-    return `${name}: ${value}`;
-}
-
-
-function append_div_messages(my_name, message, message_box_element, class_name, id_length) {
-    var m = format_sent_message(id_length, my_name, message);
-    var div = append_div(m, message_box_element, class_name);
+function append_div_messages(my_name, timestamp, message, message_box_element, class_name, id_length) {
+    var div = append_div("", message_box_element, class_name);
     if (my_name === login) {
         div.style.float = "right";
     }
+    let message_header_div = append_div("", div, "messageHeader");
+    let name = my_name.slice(0, -id_length);
+    append_div(name, message_header_div, "divAuthor");
+    let date = new Date(timestamp);
+    append_div(date.toLocaleDateString() + " - " + date.toLocaleTimeString(), message_header_div, "divTimestamp");
+    div.innerHTML += message;
 }
 
 
@@ -28,7 +27,8 @@ function handle_receive(message, message_box_element, class_name, id_length) {
     if (m["message_type"] == "message") {
         var name = m["message_sender"];
         var val = m["message_value"];
-        append_div_messages(name, val, message_box_element, class_name, id_length);
+        var timestamp = m["message_timestamp"];
+        append_div_messages(name, timestamp, val, message_box_element, class_name, id_length);
         message_box_element.scrollTo(0, message_box_element.scrollHeight);
     }
 }

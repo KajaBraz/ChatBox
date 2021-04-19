@@ -4,6 +4,7 @@ from unittest.mock import patch, MagicMock, ANY
 
 from chatbox_tests.integration.virtual_websocket_client import VirtualClient
 from src import chatbox_websocket_server
+from src.enums import JsonFields
 
 
 class MyTestCase(unittest.TestCase):
@@ -69,7 +70,7 @@ class MyTestCase(unittest.TestCase):
         await asyncio.sleep(0.5)
 
         # THEN
-        add_message_mock.assert_called_once_with(self.client.user_name, self.client.chat_name, message, ANY)
+        add_message_mock.assert_called_once_with(self.client.user_name, self.client.chat_name, message, ANY, ANY)
         add_message_mock.reset_mock()
 
         await self.client.send_not_a_json(message)
@@ -155,3 +156,19 @@ class MyTestCase(unittest.TestCase):
         self.assertIn(m5, self.client3.received_messages)
         self.server_obj.stop()
 
+    def test_server_adds_timestamp_to_message(self):
+        asyncio.run(self.server_adds_timestamp_to_message())
+
+    async def server_adds_timestamp_to_message(self):
+        # GIVEN
+        await self.server_obj.start(self.address, self.port)
+        await self.client.connect()
+
+        # WHEN
+        asyncio.create_task(self.client.start_receiving())
+        await self.client.send("message")
+        await asyncio.sleep(0.5)
+
+        # THEN
+        self.assertEqual(1, len(self.client.received_jsons))
+        self.assertIn(JsonFields.MESSAGE_TIMESTAMP, self.client.received_jsons[0])
