@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from datetime import datetime, timezone
 from sys import argv
 
 import websockets
@@ -27,6 +28,10 @@ log = logging.getLogger("chatbox_logger")
 #
 # logger.addHandler(output_file_handler)
 # logger.addHandler(stdout_handler)
+
+def date_time_to_millis(t: datetime) -> int:
+    return int(t.timestamp() * 1000)
+
 
 class Server:
     def __init__(self):
@@ -86,7 +91,8 @@ class Server:
                             json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.MESSAGE,
                                             JsonFields.MESSAGE_SENDER: message[0],
                                             JsonFields.MESSAGE_VALUE: message[1],
-                                            JsonFields.MESSAGE_DESTINATION: message[2]}
+                                            JsonFields.MESSAGE_DESTINATION: message[2],
+                                            JsonFields.MESSAGE_TIMESTAMP: date_time_to_millis(message[3])}
                             await websocket.send(my_json.to_json(json_message))
                         log.info(f'{websocket} - past messages sent')
 
@@ -94,12 +100,15 @@ class Server:
                         destination_chat_participants = self.chat_participants.get(
                             message[JsonFields.MESSAGE_DESTINATION], [])
 
-                        add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], self.conn)
+                        date_time = datetime.now(timezone.utc)
+                        time_millis = date_time_to_millis(date_time)
+                        add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], self.conn, date_time)
                         log.info(f'{websocket} - message {message} added to db, room {chat_name}')
+                        message[JsonFields.MESSAGE_TIMESTAMP] = time_millis
                         for participant_sock in destination_chat_participants:
                             log.info(f'{websocket} - sending message to {participant_sock} in '
                                      f'{message[JsonFields.MESSAGE_DESTINATION]}')
-                            await participant_sock[1].send(data)
+                            await participant_sock[1].send(my_json.to_json(message))
                             # todo add test, when database connection is down, message is sent anyway (that is why this must be after sending)
                 except KeyError:
                     log.error(f'{websocket} - KeyError; improper json: {data}')

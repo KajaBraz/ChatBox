@@ -9,6 +9,7 @@ class VirtualClient:
         self.ws = None
         self.sent_messages = []
         self.received_messages = []
+        self.received_jsons = []
         self.address = address
         self.port = port
         self.chat_name = chat_name
@@ -44,6 +45,7 @@ class VirtualClient:
             print('received', data)
             msg = from_json(data)
             self.received_messages.append(msg[JsonFields.MESSAGE_VALUE])
+            self.received_jsons.append(msg)
         # r = await self.ws.recv()
 
     async def disconnect(self):

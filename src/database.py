@@ -90,12 +90,12 @@ def add_user(new_login, new_password, connection):
     connection.execute(stm)
 
 
-def add_message(login, chat, message, db_connection):
+def add_message(login, chat, message, db_connection, date_time):
     if db_connection:
         metadata = MetaData()
         metadata.reflect(bind=db_connection)
         messages = metadata.tables['messages']
-        stm = messages.insert().values(sender_login=login, chat_name=chat, message=message, date_time=datetime.now())
+        stm = messages.insert().values(sender_login=login, chat_name=chat, message=message, date_time=date_time)
         db_connection.execute(stm)
         log.debug(f'adding message "{message}" to the database, sent by {login} in chat {chat}')
     else:
