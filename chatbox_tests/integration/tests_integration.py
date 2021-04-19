@@ -77,7 +77,7 @@ class MyTestCase(unittest.TestCase):
         await asyncio.sleep(0.5)
         add_message_mock.assert_not_called()
         add_message_mock.reset_mock()
-        
+
         await self.client.send_wrong_message(message)
         await asyncio.sleep(0.5)
         add_message_mock.assert_not_called()
