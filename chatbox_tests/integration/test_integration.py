@@ -172,4 +172,4 @@ class MyTestCase(unittest.TestCase):
         # THEN
         self.assertEqual(1, len(self.client.received_jsons))
         self.assertIn(JsonFields.MESSAGE_TIMESTAMP, self.client.received_jsons[0])
-        self.server_obj.stop()
+        # self.server_obj.stop()
