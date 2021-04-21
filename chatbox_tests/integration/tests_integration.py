@@ -99,7 +99,7 @@ class MyTestCase(unittest.TestCase):
         await asyncio.sleep(0.5)
 
         # THEN
-        logins = [user[0] for user in self.server_obj.chat_participants[self.room]]
+        logins = self.server_obj.chat_participants[self.room].keys()
         self.assertEqual(2, len(self.server_obj.chat_participants[self.room]))
         self.assertIn(self.client.user_name, logins)
         self.assertNotIn(self.client2.user_name, logins)
