@@ -28,6 +28,11 @@ jobs:
       - name: Install requirements
         run: |
           pip install -r requirements.txt
-      - name: Test with unittest
+      - name: Test pytest
         run: |
-          python -m unittest discover -s chatbox_tests/
+          pytest --junitxml=test_results/results.xml
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: test_results/**/*.xml
