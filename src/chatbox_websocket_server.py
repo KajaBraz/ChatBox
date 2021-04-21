@@ -45,18 +45,17 @@ class Server:
         self.conn = connect(db_name, db_login, db_password)
         log.info(f'server created connection to database {db_name}')
 
-    def remove_from_chat(self, chat, user_name, user_websocket):
+    def remove_from_chat(self, chat, user_name):
         log.info(f'number of participants in chat {len(self.chat_participants[chat])} before removing')
-        users = self.chat_participants[chat]
-        self.chat_participants[chat] = [user for user in users if user != (user_name, user_websocket)]
+        del self.chat_participants[chat][user_name]
         log.info(f'number of participants in chat {len(self.chat_participants[chat])} after removing')
 
     def join_chat(self, user_name, chat_name, user_websocket):
         log.info(f'{user_websocket} - joining')
         if chat_name in self.chat_participants:
-            self.chat_participants[chat_name].append((user_name, user_websocket))
+            self.chat_participants[chat_name][user_name] = user_websocket
         else:
-            self.chat_participants[chat_name] = [(user_name, user_websocket)]
+            self.chat_participants[chat_name] = {user_name: user_websocket}
         log.info(
             f'number of participants in chat {chat_name} - {len(self.chat_participants[chat_name])}:'
             f'{self.chat_participants[chat_name]}')
@@ -110,7 +109,7 @@ class Server:
                         add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], self.conn, date_time)
                         log.info(f'{websocket} - message {message} added to db, room {chat_name}')
                         message[JsonFields.MESSAGE_TIMESTAMP] = time_millis
-                        for participant_sock in destination_chat_participants:
+                        for participant_sock in destination_chat_participants.items():
                             log.info(f'{websocket} - sending message to {participant_sock} in '
                                      f'{message[JsonFields.MESSAGE_DESTINATION]}')
                             await participant_sock[1].send(my_json.to_json(message))
@@ -123,7 +122,7 @@ class Server:
         except Exception as e:
             log.exception(f"{websocket} - Unexpected error 2: {e}")
         if chat_name and login:
-            self.remove_from_chat(chat_name, login, websocket)
+            self.remove_from_chat(chat_name, login)
             log.info(f'{websocket} - {login} left chat {chat_name}')
 
     async def start(self, address, port):
