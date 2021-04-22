@@ -7,8 +7,9 @@ function append_div_messages(my_name, timestamp, message, message_box_element, c
     let name = my_name.slice(0, -id_length);
     append_div(name, message_header_div, "divAuthor");
     let date = new Date(timestamp);
-    append_div(date.toLocaleDateString() + " - " + date.toLocaleTimeString(), message_header_div, "divTimestamp");
+    new_div = append_div(date.toLocaleDateString() + " - " + date.toLocaleTimeString(), message_header_div, "divTimestamp");
     div.innerHTML += message;
+    return div;
 }
 
 
@@ -28,8 +29,13 @@ function handle_receive(message, message_box_element, class_name, id_length) {
         var name = m["message_sender"];
         var val = m["message_value"];
         var timestamp = m["message_timestamp"];
-        append_div_messages(name, timestamp, val, message_box_element, class_name, id_length);
+        var new_message = append_div_messages(name, timestamp, val, message_box_element, class_name, id_length);
         message_box_element.scrollTo(0, message_box_element.scrollHeight);
+        if (class_name === "message messageUnread") {
+            new_message.id = generate_unique_id(5);
+            console.log("pushing");
+            unread_messages_ids.push(new_message.id);
+        }
     }
 }
 
@@ -82,7 +88,14 @@ function connect(user_name, chat_name, id_length) {
         };
         webSocket.onmessage = (event) => {
             console.log("message received");
-            handle_receive(event.data, all_messages_element, "message", id_length);
+            var on_focus = check_focus();
+            if (on_focus) {
+                var class_name = "message";
+            }
+            else {
+                var class_name = "message messageUnread";
+            }
+            handle_receive(event.data, all_messages_element, class_name, id_length);
         };
         webSocket.onclose = (e) => {
             console.log(`ws closed (${user_name}, ${chat_name}), code: ${e.code}, reason: ${e.reason}`);
@@ -164,6 +177,25 @@ function not_blank(variable) {
 }
 
 
+function check_focus() {
+    if (document.hasFocus()) {
+        return true;
+    }
+    console.log("no focus");
+    return false;
+}
+
+
+function read_message() {
+    console.log("changing class", unread_messages_ids);
+    for (i = 0; i < unread_messages_ids.length; i++) {
+        var div = document.getElementById(unread_messages_ids[i]);
+        div.className = "message";
+    }
+    unread_messages_ids = [];
+}
+
+
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
 var all_messages_element = document.getElementById("receivedMessages");
@@ -180,6 +212,7 @@ var webSocket = null;
 var id_length = 20;
 var active_recent_chats = [];
 var recently_used_chats = [];
+var unread_messages_ids = []
 
 
 window.onload = function () {
@@ -229,3 +262,7 @@ message_element.addEventListener("keypress", function (event) {
         );
     }
 });
+
+
+document.addEventListener('click', read_message);
+document.addEventListener('keypress', read_message);
