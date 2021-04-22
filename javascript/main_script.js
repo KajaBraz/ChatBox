@@ -36,11 +36,12 @@ function handle_receive(message, message_box_element, class_name, id_length) {
 
 function send_button(message_type, message_element, my_name, chat_name, websocket) {
     var message = message_element.value;
-    send_websocket(message_type, message, my_name, chat_name, websocket);
-    message_element.value = "";
-    console.log('websocket sent', websocket);
+    if (not_blank(message)) {
+        send_websocket(message_type, message, my_name, chat_name, websocket);
+        message_element.value = "";
+        console.log('websocket sent', websocket);
+    }
 }
-
 
 function send_websocket(message_type, message, sender, chat_destination, websocket) {
     var json_message = {
@@ -70,7 +71,7 @@ function connect(user_name, chat_name, id_length) {
         console.log('not nnull');
         webSocket.close(1000);
     }
-    if (user_name != "" && chat_name != "") {
+    if (not_blank(user_name.slice(0, -id_length)) && not_blank(chat_name)) {
         var url = `ws://${server_address}/${chat_name}/${user_name}`;
         console.log("url", url);
         webSocket = new WebSocket(url);
@@ -109,7 +110,7 @@ function remove_redundant_chat(chat_array, max_num) {
 
 function add_chat(new_chat) {
     console.log("adding");
-    if (!active_recent_chats.includes(new_chat)) {
+    if (!active_recent_chats.includes(new_chat) && not_blank(new_chat)) {
         active_recent_chats.push(new_chat);
         var new_div = append_div(new_chat, recent_chats, "availableChat");
         new_div.id = new_chat;
@@ -128,6 +129,7 @@ function chat_change(chat_name) {
     localStorage.setItem("active_chat", chat);
     connect(login, chat, id_length);
     localStorage.setItem("recent_chats", active_recent_chats);
+
 }
 
 
@@ -150,6 +152,15 @@ function clear_message_element(message_box) {
     while (message_box.firstChild) {
         message_box.removeChild(message_box.firstChild);
     }
+}
+
+
+function not_blank(variable) {
+    if (variable == false) {
+        console.log("blank field");
+        return false;
+    }
+    return true;
 }
 
 
