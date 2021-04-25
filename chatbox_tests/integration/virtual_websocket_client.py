@@ -37,15 +37,16 @@ class VirtualClient:
         self.sent_messages.append(message)
         await self.ws.send(to_json(json_mess))
 
-    async def send_not_a_json(self,message):
+    async def send_not_a_json(self, message):
         await self.ws.send(message)
 
     async def start_receiving(self):
         async for data in self.ws:
             print('received', data)
             msg = from_json(data)
-            self.received_messages.append(msg[JsonFields.MESSAGE_VALUE])
-            self.received_jsons.append(msg)
+            if msg[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
+                self.received_messages.append(msg[JsonFields.MESSAGE_VALUE])
+                self.received_jsons.append(msg)
         # r = await self.ws.recv()
 
     async def disconnect(self):
