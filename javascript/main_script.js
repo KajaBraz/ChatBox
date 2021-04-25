@@ -4,7 +4,7 @@ function append_div_messages(my_name, timestamp, message, message_box_element, c
         div.style.float = "right";
     }
     let message_header_div = append_div("", div, "messageHeader");
-    let name = my_name.slice(0, -id_length);
+    let name = retrieve_display_login(my_name);
     append_div(name, message_header_div, "divAuthor");
     let date = new Date(timestamp);
     new_div = append_div(date.toLocaleDateString() + " - " + date.toLocaleTimeString(), message_header_div, "divTimestamp");
@@ -37,6 +37,13 @@ function handle_receive(message, message_box_element, class_name, id_length) {
             unread_messages_ids.push(new_message.id);
         }
     }
+    if (m["message_type"] == "users_update") {
+        let active_users_element = document.getElementById("activeUsers");
+        let new_users = m["message_value"];
+        let chat_name = m["message_destination"];
+        update_user_list(new_users, active_users_element, chat_name);
+        console.log(new_users, chat_name);
+    }
 }
 
 
@@ -48,6 +55,7 @@ function send_button(message_type, message_element, my_name, chat_name, websocke
         console.log('websocket sent', websocket);
     }
 }
+
 
 function send_websocket(message_type, message, sender, chat_destination, websocket) {
     var json_message = {
@@ -72,12 +80,20 @@ function generate_unique_id(n) {
 }
 
 
+function retrieve_display_login(user_name) {
+    let name = user_name.slice(0, -id_length);
+    console.log("retrieving user name:", name);
+    return name;
+}
+
+
 function connect(user_name, chat_name, id_length) {
     if (webSocket != null) {
         console.log('not nnull');
         webSocket.close(1000);
     }
-    if (not_blank(user_name.slice(0, -id_length)) && not_blank(chat_name)) {
+    let short_name = retrieve_display_login(user_name);
+    if (not_blank(short_name) && not_blank(chat_name)) {
         var url = `ws://${server_address}/${chat_name}/${user_name}`;
         console.log("url", url);
         webSocket = new WebSocket(url);
@@ -134,6 +150,25 @@ function add_chat(new_chat) {
     }
 }
 
+
+function update_user_list(new_users_array, active_users_element, class_name) {
+    for (let n = 0; n < new_users_array.length; n++) {
+        let user_name = new_users_array[n];
+        let short_name = retrieve_display_login(user_name);
+        console.log("updating:", user_name);
+        if (!chat_participants.has(user_name)) {
+            append_div(short_name, active_users_element, class_name);
+            chat_participants.add(user_name);
+        }
+        else if (user_name != login) {
+            active_users_element.remove(short_name);
+            chat_participants.delete(user_name);
+        }
+        console.log(chat_participants);
+    }
+}
+
+
 function chat_change(chat_name) {
     clear_message_element(all_messages_element);
     chat = chat_name;
@@ -188,7 +223,7 @@ function check_focus() {
 
 function read_message() {
     console.log("changing class", unread_messages_ids);
-    for (i = 0; i < unread_messages_ids.length; i++) {
+    for (let i = 0; i < unread_messages_ids.length; i++) {
         var div = document.getElementById(unread_messages_ids[i]);
         div.className = "message";
     }
@@ -212,19 +247,22 @@ var webSocket = null;
 var id_length = 20;
 var active_recent_chats = [];
 var recently_used_chats = [];
-var unread_messages_ids = []
+var unread_messages_ids = [];
+var chat_participants = new Set();
 
 
 window.onload = function () {
     console.log("onload");
-    my_name_element.value = localStorage.getItem("active_user").slice(0, -id_length);
+    let short_name = retrieve_display_login(localStorage.getItem("active_user"));
+    my_name_element.value = short_name;
     chat_destination_element.value = localStorage.getItem("active_chat");
     retrieve_recent_chats();
 }
 
 
 connect_button.onclick = () => {
-    if (localStorage.getItem("active_user") && my_name_element.value === localStorage.getItem("active_user").slice(0, -id_length)) {
+    let user_name = retrieve_display_login(localStorage.getItem("active_user"));
+    if (localStorage.getItem("active_user") && my_name_element.value === user_name) {
         login = localStorage.getItem("active_user");
         console.log('equal logins');
     } else {

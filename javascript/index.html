@@ -26,19 +26,23 @@
 
         .gridContainer {
             display: grid;
-            grid-template-columns: 1fr 2.5fr 0.5fr;
+            grid-template-columns: 0.5fr 2.5fr 0.5fr 1fr;
             grid-gap: 10px;
             grid-template-areas:
-                "..................  header-area    header-area"
-                "..................  search-area    search-button-area"
-                "connect-area        messages-area  messages-area"
-                "recent-chats-area   messages-area  messages-area"
-                "recent-chats-area   messages-area  messages-area"
-                "..................  messages-area  messages-area"
-                "..................  send-area      send-button-area";
+                "..................  header-area    header-area         .............."
+                "..................  search-area    search-button-area  .............."
+                "connect-area        messages-area  messages-area       user-list-area"
+                "recent-chats-area   messages-area  messages-area       user-list-area"
+                "recent-chats-area   messages-area  messages-area       user-list-area"
+                "..................  messages-area  messages-area       .............."
+                "..................  send-area      send-button-area    ..............";
             padding-left: 5%;
             padding-right: 5%;
             text-align: center;
+        }
+
+        .chatUsers{
+            grid-area: user-list-area;
         }
 
         .chatNameHeaderGrid {
@@ -128,6 +132,10 @@
             color: DimGray;
         }
 
+        .userList {
+            border: 1px solid black;
+        }
+
     </style>
 
     <body>
@@ -162,6 +170,12 @@
             <textarea id="newMessage" class="sendGrid" placeholder="Type your message" autofocus></textarea>
             <button id="sendMessageButton" class="sendButtonGrid">Send</button>
 
+            <div class="chatUsers">
+                <h4>Active Users:</h4>
+                <div id="activeUsers" class="userList">
+                    <div>User 1</div>
+                </div>
+            </div>
         </div>
         <script src="main_script.js"></script>
     </body>

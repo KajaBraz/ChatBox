@@ -50,15 +50,29 @@ class Server:
         del self.chat_participants[chat][user_name]
         log.info(f'number of participants in chat {len(self.chat_participants[chat])} after removing')
 
-    def join_chat(self, user_name, chat_name, user_websocket):
+    async def join_chat(self, user_name, chat_name, user_websocket):
         log.info(f'{user_websocket} - joining')
         if chat_name in self.chat_participants:
             self.chat_participants[chat_name][user_name] = user_websocket
+            await self.send_new_user_notification([user_name], list(self.chat_participants.get(chat_name, [])),
+                                                  chat_name)
         else:
             self.chat_participants[chat_name] = {user_name: user_websocket}
         log.info(
             f'number of participants in chat {chat_name} - {len(self.chat_participants[chat_name])}:'
             f'{self.chat_participants[chat_name]}')
+
+    def send_message(self):
+        pass
+
+    async def send_new_user_notification(self, user_name_list: list, receivers_logins: list, chat_name: str):
+        log.info('sending new user notification')
+        json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.USERS_UPDATE,
+                        JsonFields.MESSAGE_VALUE: user_name_list,
+                        JsonFields.MESSAGE_DESTINATION: receivers_logins}
+        for participant in self.chat_participants.get(chat_name, []).items():
+            if participant[0] in receivers_logins:
+                await participant[1].send(my_json.to_json(json_message))
 
     async def receive(self, websocket: websockets.WebSocketServerProtocol, path: str):
         data, chat_name, login = '', '', ''
@@ -73,7 +87,7 @@ class Server:
             path_items = path.split('/')
             login, chat_name = path_items[-1], path_items[-2]
 
-            self.join_chat(login, chat_name, websocket)
+            await self.join_chat(login, chat_name, websocket)
             log.info(f'{websocket} - {login} joined chat {chat_name}')
 
             async for data in websocket:
@@ -90,6 +104,7 @@ class Server:
 
                     elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES:
                         chat = message[JsonFields.MESSAGE_DESTINATION]
+                        participants = list(self.chat_participants.get(chat, []).keys())
                         past_messages = (fetch_last_messages(chat, self.conn))
                         for message in past_messages:
                             json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.MESSAGE,
@@ -99,6 +114,7 @@ class Server:
                                             JsonFields.MESSAGE_TIMESTAMP: date_time_to_millis(message[3])}
                             await websocket.send(my_json.to_json(json_message))
                         log.info(f'{websocket} - past messages sent')
+                        await self.send_new_user_notification(participants, [login], chat)
 
                     elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
                         destination_chat_participants = self.chat_participants.get(
