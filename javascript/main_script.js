@@ -39,6 +39,7 @@ function handle_receive(message, message_box_element, class_name, id_length) {
     }
     if (m["message_type"] == "users_update") {
         let active_users_element = document.getElementById("activeUsers");
+        console.log("active users ", active_users_element);
         let new_users = m["message_value"];
         let chat_name = m["message_destination"];
         update_user_list(new_users, active_users_element, chat_name);
@@ -152,16 +153,19 @@ function add_chat(new_chat) {
 
 
 function update_user_list(new_users_array, active_users_element, class_name) {
+    console.log("new users number", new_users_array.length);
     for (let n = 0; n < new_users_array.length; n++) {
         let user_name = new_users_array[n];
         let short_name = retrieve_display_login(user_name);
         console.log("updating:", user_name);
         if (!chat_participants.has(user_name)) {
-            append_div(short_name, active_users_element, class_name);
+            var child_div = append_div(short_name, active_users_element, class_name);
+            child_div.id = user_name;
             chat_participants.add(user_name);
         }
         else if (user_name != login) {
-            active_users_element.remove(short_name);
+            console.log("removing ", user_name);
+            active_users_element.removeChild(document.getElementById(user_name));
             chat_participants.delete(user_name);
         }
         console.log(chat_participants);
@@ -261,6 +265,8 @@ window.onload = function () {
 
 
 connect_button.onclick = () => {
+    chat_participants = new Set();
+    document.getElementById("activeUsers").innerHTML = "";
     let user_name = retrieve_display_login(localStorage.getItem("active_user"));
     if (localStorage.getItem("active_user") && my_name_element.value === user_name) {
         login = localStorage.getItem("active_user");

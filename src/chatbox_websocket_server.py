@@ -1,9 +1,8 @@
 import asyncio
 import logging
+import websockets
 from datetime import datetime, timezone
 from sys import argv
-
-import websockets
 
 import src.my_json as my_json
 from src import helper_functions
@@ -71,6 +70,8 @@ class Server:
                         JsonFields.MESSAGE_VALUE: user_name_list,
                         JsonFields.MESSAGE_DESTINATION: receivers_logins}
         for participant in self.chat_participants.get(chat_name, []).items():
+            log.info(f'sending notification to {participant}; json: {json_message}')
+            log.info(f'participant[0]: {participant[0]}, receivers_logins: {receivers_logins}')
             if participant[0] in receivers_logins:
                 await participant[1].send(my_json.to_json(json_message))
 
@@ -139,6 +140,7 @@ class Server:
             log.exception(f"{websocket} - Unexpected error 2: {e}")
         if chat_name and login:
             self.remove_from_chat(chat_name, login)
+            await self.send_new_user_notification([login], list(self.chat_participants[chat_name].keys()), chat_name)
             log.info(f'{websocket} - {login} left chat {chat_name}')
 
     async def start(self, address, port):
