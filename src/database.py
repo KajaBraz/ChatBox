@@ -139,14 +139,22 @@ def fetch_last_messages(chat_name, conn, n=100):
     metadata = MetaData()
     metadata.reflect(bind=conn)
     message_table = metadata.tables['messages']
-    cls_to_select = [message_table.c.sender_login, message_table.c.message, message_table.c.chat_name, message_table.c.date_time]
-    n_entries = conn.execute(select(cls_to_select, message_table.c.chat_name == chat_name).limit(n))
+    cls_to_select = [message_table.c.sender_login, message_table.c.message, message_table.c.chat_name,
+                     message_table.c.date_time]
+    inner_query = (select([message_table], message_table.c.chat_name == chat_name)
+                   .order_by(message_table.c.id.desc())
+                   .limit(n)
+                   .alias('inner_query'))
+    n_entries = conn.execute(select(cls_to_select)
+                             .where(message_table.c.id == inner_query.c.id))
     return n_entries.fetchall()
 
-def print_df(data_list,column_names):
+
+def print_df(data_list, column_names):
     df = pd.DataFrame(data_list, columns=column_names)
     pd.set_option('max_columns', None)
     print(df)
+
 
 if __name__ == '__main__':
     # create_my_database(db_login, db_password)
