@@ -35,5 +35,9 @@ jobs:
       - name: Start tests
         run: |
           curl \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/octocat/hello-world/actions/runs
+          --request POST \
+          --header "Accept: application/vnd.github.v3+json" \
+          --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+          --data '{"ref": "master"}' \
+          --url https://api.github.com/repos/KajaBraz/ChatBox/actions/workflows/pythonapp.yml/dispatches
+    #            https://api.github.com/repos/octocat/hello-world/actions/runs
