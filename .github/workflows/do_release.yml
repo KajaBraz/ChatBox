@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Start tests
-        run:\
-        curl \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/octocat/hello-world/actions/runs
+        run: |
+          curl \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/octocat/hello-world/actions/runs
