@@ -39,5 +39,6 @@ jobs:
           --header "Accept: application/vnd.github.v3+json" \
           --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
           --data '{"ref": "master"}' \
-          --url https://api.github.com/repos/KajaBraz/ChatBox/actions/workflows/pythonapp.yml/dispatches
+          --url https://api.github.com/repos/KajaBraz/ChatBox/actions/workflows/pythonapp.yml/dispatches \
+          -i
     #            https://api.github.com/repos/octocat/hello-world/actions/runs
