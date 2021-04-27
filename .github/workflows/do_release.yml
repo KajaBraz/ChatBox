@@ -33,6 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: write
+      repository-projects: write
     steps:
       - name: Start tests
         run: |
