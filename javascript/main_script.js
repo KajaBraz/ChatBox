@@ -37,7 +37,20 @@ function handle_receive(message, message_box_element, class_name, id_length) {
             unread_messages_ids.push(new_message.id);
         }
     }
-    if (m["message_type"] == "users_update") {
+    else if (m["message_type"] == "previous_messages") {
+        var name = m["message_sender"];
+        var val = m["message_value"];
+        var timestamp = m["message_timestamp"];
+        var status = assign_read_unread_class(timestamp);
+        var new_message = append_div_messages(name, timestamp, val, message_box_element, status, id_length);
+        message_box_element.scrollTo(0, message_box_element.scrollHeight);
+        if (status === "message messageUnread") {
+            new_message.id = generate_unique_id(5);
+            console.log("pushing");
+            unread_messages_ids.push(new_message.id);
+        }
+    }
+    else if (m["message_type"] == "users_update") {
         let active_users_element = document.getElementById("activeUsers");
         console.log("active users ", active_users_element);
         let new_users = m["message_value"];
@@ -105,8 +118,7 @@ function connect(user_name, chat_name, id_length) {
         };
         webSocket.onmessage = (event) => {
             console.log("message received");
-            var on_focus = check_focus();
-            if (on_focus) {
+            if (check_focus()) {
                 var class_name = "message";
             }
             else {
@@ -191,6 +203,18 @@ function retrieve_messages(user_name, chat_name, ws) {
 }
 
 
+function assign_read_unread_class(sending_time) {
+    console.log("sending time", sending_time);
+    console.log("leaving time", previous_leaving_time);
+    if (sending_time > previous_leaving_time) {
+        console.log("message messageUnread");
+        return "message messageUnread";
+    }
+    console.log("message");
+    return "message";
+}
+
+
 function retrieve_recent_chats() {
     recently_used_chats = localStorage.getItem("recent_chats").split(",");
     console.log(recently_used_chats);
@@ -253,6 +277,7 @@ var active_recent_chats = [];
 var recently_used_chats = [];
 var unread_messages_ids = [];
 var chat_participants = new Set();
+var previous_leaving_time;
 
 
 window.onload = function () {
@@ -261,6 +286,12 @@ window.onload = function () {
     my_name_element.value = short_name;
     chat_destination_element.value = localStorage.getItem("active_chat");
     retrieve_recent_chats();
+}
+
+
+window.onunload = () =>{
+    let leaving_time = new Date().getTime();
+    localStorage.setItem("leaving_time", leaving_time);
 }
 
 
@@ -280,6 +311,8 @@ connect_button.onclick = () => {
     chat_change(chat_destination_element.value);
     add_chat(chat);
     console.log(login, chat);
+
+    previous_leaving_time = localStorage.getItem("leaving_time");
 }
 
 
