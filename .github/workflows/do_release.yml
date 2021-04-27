@@ -31,17 +31,18 @@ jobs:
 
   run_tests:
     runs-on: ubuntu-latest
-    permissions:
-      actions: write
-      repository-projects: write
+#    permissions:
+#      actions: write
+#      repository-projects: write
     steps:
       - name: Start tests
         run: |
           curl \
           --request POST \
           --header "Accept: application/vnd.github.v3+json" \
-          --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+          --header 'authorization: Bearer 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' \
           --data '{"ref": "master"}' \
           --url https://api.github.com/repos/KajaBraz/ChatBox/actions/workflows/pythonapp.yml/dispatches \
           -i
+#          --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
     #            https://api.github.com/repos/octocat/hello-world/actions/runs
