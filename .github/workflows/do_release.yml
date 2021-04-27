@@ -40,9 +40,8 @@ jobs:
           curl \
           --request POST \
           --header "Accept: application/vnd.github.v3+json" \
-          --header 'authorization: Bearer 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' \
+          --header 'authorization: Bearer ${{ secrets.ACTION_SECRET }}' \
           --data '{"ref": "master"}' \
           --url https://api.github.com/repos/KajaBraz/ChatBox/actions/workflows/pythonapp.yml/dispatches \
           -i
-#          --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
     #            https://api.github.com/repos/octocat/hello-world/actions/runs
