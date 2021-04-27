@@ -108,7 +108,7 @@ class Server:
                         participants = list(self.chat_participants.get(chat, []).keys())
                         past_messages = (fetch_last_messages(chat, self.conn))
                         for message in past_messages:
-                            json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.MESSAGE,
+                            json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES,
                                             JsonFields.MESSAGE_SENDER: message[0],
                                             JsonFields.MESSAGE_VALUE: message[1],
                                             JsonFields.MESSAGE_DESTINATION: message[2],
