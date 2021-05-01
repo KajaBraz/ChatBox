@@ -49,6 +49,12 @@ class Server:
         del self.chat_participants[chat][user_name]
         log.info(f'number of participants in chat {len(self.chat_participants[chat])} after removing')
 
+    def get_num_of_chat_participants(self, chat_room):
+        return len(self.chat_participants[chat_room])
+
+    def remove_chat(self, chat_room):
+        del self.chat_participants[chat_room]
+
     async def join_chat(self, user_name, chat_name, user_websocket):
         log.info(f'{user_websocket} - joining')
         if chat_name in self.chat_participants:
@@ -142,6 +148,10 @@ class Server:
             self.remove_from_chat(chat_name, login)
             await self.send_new_user_notification([login], list(self.chat_participants[chat_name].keys()), chat_name)
             log.info(f'{websocket} - {login} left chat {chat_name}')
+        if self.get_num_of_chat_participants(chat_name) == 0:
+            self.remove_chat(chat_name)
+            log.info(f'{chat_name} removed from the dictionary')
+            log.info(f'remaining chat rooms: {self.chat_participants.keys()}')
 
     async def start(self, address, port):
         self.server = await websockets.serve(self.receive, address, port)
