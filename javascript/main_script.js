@@ -55,7 +55,7 @@ function handle_receive(message, message_box_element, class_name, id_length) {
         console.log("active users ", active_users_element);
         let new_users = m["message_value"];
         let chat_name = m["message_destination"];
-        update_user_list(new_users, active_users_element, chat_name);
+        update_user_list(new_users, active_users_element, "chatUser");
         console.log(new_users, chat_name);
     }
 }
