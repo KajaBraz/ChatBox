@@ -114,6 +114,8 @@ function connect(user_name, chat_name, id_length) {
 
         webSocket.onopen = () => {
             retrieve_messages(login, chat, webSocket);
+            chat_participants = new Set();
+            document.getElementById("activeUsers").innerHTML = "";
             console.log(webSocket.readyState);
         };
         webSocket.onmessage = (event) => {
@@ -289,15 +291,13 @@ window.onload = function () {
 }
 
 
-window.onunload = () =>{
+window.onunload = () => {
     let leaving_time = new Date().getTime();
     localStorage.setItem("leaving_time", leaving_time);
 }
 
 
 connect_button.onclick = () => {
-    chat_participants = new Set();
-    document.getElementById("activeUsers").innerHTML = "";
     let user_name = retrieve_display_login(localStorage.getItem("active_user"));
     if (localStorage.getItem("active_user") && my_name_element.value === user_name) {
         login = localStorage.getItem("active_user");
