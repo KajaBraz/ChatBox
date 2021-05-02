@@ -36,7 +36,6 @@ def date_time_to_millis(t: datetime) -> int:
 class Server:
     def __init__(self):
         self.chat_participants = {}
-        self.logged_users = {}
         self.server: websockets.WebSocketServer = None
         self.conn = None
 
@@ -67,8 +66,14 @@ class Server:
             f'number of participants in chat {chat_name} - {len(self.chat_participants[chat_name])}:'
             f'{self.chat_participants[chat_name]}')
 
-    def send_message(self):
-        pass
+    def update_and_save_message(self, message, chat_name, login, websocket):
+        updated_message = message.copy()
+        date_time = datetime.now(timezone.utc)
+        time_millis = date_time_to_millis(date_time)
+        add_message(login, chat_name, updated_message[JsonFields.MESSAGE_VALUE], self.conn, date_time)
+        log.info(f'{websocket} - message {updated_message} added to db, room {chat_name}')
+        updated_message[JsonFields.MESSAGE_TIMESTAMP] = time_millis
+        return updated_message
 
     async def send_new_user_notification(self, user_name_list: list, receivers_logins: list, chat_name: str):
         log.info('sending new user notification')
@@ -103,13 +108,7 @@ class Server:
                     log.info(f'{websocket} - raw data received: {data}')
                     log.info(f'{websocket} - message: {message}')
 
-                    if message[JsonFields.MESSAGE_TYPE] == MessageTypes.ALL_USERS:
-                        logged_users_message = {JsonFields.MESSAGE_TYPE: MessageTypes.ALL_USERS,
-                                                JsonFields.MESSAGE_VALUE: list(self.logged_users.keys())}
-                        await websocket.send(my_json.to_json(logged_users_message))
-                        log.info(f'{websocket} - get all logged: {self.logged_users.keys()}')
-
-                    elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES:
+                    if message[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES:
                         chat = message[JsonFields.MESSAGE_DESTINATION]
                         participants = list(self.chat_participants.get(chat, []).keys())
                         past_messages = (fetch_last_messages(chat, self.conn))
@@ -124,19 +123,15 @@ class Server:
                         await self.send_new_user_notification(participants, [login], chat)
 
                     elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
+                        updated_message = self.update_and_save_message(message, chat_name, login, websocket)
                         destination_chat_participants = self.chat_participants.get(
-                            message[JsonFields.MESSAGE_DESTINATION], [])
-
-                        date_time = datetime.now(timezone.utc)
-                        time_millis = date_time_to_millis(date_time)
-                        add_message(login, chat_name, message[JsonFields.MESSAGE_VALUE], self.conn, date_time)
-                        log.info(f'{websocket} - message {message} added to db, room {chat_name}')
-                        message[JsonFields.MESSAGE_TIMESTAMP] = time_millis
+                            updated_message[JsonFields.MESSAGE_DESTINATION], [])
                         for participant_sock in destination_chat_participants.items():
-                            log.info(f'{websocket} - sending message to {participant_sock} in '
-                                     f'{message[JsonFields.MESSAGE_DESTINATION]}')
-                            await participant_sock[1].send(my_json.to_json(message))
-                            # todo add test, when database connection is down, message is sent anyway (that is why this must be after sending)
+                            log.info(
+                                f'{websocket} - sending message to {participant_sock} in '
+                                f'{updated_message[JsonFields.MESSAGE_DESTINATION]}')
+                            await participant_sock[1].send(my_json.to_json(updated_message))
+                        # todo add test, when database connection is down, message is sent anyway (that is why this must be after sending)
                 except KeyError:
                     log.error(f'{websocket} - KeyError; improper json: {data}')
                 except Exception as e:

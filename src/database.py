@@ -141,7 +141,8 @@ def fetch_last_messages(chat_name, conn, n=100):
     message_table = metadata.tables['messages']
     cls_to_select = [message_table.c.sender_login, message_table.c.message, message_table.c.chat_name,
                      message_table.c.date_time]
-    inner_query = (select([message_table], message_table.c.chat_name == chat_name)
+    inner_query = (select([message_table.c.id])
+                   .where(message_table.c.chat_name == chat_name)
                    .order_by(message_table.c.id.desc())
                    .limit(n)
                    .alias('inner_query'))
@@ -160,6 +161,7 @@ if __name__ == '__main__':
     # create_my_database(db_login, db_password)
     # drop_my_database(db_name, db_login, db_password)
     # conn = connect(db_name, db_login, db_password)
+    # print(fetch_last_messages('zwierzaki', conn, 10))
     # fill_with_examples(conn)
     # add_user('anna_magnani', 'roma_citta_aperta', conn)
     # add_message('giordano_bruno', 'sapienza', "il sapere e' il potere", conn)
