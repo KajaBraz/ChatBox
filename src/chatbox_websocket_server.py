@@ -109,28 +109,32 @@ class Server:
                     log.info(f'{websocket} - message: {message}')
 
                     if message[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES:
-                        chat = message[JsonFields.MESSAGE_DESTINATION]
-                        participants = list(self.chat_participants.get(chat, []).keys())
-                        past_messages = (fetch_last_messages(chat, self.conn))
-                        for message in past_messages:
-                            json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES,
-                                            JsonFields.MESSAGE_SENDER: message[0],
-                                            JsonFields.MESSAGE_VALUE: message[1],
-                                            JsonFields.MESSAGE_DESTINATION: message[2],
-                                            JsonFields.MESSAGE_TIMESTAMP: date_time_to_millis(message[3])}
-                            await websocket.send(my_json.to_json(json_message))
-                        log.info(f'{websocket} - past messages sent')
-                        await self.send_new_user_notification(participants, [login], chat)
+                        if helper_functions.check_previous_messages_json(data):
+                            log.info(f'{websocket} - previous messages json correct')
+                            chat = message[JsonFields.MESSAGE_DESTINATION]
+                            participants = list(self.chat_participants.get(chat, []).keys())
+                            past_messages = (fetch_last_messages(chat, self.conn))
+                            for message in past_messages:
+                                json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES,
+                                                JsonFields.MESSAGE_SENDER: message[0],
+                                                JsonFields.MESSAGE_VALUE: message[1],
+                                                JsonFields.MESSAGE_DESTINATION: message[2],
+                                                JsonFields.MESSAGE_TIMESTAMP: date_time_to_millis(message[3])}
+                                await websocket.send(my_json.to_json(json_message))
+                            log.info(f'{websocket} - past messages sent')
+                            await self.send_new_user_notification(participants, [login], chat)
 
                     elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
-                        updated_message = self.update_and_save_message(message, chat_name, login, websocket)
-                        destination_chat_participants = self.chat_participants.get(
-                            updated_message[JsonFields.MESSAGE_DESTINATION], [])
-                        for participant_sock in destination_chat_participants.items():
-                            log.info(
-                                f'{websocket} - sending message to {participant_sock} in '
-                                f'{updated_message[JsonFields.MESSAGE_DESTINATION]}')
-                            await participant_sock[1].send(my_json.to_json(updated_message))
+                        if helper_functions.check_message_json(data):
+                            log.info(f'{websocket} - messages json correct')
+                            updated_message = self.update_and_save_message(message, chat_name, login, websocket)
+                            destination_chat_participants = self.chat_participants.get(
+                                message[JsonFields.MESSAGE_DESTINATION], [])
+                            for participant_sock in destination_chat_participants.items():
+                                log.info(
+                                    f'{websocket} - sending message to {participant_sock} in '
+                                    f'{updated_message[JsonFields.MESSAGE_DESTINATION]}')
+                                await participant_sock[1].send(my_json.to_json(updated_message))
                         # todo add test, when database connection is down, message is sent anyway (that is why this must be after sending)
                 except KeyError:
                     log.error(f'{websocket} - KeyError; improper json: {data}')
