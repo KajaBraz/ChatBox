@@ -200,7 +200,7 @@ function chat_change(chat_name) {
 
 
 function retrieve_messages(user_name, chat_name, ws) {
-    send_websocket("previous_messages", "history", user_name, chat_name, ws);
+    send_websocket("previous_messages", "", user_name, chat_name, ws);
     console.log("retrieving old messages");
 }
 
