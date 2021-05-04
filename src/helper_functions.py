@@ -34,7 +34,7 @@ def check_previous_messages_json(json_message: str) -> bool:
     dict_message = from_json(json_message)
     if (JsonFields.MESSAGE_TYPE in dict_message and
             JsonFields.MESSAGE_DESTINATION in dict_message and
-            JsonFields.MESSAGE_SENDER):
+            JsonFields.MESSAGE_SENDER in dict_message):
         if (dict_message[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES and
                 dict_message[JsonFields.MESSAGE_DESTINATION] != '' and
                 dict_message[JsonFields.MESSAGE_SENDER] != ''):
