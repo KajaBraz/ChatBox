@@ -298,16 +298,17 @@ window.onunload = () => {
 
 
 connect_button.onclick = () => {
-    let user_name = retrieve_display_login(localStorage.getItem("active_user"));
-    if (localStorage.getItem("active_user") && my_name_element.value === user_name) {
-        login = localStorage.getItem("active_user");
-        console.log('equal logins');
-    } else {
-        var id = generate_unique_id(id_length);
-        login = my_name_element.value + id;
-        localStorage.setItem("active_user", login);
+    if (localStorage.getItem("active_user")) {
+        let user_name = retrieve_display_login(localStorage.getItem("active_user"));
+        if (localStorage.getItem("active_user") && my_name_element.value === user_name) {
+            login = localStorage.getItem("active_user");
+            console.log('equal logins');
+        } else {
+            var id = generate_unique_id(id_length);
+            login = my_name_element.value + id;
+            localStorage.setItem("active_user", login);
+        }
     }
-
     chat_change(chat_destination_element.value);
     add_chat(chat);
     console.log(login, chat);
