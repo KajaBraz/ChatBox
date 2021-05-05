@@ -1,4 +1,4 @@
-function append_div_messages(my_name, timestamp, message, message_box_element, class_name, id_length) {
+function append_div_messages(my_name, timestamp, message, message_box_element, class_name) {
     var div = append_div("", message_box_element, class_name);
     if (my_name === login) {
         div.style.float = "right";
@@ -23,13 +23,13 @@ function append_div(child, parent, class_name) {
 }
 
 
-function handle_receive(message, message_box_element, class_name, id_length) {
+function handle_receive(message, message_box_element, class_name) {
     var m = JSON.parse(message);
     if (m["message_type"] == "message") {
         var name = m["message_sender"];
         var val = m["message_value"];
         var timestamp = m["message_timestamp"];
-        var new_message = append_div_messages(name, timestamp, val, message_box_element, class_name, id_length);
+        var new_message = append_div_messages(name, timestamp, val, message_box_element, class_name);
         message_box_element.scrollTo(0, message_box_element.scrollHeight);
         if (class_name === "message messageUnread") {
             new_message.id = generate_unique_id(5);
@@ -42,7 +42,7 @@ function handle_receive(message, message_box_element, class_name, id_length) {
         var val = m["message_value"];
         var timestamp = m["message_timestamp"];
         var status = assign_read_unread_class(timestamp);
-        var new_message = append_div_messages(name, timestamp, val, message_box_element, status, id_length);
+        var new_message = append_div_messages(name, timestamp, val, message_box_element, status);
         message_box_element.scrollTo(0, message_box_element.scrollHeight);
         if (status === "message messageUnread") {
             new_message.id = generate_unique_id(5);
@@ -101,7 +101,7 @@ function retrieve_display_login(user_name) {
 }
 
 
-function connect(user_name, chat_name, id_length) {
+function connect(user_name, chat_name) {
     if (webSocket != null) {
         console.log('not nnull');
         webSocket.close(1000);
@@ -119,14 +119,24 @@ function connect(user_name, chat_name, id_length) {
             console.log(webSocket.readyState);
         };
         webSocket.onmessage = (event) => {
-            console.log("message received");
+            // if (event.data["message_type"] === "message" || event.data["message_type"]==="previous_messages") {
+            console.log("message received __________________________________________________________");
+            console.log(event.data);
             if (check_focus()) {
                 var class_name = "message";
             }
             else {
                 var class_name = "message messageUnread";
             }
-            handle_receive(event.data, all_messages_element, class_name, id_length);
+            handle_receive(event.data, all_messages_element, class_name);
+            // }
+            // else if(event.data["message_type"] === "users_update"){
+            //     console.log("*************************************");
+            //     console.log(event.data);
+            //     console.log("*************************************");
+            //     let active_users_element = document.getElementById("activeUsers");
+            //     update_user_list(event.data["message_value"], active_users_element, "chatUser");
+            // }
         };
         webSocket.onclose = (e) => {
             console.log(`ws closed (${user_name}, ${chat_name}), code: ${e.code}, reason: ${e.reason}`);
@@ -193,7 +203,7 @@ function chat_change(chat_name) {
     chat_name_header.innerHTML = chat;
     chat_destination_element.value = chat;
     localStorage.setItem("active_chat", chat);
-    connect(login, chat, id_length);
+    connect(login, chat);
     localStorage.setItem("recent_chats", active_recent_chats);
 
 }
@@ -284,10 +294,12 @@ var previous_leaving_time;
 
 window.onload = function () {
     console.log("onload");
-    let short_name = retrieve_display_login(localStorage.getItem("active_user"));
-    my_name_element.value = short_name;
-    chat_destination_element.value = localStorage.getItem("active_chat");
-    retrieve_recent_chats();
+    if (localStorage.getItem("active_user") && localStorage.getItem("active_chat")) {
+        let short_name = retrieve_display_login(localStorage.getItem("active_user"));
+        my_name_element.value = short_name;
+        chat_destination_element.value = localStorage.getItem("active_chat");
+        retrieve_recent_chats();
+    }
 }
 
 
@@ -298,16 +310,13 @@ window.onunload = () => {
 
 
 connect_button.onclick = () => {
-    if (localStorage.getItem("active_user")) {
-        let user_name = retrieve_display_login(localStorage.getItem("active_user"));
-        if (localStorage.getItem("active_user") && my_name_element.value === user_name) {
-            login = localStorage.getItem("active_user");
-            console.log('equal logins');
-        } else {
-            var id = generate_unique_id(id_length);
-            login = my_name_element.value + id;
-            localStorage.setItem("active_user", login);
-        }
+    if (localStorage.getItem("active_user") && my_name_element.value === retrieve_display_login(localStorage.getItem("active_user"))) {
+        login = localStorage.getItem("active_user");
+        console.log('equal logins');
+    } else {
+        var id = generate_unique_id(id_length);
+        login = my_name_element.value + id;
+        localStorage.setItem("active_user", login);
     }
     chat_change(chat_destination_element.value);
     add_chat(chat);
