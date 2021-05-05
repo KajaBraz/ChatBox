@@ -119,8 +119,6 @@ function connect(user_name, chat_name) {
             console.log(webSocket.readyState);
         };
         webSocket.onmessage = (event) => {
-            // if (event.data["message_type"] === "message" || event.data["message_type"]==="previous_messages") {
-            console.log("message received __________________________________________________________");
             console.log(event.data);
             if (check_focus()) {
                 var class_name = "message";
@@ -129,14 +127,6 @@ function connect(user_name, chat_name) {
                 var class_name = "message messageUnread";
             }
             handle_receive(event.data, all_messages_element, class_name);
-            // }
-            // else if(event.data["message_type"] === "users_update"){
-            //     console.log("*************************************");
-            //     console.log(event.data);
-            //     console.log("*************************************");
-            //     let active_users_element = document.getElementById("activeUsers");
-            //     update_user_list(event.data["message_value"], active_users_element, "chatUser");
-            // }
         };
         webSocket.onclose = (e) => {
             console.log(`ws closed (${user_name}, ${chat_name}), code: ${e.code}, reason: ${e.reason}`);
