@@ -1,5 +1,12 @@
+import logging
+from datetime import datetime
+
 from src.enums import JsonFields, MessageTypes
 from src.my_json import from_json
+
+
+def date_time_to_millis(t: datetime) -> int:
+    return int(t.timestamp() * 1000)
 
 
 def check_url(input: str) -> bool:
@@ -40,3 +47,13 @@ def check_previous_messages_json(json_message: str) -> bool:
                 dict_message[JsonFields.MESSAGE_SENDER] != ''):
             return True
     return False
+
+
+def set_logger(logger_name,to_console=True):
+    print(to_console)
+    formatter = '%(asctime)s ; %(levelname)s ; %(filename)s ; %(lineno)d. ; %(message)s'
+    if to_console:
+        logging.basicConfig(format=formatter, level=logging.INFO)
+    else:
+        logging.basicConfig(filename='logs.log', format=formatter, level=logging.INFO)
+    return logging.getLogger(logger_name)
