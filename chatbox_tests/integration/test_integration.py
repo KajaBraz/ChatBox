@@ -4,7 +4,7 @@ from unittest.mock import patch, ANY
 import pytest
 
 from chatbox_tests.integration.virtual_websocket_client import VirtualClient
-from src import chatbox_websocket_server
+from src import chatbox_websocket_server, helper_functions
 from src.enums import JsonFields
 
 
@@ -15,9 +15,10 @@ class TestState:
 @pytest.fixture
 async def state():
     # setup actions
+    data = helper_functions.read_config('../chatbox_config.json')
     state = TestState()
-    state.address = 'localhost'
-    state.port = 11000
+    state.address = data['address']['name']
+    state.port = data['address']['port']
     state.room = "room1"
     state.server_obj = chatbox_websocket_server.Server()
     await state.server_obj.start(state.address, state.port)

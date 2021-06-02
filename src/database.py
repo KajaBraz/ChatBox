@@ -1,3 +1,4 @@
+import json
 import logging
 import random
 from datetime import datetime
@@ -6,10 +7,13 @@ import pandas as pd
 import sqlalchemy
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, DateTime, text, select
 
-db_login = "postgres"
-db_password = "000"
-db_name = 'chatbox2'
-log = logging.getLogger("chatbox_logger")
+from src import helper_functions
+
+data = helper_functions.read_config('../chatbox_config.json')
+db_login = data['database']['db_login']
+db_password = data['database']['db_password']
+db_name = data['database']['db_name']
+log = helper_functions.set_logger(data['logs']['log_file_name'], data['logs']['to_console'])
 
 
 def create_my_database(login, password):

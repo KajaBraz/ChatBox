@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime
 
@@ -9,14 +10,14 @@ def date_time_to_millis(t: datetime) -> int:
     return int(t.timestamp() * 1000)
 
 
-def check_url(input: str) -> bool:
+def check_url(url_input: str) -> bool:
     range1 = range(48, 58)
     range2 = range(65, 91)
     range3 = range(97, 123)
-    if input.count('/') != 2:
+    if url_input.count('/') != 2:
         return False
-    input = input.replace('/', '')
-    for ch in input:
+    updated_input = url_input.replace('/', '')
+    for ch in updated_input:
         o = ord(ch)
         if (o not in range1) and (o not in range2) and (o not in range3):
             return False
@@ -49,11 +50,18 @@ def check_previous_messages_json(json_message: str) -> bool:
     return False
 
 
-def set_logger(logger_name,to_console=True):
-    print(to_console)
+def set_logger(logger_name, to_console=True):
+    # TODO add to the configuration file to_console parameter
+    #  (at the moment, it must be the same in every function call - database and server)
     formatter = '%(asctime)s ; %(levelname)s ; %(filename)s ; %(lineno)d. ; %(message)s'
     if to_console:
         logging.basicConfig(format=formatter, level=logging.INFO)
     else:
         logging.basicConfig(filename='logs.log', format=formatter, level=logging.INFO)
     return logging.getLogger(logger_name)
+
+
+def read_config(filename: str) -> dict:
+    with open(filename) as config_data:
+        data = json.load(config_data)
+        return data

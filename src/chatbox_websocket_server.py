@@ -1,20 +1,26 @@
 import asyncio
+import json
+import sys
+
 import websockets
 from datetime import datetime, timezone
 from sys import argv
 
 import src.my_json as my_json
 from src import helper_functions
-from src.database import connect, add_message, db_name, db_login, db_password, fetch_last_messages
+# from src.database import connect, add_message, db_name, db_login, db_password, fetch_last_messages
+from src.database import connect, add_message, fetch_last_messages
 from src.enums import JsonFields, MessageTypes
 
 
 class Server:
-    def __init__(self):
+    def __init__(self, logs_to_console=True):
         self.chat_participants = {}
         self.server: websockets.WebSocketServer = None
         self.conn = None
-        self.log = helper_functions.set_logger('chatbox_logger')
+        data = helper_functions.read_config('../chatbox_config.json')
+        logs_file = data['logs']['log_file_name']
+        self.log = helper_functions.set_logger(logs_file, logs_to_console)
 
     def remove_from_chat(self, chat, user_name):
         self.log.info(f'number of participants in chat {len(self.chat_participants[chat])} before removing')
@@ -130,7 +136,7 @@ class Server:
     async def start(self, address, port):
         self.server = await websockets.serve(self.receive, address, port)
         self.log.info('chatbox started')
-        # todo set webosckets.serve logger
+        # todo set websockets.serve logger
 
     async def wait_stop(self):
         await self.server.wait_closed()
@@ -142,14 +148,23 @@ class Server:
 
 
 async def main(address, port):
-    server = Server()
+    data = helper_functions.read_config('../chatbox_config.json')
+    db_login = data['database']['db_login']
+    db_password = data['database']['db_password']
+    db_name = data['database']['db_name']
+    logs_to_console = data['logs']['to_console']
+
+    server = Server(logs_to_console)
+    # server = Server(False)
+
     server.conn = connect(db_name, db_login, db_password)
     await server.start(address, port)
     await server.wait_stop()
 
 
 if __name__ == '__main__':
+    config_data = helper_functions.read_config('../chatbox_config.json')
     if len(argv) > 1:
         asyncio.run(main(argv[1], int(argv[2])))
     else:
-        asyncio.run(main('localhost', 11000))
+        asyncio.run(main(config_data['address']['name'], config_data['address']['port']))
