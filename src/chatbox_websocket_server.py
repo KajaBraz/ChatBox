@@ -1,26 +1,22 @@
 import asyncio
-import json
-import sys
-
 import websockets
 from datetime import datetime, timezone
 from sys import argv
 
 import src.my_json as my_json
-from src import helper_functions
-# from src.database import connect, add_message, db_name, db_login, db_password, fetch_last_messages
-from src.database import connect, add_message, fetch_last_messages
+from src import helper_functions, database
 from src.enums import JsonFields, MessageTypes
 
 
 class Server:
-    def __init__(self, logs_to_console=True):
+    def __init__(self, config_file_path: str):
         self.chat_participants = {}
         self.server: websockets.WebSocketServer = None
+        self.chatbox_database = None
         self.conn = None
-        data = helper_functions.read_config('../chatbox_config.json')
+        data = helper_functions.read_config(config_file_path)
         logs_file = data['logs']['log_file_name']
-        self.log = helper_functions.set_logger(logs_file, logs_to_console)
+        self.log = helper_functions.set_logger(logs_file, data['logs']['to_console'])
 
     def remove_from_chat(self, chat, user_name):
         self.log.info(f'number of participants in chat {len(self.chat_participants[chat])} before removing')
@@ -49,7 +45,7 @@ class Server:
         updated_message = message.copy()
         date_time = datetime.now(timezone.utc)
         time_millis = helper_functions.date_time_to_millis(date_time)
-        add_message(login, chat_name, updated_message[JsonFields.MESSAGE_VALUE], self.conn, date_time)
+        self.chatbox_database.add_message(login, chat_name, updated_message[JsonFields.MESSAGE_VALUE], date_time)
         self.log.info(f'{websocket} - message {updated_message} added to db, room {chat_name}')
         updated_message[JsonFields.MESSAGE_TIMESTAMP] = time_millis
         return updated_message
@@ -92,7 +88,7 @@ class Server:
                             self.log.info(f'{websocket} - previous messages json correct')
                             chat = message[JsonFields.MESSAGE_DESTINATION]
                             participants = list(self.chat_participants.get(chat, {}).keys())
-                            past_messages = (fetch_last_messages(chat, self.conn))
+                            past_messages = (self.chatbox_database.fetch_last_messages(chat))
                             for message in past_messages:
                                 json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES,
                                                 JsonFields.MESSAGE_SENDER: message[0],
@@ -147,24 +143,20 @@ class Server:
         self.server.close()
 
 
-async def main(address, port):
-    data = helper_functions.read_config('../chatbox_config.json')
-    db_login = data['database']['db_login']
-    db_password = data['database']['db_password']
-    db_name = data['database']['db_name']
-    logs_to_console = data['logs']['to_console']
+async def main(config_file_path):
+    data = helper_functions.read_config(config_file_path)
+    address = data['address']['name']
+    port = data['address']['port']
+    server = Server(config_file_path)
 
-    server = Server(logs_to_console)
-    # server = Server(False)
-
-    server.conn = connect(db_name, db_login, db_password)
+    server.chatbox_database = database.ChatBoxDatabase(config_file_path)
+    server.conn = server.chatbox_database.connect()
     await server.start(address, port)
     await server.wait_stop()
 
 
 if __name__ == '__main__':
-    config_data = helper_functions.read_config('../chatbox_config.json')
     if len(argv) > 1:
-        asyncio.run(main(argv[1], int(argv[2])))
+        asyncio.run(main(argv[1]))
     else:
-        asyncio.run(main(config_data['address']['name'], config_data['address']['port']))
+        asyncio.run(main('../chatbox_config.json'))
