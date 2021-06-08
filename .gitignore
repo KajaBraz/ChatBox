@@ -132,4 +132,5 @@ dmypy.json
 .idea/
 
 # Other
-chatbox_config.json
+*_config.json
+kuba.py
