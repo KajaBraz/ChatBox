@@ -132,5 +132,4 @@ dmypy.json
 .idea/
 
 # Other
-*_config.json
 kuba.py

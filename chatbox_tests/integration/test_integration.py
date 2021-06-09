@@ -21,9 +21,10 @@ async def state():
     state.address = data['address']['name']
     state.port = data['address']['port']
     state.room = "room1"
-    state.server_obj = chatbox_websocket_server.Server(config_path)
-    state.server_obj.chatbox_database = database.ChatBoxDatabase(config_path)
-    state.server_obj.conn = state.server_obj.chatbox_database.connect()
+    state.server_obj = chatbox_websocket_server.Server(data)
+    if 'database' in data:
+        state.server_obj.chatbox_database = database.ChatBoxDatabase(data)
+        state.server_obj.conn = state.server_obj.chatbox_database.connect()
     await state.server_obj.start(state.address, state.port)
     state.client = VirtualClient(state.address, state.port, state.room, 'user1')
     state.client2 = VirtualClient(state.address, state.port, state.room, 'user2')

@@ -9,14 +9,13 @@ from src.enums import JsonFields, MessageTypes
 
 
 class Server:
-    def __init__(self, config_file_path: str):
+    def __init__(self, config_data: dict):
         self.chat_participants = {}
         self.server: websockets.WebSocketServer = None
         self.chatbox_database = None
         self.conn = None
-        data = helper_functions.read_config(config_file_path)
-        logs_file = data['logs']['log_file_name']
-        self.log = helper_functions.set_logger(logs_file, data['logs']['to_console'])
+        logs_file = config_data['logs']['log_file_name']
+        self.log = helper_functions.set_logger(logs_file, config_data['logs']['to_console'])
 
     def remove_from_chat(self, chat, user_name):
         self.log.info(f'number of participants in chat {len(self.chat_participants[chat])} before removing')
@@ -45,8 +44,9 @@ class Server:
         updated_message = message.copy()
         date_time = datetime.now(timezone.utc)
         time_millis = helper_functions.date_time_to_millis(date_time)
-        self.chatbox_database.add_message(login, chat_name, updated_message[JsonFields.MESSAGE_VALUE], date_time)
-        self.log.info(f'{websocket} - message {updated_message} added to db, room {chat_name}')
+        if self.chatbox_database:
+            self.chatbox_database.add_message(login, chat_name, updated_message[JsonFields.MESSAGE_VALUE], date_time)
+            self.log.info(f'{websocket} - message {updated_message} added to db, room {chat_name}')
         updated_message[JsonFields.MESSAGE_TIMESTAMP] = time_millis
         return updated_message
 
@@ -144,13 +144,14 @@ class Server:
 
 
 async def main(config_file_path):
-    data = helper_functions.read_config(config_file_path)
-    address = data['address']['name']
-    port = data['address']['port']
-    server = Server(config_file_path)
+    config_data = helper_functions.read_config(config_file_path)
+    address = config_data['address']['name']
+    port = config_data['address']['port']
+    server = Server(config_data)
 
-    server.chatbox_database = database.ChatBoxDatabase(config_file_path)
-    server.conn = server.chatbox_database.connect()
+    if 'database' in config_data:
+        server.chatbox_database = database.ChatBoxDatabase(config_data)
+        server.conn = server.chatbox_database.connect()
     await server.start(address, port)
     await server.wait_stop()
 

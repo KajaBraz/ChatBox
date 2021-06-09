@@ -10,16 +10,14 @@ from src import helper_functions
 
 
 class ChatBoxDatabase:
-
-    def __init__(self, path_to_config_file: str):
-        data = helper_functions.read_config(path_to_config_file)
-        self.db_login = data['database']['db_login']
-        self.db_password = data['database']['db_password']
-        self.db_name = data['database']['db_name']
+    def __init__(self, config_data: dict):
+        self.db_login = config_data['database']['db_login']
+        self.db_password = config_data['database']['db_password']
+        self.db_name = config_data['database']['db_name']
         self.connection = self.connect()
         self.metadata = MetaData()
         self.metadata.reflect(bind=self.connection)
-        self.log = helper_functions.set_logger(data['logs']['log_file_name'], data['logs']['to_console'])
+        self.log = helper_functions.set_logger(config_data['logs']['log_file_name'], config_data['logs']['to_console'])
 
     def connect(self) -> sqlalchemy.engine.Engine:
         try:
@@ -63,7 +61,6 @@ class ChatBoxDatabase:
         :param start_period: '%d/%m/%y' ex. '01/03/21 00:00:00'
         :param end_period: '%d/%m/%y' ex. '01/03/21 23:59:59'
         :param str_to_search: substring that must be present in messages
-        :param conn:
         :return:
         """
         message_table = self.metadata.tables['messages']
@@ -93,7 +90,8 @@ class ChatBoxDatabase:
 
 
 if __name__ == '__main__':
-    chatbox_database = ChatBoxDatabase('../chatbox_config.json')
+    data = helper_functions.read_config('../chatbox_config.json')
+    chatbox_database = ChatBoxDatabase(data)
     chatbox_database.show_entries('users')
     chatbox_database.show_entries('messages')
     chatbox_database.add_user('anna_magnani', 'roma_citta_aperta')
