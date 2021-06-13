@@ -15,7 +15,7 @@ class TestState:
 @pytest.fixture
 async def state():
     # setup actions
-    config_path = '../chatbox_tests_config.json'
+    config_path = 'chatbox_tests_config.json'
     data = helper_functions.read_config(config_path)
     state = TestState()
     state.address = data['address']['name']
