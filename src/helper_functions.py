@@ -1,5 +1,6 @@
 import json
 import logging
+import regex as re
 from datetime import datetime
 
 from src.enums import JsonFields, MessageTypes
@@ -65,3 +66,20 @@ def read_config(filename: str) -> dict:
     with open(filename) as config_data:
         data = json.load(config_data)
         return data
+
+
+def detect_hyperlink(text: str):
+    # link_pattern = r'www\.\S+\.[a-z]{2,3}(\/\S*)?'
+    # link_pattern = r'www\.\S+\.[a-z]{2,3}\S*'
+    link_pattern = r'www\.\S+\.[a-z]{2,3}\S*|https?://\S+'
+    links = re.findall(link_pattern, text)
+    updated_text = text
+    for link in set(links):
+        if link != '':
+            if 'http' in link:
+                replace_link = f'<a href="{link}">{link}</a>'
+                print(replace_link)
+            else:
+                replace_link = f'<a href="https://{link}">{link}</a>'
+            updated_text = re.sub(re.escape(link), replace_link, updated_text)
+    return updated_text
