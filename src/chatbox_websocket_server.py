@@ -92,7 +92,7 @@ class Server:
                             for message in past_messages:
                                 json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES,
                                                 JsonFields.MESSAGE_SENDER: message[0],
-                                                JsonFields.MESSAGE_VALUE: helper_functions.detect_hyperlink(message[1]),
+                                                JsonFields.MESSAGE_VALUE: message[1],
                                                 JsonFields.MESSAGE_DESTINATION: message[2],
                                                 JsonFields.MESSAGE_TIMESTAMP: helper_functions.date_time_to_millis(
                                                     message[3])}
@@ -104,8 +104,6 @@ class Server:
                         if helper_functions.check_message_json(data):
                             self.log.info(f'{websocket} - messages json correct')
                             updated_message = self.update_and_save_message(message, chat_name, login, websocket)
-                            updated_message[JsonFields.MESSAGE_VALUE] = helper_functions.detect_hyperlink(
-                                updated_message[JsonFields.MESSAGE_VALUE])
                             self.log.info(f'message after hyperlink control: {message[JsonFields.MESSAGE_VALUE]}')
                             destination_chat_participants = self.chat_participants.get(
                                 message[JsonFields.MESSAGE_DESTINATION], {})

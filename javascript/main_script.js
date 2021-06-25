@@ -27,8 +27,9 @@ function handle_receive(message, message_box_element, class_name) {
     var m = JSON.parse(message);
     if (m["message_type"] == "message") {
         var name = m["message_sender"];
-        var val = m["message_value"];
+        var val = detect_hyperlink(m["message_value"]);
         var timestamp = m["message_timestamp"];
+        console.log('message val', val);
         var new_message = append_div_messages(name, timestamp, val, message_box_element, class_name);
         message_box_element.scrollTo(0, message_box_element.scrollHeight);
         if (class_name === "message messageUnread") {
@@ -39,7 +40,7 @@ function handle_receive(message, message_box_element, class_name) {
     }
     else if (m["message_type"] == "previous_messages") {
         var name = m["message_sender"];
-        var val = m["message_value"];
+        var val = detect_hyperlink(m["message_value"]);
         var timestamp = m["message_timestamp"];
         var status = assign_read_unread_class(timestamp);
         var new_message = append_div_messages(name, timestamp, val, message_box_element, status);
@@ -258,6 +259,26 @@ function read_message() {
         div.className = "message";
     }
     unread_messages_ids = [];
+}
+
+
+function detect_hyperlink(text) {
+    let link_pattern = /(www\.\S+\.\S+|https?:\/\/\S+)/g;
+    let links = text.match(link_pattern);
+    console.log("LINKS", links);
+    var updated_text = text.slice();
+    if (links != null) {
+        links.forEach((link) => {
+            if (link.includes("http")) {
+                var replace_link = '<a href="' + link + '">' + link + '</a>';
+            }
+            else {
+                var replace_link = '<a href="https://' + link + '">' + link + '</a>';
+            }
+            updated_text = updated_text.replace(link, replace_link);
+        });
+    }
+    return updated_text;
 }
 
 
