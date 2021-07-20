@@ -22,6 +22,15 @@ function append_div(child, parent, class_name) {
     return div;
 }
 
+function insert_div(child,parent,class_name){
+    var node=document.createTextNode(child);
+    var div = document.createElement("div");
+    div.className=class_name;
+    div.appendChild(node);
+    parent.insertBefore(div,parent.firstChild);
+    return div;
+}
+
 
 function handle_receive(message, message_box_element, class_name) {
     var m = JSON.parse(message);
@@ -165,7 +174,8 @@ function add_chat(new_chat) {
         console.log("IF");
         console.log(active_recent_chats);
         active_recent_chats.push(new_chat);
-        var new_div = append_div(new_chat, recent_chats, "availableChat");
+        // var new_div = append_div(new_chat, recent_chats, "availableChat");
+        var new_div = insert_div(new_chat, recent_chats, "availableChat");
         new_div.id = new_chat;
         new_div.onclick = () => {
             chat_change(new_chat);
@@ -179,7 +189,8 @@ function add_chat(new_chat) {
         active_recent_chats.splice(elem_ind, 1);
         active_recent_chats.push(new_chat);
         remove_given_chat(active_recent_chats, new_chat);
-        var new_div = append_div(new_chat, recent_chats, "availableChat");
+        // var new_div = append_div(new_chat, recent_chats, "availableChat");
+        var new_div = insert_div(new_chat, recent_chats, "availableChat");
         new_div.id = new_chat;
         new_div.onclick = () => {
             chat_change(new_chat);
