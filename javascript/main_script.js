@@ -22,12 +22,12 @@ function append_div(child, parent, class_name) {
     return div;
 }
 
-function insert_div(child,parent,class_name){
-    var node=document.createTextNode(child);
+function insert_div(child, parent, class_name) {
+    var node = document.createTextNode(child);
     var div = document.createElement("div");
-    div.className=class_name;
+    div.className = class_name;
     div.appendChild(node);
-    parent.insertBefore(div,parent.firstChild);
+    parent.insertBefore(div, parent.firstChild);
     return div;
 }
 
@@ -381,8 +381,9 @@ button_element.onclick = () => {
 
 
 message_element.addEventListener("keypress", function (event) {
-    if (event.code === 'Enter') {
+    if (event.code === 'Enter' && !event.shiftKey) {
         event.preventDefault();
+        message_element.value = message_element.value.replaceAll(/\n/g, "<br>");
         send_button(
             "message",
             message_element,
