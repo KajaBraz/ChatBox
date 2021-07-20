@@ -79,7 +79,7 @@ function send_websocket(message_type, message, sender, chat_destination, websock
         message_destination: chat_destination,
         message_sender: sender
     };
-    console.log(json_message);
+    // console.log(json_message);
     websocket.send(JSON.stringify(json_message));
 }
 
@@ -152,10 +152,18 @@ function remove_redundant_chat(chat_array, max_num) {
     }
 }
 
+function remove_given_chat(chat_array, chat_name) {
+    let to_remove = document.getElementById(chat_name);
+    to_remove.remove();
+    console.log("removed", to_remove);
+}
+
 
 function add_chat(new_chat) {
     console.log("adding");
     if (!active_recent_chats.includes(new_chat) && not_blank(new_chat)) {
+        console.log("IF");
+        console.log(active_recent_chats);
         active_recent_chats.push(new_chat);
         var new_div = append_div(new_chat, recent_chats, "availableChat");
         new_div.id = new_chat;
@@ -163,6 +171,19 @@ function add_chat(new_chat) {
             chat_change(new_chat);
         }
         remove_redundant_chat(active_recent_chats, 5);
+    }
+    else if (active_recent_chats.includes(new_chat) && active_recent_chats.indexOf(new_chat) != 4) {
+        console.log("ELSE");
+        console.log(active_recent_chats);
+        var elem_ind = active_recent_chats.indexOf(new_chat);
+        active_recent_chats.splice(elem_ind, 1);
+        active_recent_chats.push(new_chat);
+        remove_given_chat(active_recent_chats, new_chat);
+        var new_div = append_div(new_chat, recent_chats, "availableChat");
+        new_div.id = new_chat;
+        new_div.onclick = () => {
+            chat_change(new_chat);
+        }
     }
 }
 
@@ -253,7 +274,7 @@ function check_focus() {
 
 
 function read_message() {
-    console.log("changing class", unread_messages_ids);
+    // console.log("changing class", unread_messages_ids);
     for (let i = 0; i < unread_messages_ids.length; i++) {
         var div = document.getElementById(unread_messages_ids[i]);
         div.className = "message";
