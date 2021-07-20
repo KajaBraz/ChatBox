@@ -270,10 +270,10 @@ function detect_hyperlink(text) {
     if (links != null) {
         links.forEach((link) => {
             if (link.includes("http")) {
-                var replace_link = '<a href="' + link + '">' + link + '</a>';
+                var replace_link = '<a href="' + link + '" target="_blank">' + link + '</a>';
             }
             else {
-                var replace_link = '<a href="https://' + link + '">' + link + '</a>';
+                var replace_link = '<a href="https://' + link + '" target="_blank">' + link + '</a>';
             }
             updated_text = updated_text.replace(link, replace_link);
         });
