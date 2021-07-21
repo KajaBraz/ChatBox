@@ -85,7 +85,6 @@
         border: 1px solid black;
         border-radius: 5px;
         resize: none;
-        position: relative;
     }
 
     .sendButtonGrid {
@@ -140,19 +139,6 @@
         text-align: right;
         color: DimGray;
     }
-
-    #newMessage {
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    #attachment {
-        margin: 0.2%;
-        border: 1px solid rgba(0, 0, 0, 0.8);
-        position: absolute;
-        top: 0;
-        right: 0;
-    }
 </style>
 
 <body>
@@ -195,10 +181,7 @@
             </div>
         </div>
 
-        <div class="sendGrid">
-            <textarea id="newMessage" placeholder="Type your message" autofocus></textarea>
-            <div id="attachment">ATT</div>
-        </div>
+        <textarea id="newMessage" class="sendGrid" placeholder="Type your message" autofocus></textarea>
         <button id="sendMessageButton" class="sendButtonGrid">Send</button>
 
         <div class="chatUsers">
