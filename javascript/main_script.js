@@ -88,7 +88,6 @@ function send_websocket(message_type, message, sender, chat_destination, websock
         message_destination: chat_destination,
         message_sender: sender
     };
-    // console.log(json_message);
     websocket.send(JSON.stringify(json_message));
 }
 
@@ -285,7 +284,6 @@ function check_focus() {
 
 
 function read_message() {
-    // console.log("changing class", unread_messages_ids);
     for (let i = 0; i < unread_messages_ids.length; i++) {
         var div = document.getElementById(unread_messages_ids[i]);
         div.className = "message";
@@ -311,6 +309,52 @@ function detect_hyperlink(text) {
         });
     }
     return updated_text;
+}
+
+
+// function append_div_messages(my_name, timestamp, message, message_box_element, class_name) {
+//     var div = append_div("", message_box_element, class_name);
+//     if (my_name === login) {
+//         div.style.float = "right";
+//     }
+//     let message_header_div = append_div("", div, "messageHeader");
+//     let name = retrieve_display_login(my_name);
+//     append_div(name, message_header_div, "divAuthor");
+//     let date = new Date(timestamp);
+//     new_div = append_div(date.toLocaleDateString() + " - " + date.toLocaleTimeString(), message_header_div, "divTimestamp");
+//     div.innerHTML += message;
+//     return div;
+// }
+
+
+function prepare_image_message(img_as_file, my_name) {
+    var reader = new FileReader();
+    reader.onload = function (event) {
+        var img_str = event.target.result;
+        console.log(img_str);
+
+        // var node = all_messages_element.createTextNode(img_as_file);
+        var img_elem = document.createElement("img");
+        img_elem.className = "message";
+        img_elem.width = "300";
+        img_elem.height = "150";
+        img_elem.src = img_str;
+
+        if (my_name === login) {
+            img_elem.style.float = "right";
+        }
+        let message_header_div = append_div("", img_elem, "messageHeader");
+        let name = retrieve_display_login(my_name);
+        append_div(name, message_header_div, "divAuthor");
+        // let date = new Date(timestamp);
+        // new_div = append_div(date.toLocaleDateString() + " - " + date.toLocaleTimeString(), message_header_div, "divTimestamp");
+
+        // img_elem.appendChild(node);
+        all_messages_element.appendChild(img_elem)
+
+        // document.getElementById("container").src = event.target.result;
+    };
+    reader.readAsDataURL(img_as_file);
 }
 
 
@@ -393,6 +437,20 @@ message_element.addEventListener("keypress", function (event) {
         );
     }
 });
+
+
+message_element.onpaste = function (e) {
+    console.log(e.clipboardData.items);
+    var item = e.clipboardData.items[0];
+    console.log(item.type.indexOf("image"));
+
+    if (item.type.indexOf("image") === 0) {
+        console.log("++++++++++++++++++++++++", item);
+        var blob = item.getAsFile();
+
+        prepare_image_message(blob, login);
+    }
+}
 
 
 document.addEventListener('click', read_message);
