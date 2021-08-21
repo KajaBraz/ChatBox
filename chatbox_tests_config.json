@@ -1,7 +1,7 @@
 {
   "logs": {
     "log_file_name": "chatbox_logger",
-    "to_console": "False"
+    "to_console": false
   },
   "address": {
     "name": "localhost",
