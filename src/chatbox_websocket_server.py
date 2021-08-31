@@ -89,13 +89,13 @@ class Server:
                             chat = message[JsonFields.MESSAGE_DESTINATION]
                             participants = list(self.chat_participants.get(chat, {}).keys())
                             past_messages = (self.chatbox_database.fetch_last_messages(chat))
-                            for message in past_messages[::-1]:
+                            for message in past_messages:
                                 json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES,
-                                                JsonFields.MESSAGE_SENDER: message[0],
-                                                JsonFields.MESSAGE_VALUE: message[1],
-                                                JsonFields.MESSAGE_DESTINATION: message[2],
+                                                JsonFields.MESSAGE_SENDER: message.sender_login,
+                                                JsonFields.MESSAGE_VALUE: message.message,
+                                                JsonFields.MESSAGE_DESTINATION: message.chat_name,
                                                 JsonFields.MESSAGE_TIMESTAMP: helper_functions.date_time_to_millis(
-                                                    message[3])}
+                                                    message.date_time)}
                                 await websocket.send(my_json.to_json(json_message))
                             self.log.info(f'{websocket} - past messages sent')
                             await self.send_new_user_notification(participants, [login], chat)
