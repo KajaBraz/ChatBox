@@ -72,9 +72,7 @@ class ChatBoxDatabase:
 
     def fetch_last_messages(self, chat_name, n=100):
         message_table = self.metadata.tables['messages']
-        cls_to_select = [message_table.c.sender_login, message_table.c.message, message_table.c.chat_name,
-                         message_table.c.date_time, message_table.c.id]
-        inner_query = (select(cls_to_select)
+        inner_query = (select([message_table])
                        .where(message_table.c.chat_name == chat_name)
                        .order_by(message_table.c.id.desc())
                        .limit(n)

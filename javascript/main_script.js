@@ -22,6 +22,7 @@ function append_div(child, parent, class_name) {
     return div;
 }
 
+
 function insert_div(child, parent, class_name) {
     var node = document.createTextNode(child);
     var div = document.createElement("div");
@@ -126,6 +127,7 @@ function connect(user_name, chat_name) {
             chat_participants = new Set();
             document.getElementById("activeUsers").innerHTML = "";
             console.log(webSocket.readyState);
+            message_element.focus();
         };
         webSocket.onmessage = (event) => {
             console.log(event.data);
