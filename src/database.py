@@ -5,8 +5,9 @@ from datetime import datetime
 import pandas as pd
 import sqlalchemy
 from sqlalchemy import create_engine, MetaData, select
+from sqlalchemy.engine import ResultProxy
 
-from src import helper_functions
+from src import helper_functions, message
 
 
 class ChatBoxDatabase:
@@ -70,15 +71,16 @@ class ChatBoxDatabase:
             message_table.c.date_time <= date_to).where(message_table.c.message.contains(str_to_search)))
         return entries.fetchall()
 
-    def fetch_last_messages(self, chat_name, n=100):
+    def fetch_last_messages(self, chat_name, n=100) -> [message.Message]:
         message_table = self.metadata.tables['messages']
         inner_query = (select([message_table])
                        .where(message_table.c.chat_name == chat_name)
                        .order_by(message_table.c.id.desc())
                        .limit(n)
                        .alias('inner_query'))
-        n_entries = self.connection.execute(select([inner_query]).order_by(inner_query.c.id))
-        return n_entries.fetchall()
+        n_entries: ResultProxy = self.connection.execute(select([inner_query]).order_by(inner_query.c.id))
+        return [message.Message(entry.id, entry.sender_login, entry.message, entry.chat_name,
+                                helper_functions.date_time_to_millis(entry.date_time)) for entry in n_entries]
 
     def print_df(self, data_list, column_names):
         df = pd.DataFrame(data_list, columns=column_names)

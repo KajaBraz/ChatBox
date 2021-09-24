@@ -4,6 +4,7 @@ class JsonFields(object):
     MESSAGE_SENDER = "message_sender"
     MESSAGE_DESTINATION = "message_destination"
     MESSAGE_TIMESTAMP = "message_timestamp"
+    MULTIPLE_MESSAGES = "multiple_messages"
 
 
 class MessageTypes(object):

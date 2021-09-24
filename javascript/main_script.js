@@ -49,17 +49,19 @@ function handle_receive(message, message_box_element, class_name) {
         }
     }
     else if (m["message_type"] == "previous_messages") {
-        var name = m["message_sender"];
-        var val = detect_hyperlink(m["message_value"]);
-        var timestamp = m["message_timestamp"];
-        var status = assign_read_unread_class(timestamp);
-        var new_message = append_div_messages(name, timestamp, val, message_box_element, status);
-        message_box_element.scrollTo(0, message_box_element.scrollHeight);
-        if (status === "message messageUnread") {
-            new_message.id = generate_unique_id(5);
-            console.log("pushing");
-            unread_messages_ids.push(new_message.id);
-        }
+        m["multiple_messages"].forEach(single_message => {
+            var name = single_message["sender_login"];
+            var val = detect_hyperlink(single_message["message"]);
+            var timestamp = single_message["timestamp"];
+            var status = assign_read_unread_class(timestamp);
+            var new_message = append_div_messages(name, timestamp, val, message_box_element, status);
+            message_box_element.scrollTo(0, message_box_element.scrollHeight);
+            if (status === "message messageUnread") {
+                new_message.id = generate_unique_id(5);
+                console.log("pushing");
+                unread_messages_ids.push(new_message.id);
+            }
+        })
     }
     else if (m["message_type"] == "users_update") {
         let active_users_element = document.getElementById("activeUsers");
@@ -300,7 +302,7 @@ function detect_hyperlink(text) {
     console.log("LINKS", links);
     var updated_text = text.slice();
     if (links != null) {
-        links.forEach((link) => {
+        links.forEach(link => {
             if (link.includes("http")) {
                 var replace_link = '<a href="' + link + '" target="_blank">' + link + '</a>';
             }
