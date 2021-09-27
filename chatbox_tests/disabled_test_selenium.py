@@ -1,4 +1,6 @@
 import os
+import random
+import string
 import time
 
 import pytest
@@ -14,7 +16,7 @@ class TestState:
 def state():
     state = TestState()
     options = Options()
-    options.add_argument('--headless')  # don't use when you want to actually open and see the browser window
+    # options.add_argument('--headless')  # don't use when you want to actually open and see the browser window
     state.driver = webdriver.Firefox(options=options)
 
     relative_path = os.path.join(os.pardir, 'javascript', 'index.html')
@@ -22,37 +24,36 @@ def state():
 
     state.driver.get(f'file:///{absolute_path}')
 
+    state.user_name = ''.join(random.sample(string.ascii_letters, 10))
+    state.chat_room = ''.join(random.sample(string.ascii_letters, 10))
+
     yield state
     state.driver.quit()
 
 
 def test_first_connection(state):
-    chat_room = 'NewChat'
-    login = 'UserName'
     login_elem = state.driver.find_element_by_id('login')
     chat_elem = state.driver.find_element_by_id('findChat')
     connect_button_elem = state.driver.find_element_by_id('connectButton')
     header_elem = state.driver.find_element_by_id('chatNameHeader')
     chat_list_elem = state.driver.find_element_by_id('recentlyUsedChats')
     user_list_elem = state.driver.find_element_by_id('activeUsers')
-    login_elem.send_keys(login)
-    chat_elem.send_keys(chat_room)
+    login_elem.send_keys(state.user_name)
+    chat_elem.send_keys(state.chat_room)
     connect_button_elem.click()
     time.sleep(1)
-    assert header_elem.text == chat_room
-    assert chat_list_elem.find_element_by_id(chat_room).text == chat_room
-    assert user_list_elem.find_element_by_class_name('chatUser').text == login
+    assert header_elem.text == state.chat_room
+    assert chat_list_elem.find_element_by_id(state.chat_room).text == state.chat_room
+    assert user_list_elem.find_element_by_class_name('chatUser').text == state.user_name
 
 
 def test_sending_message(state):
     # CONNECTION
-    chat_room = 'NewChat'
-    login = 'UserName'
     login_elem = state.driver.find_element_by_id('login')
     chat_elem = state.driver.find_element_by_id('findChat')
     connect_button_elem = state.driver.find_element_by_id('connectButton')
-    login_elem.send_keys(login)
-    chat_elem.send_keys(chat_room)
+    login_elem.send_keys(state.user_name)
+    chat_elem.send_keys(state.chat_room)
     connect_button_elem.click()
     time.sleep(1)
 
