@@ -1,3 +1,4 @@
+import datetime
 import os
 import random
 import string
@@ -16,7 +17,7 @@ class TestState:
 def state():
     state = TestState()
     options = Options()
-    # options.add_argument('--headless')  # don't use when you want to actually open and see the browser window
+    options.add_argument('--headless')  # don't use when you want to actually open and see the browser window
     state.driver = webdriver.Firefox(options=options)
 
     relative_path = os.path.join(os.pardir, 'javascript', 'index.html')
@@ -28,6 +29,9 @@ def state():
     state.chat_room = ''.join(random.sample(string.ascii_letters, 10))
 
     yield state
+    screenshot_path = os.path.join('selenium_screenshots',
+                                   f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.png')
+    state.driver.get_screenshot_as_file(screenshot_path)
     state.driver.quit()
 
 
