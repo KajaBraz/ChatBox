@@ -15,6 +15,7 @@ class ChatBoxDatabase:
         self.db_login = config_data['database']['db_login']
         self.db_password = config_data['database']['db_password']
         self.db_name = config_data['database']['db_name']
+        self.address_name = config_data['address']['name']
         self.connection = self.connect()
         self.metadata = MetaData()
         self.metadata.reflect(bind=self.connection)
@@ -22,7 +23,8 @@ class ChatBoxDatabase:
 
     def connect(self) -> sqlalchemy.engine.Engine:
         try:
-            return create_engine(f'postgresql://{self.db_login}:{self.db_password}@localhost/{self.db_name}').connect()
+            return create_engine(
+                f'postgresql://{self.db_login}:{self.db_password}@{self.address_name}/{self.db_name}').connect()
         except Exception as e:
             self.log.exception(f'Database connection error: {e}')
             return None
