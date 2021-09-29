@@ -29,8 +29,8 @@ def state():
     state.chat_room = helper_functions.generate_random_string(10)
 
     yield state
-    screenshot_path = os.path.join('selenium_screenshots',
-                                   f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.png')
+    screenshot_path = os.path.abspath(os.path.join(os.pardir, 'test_results', 'selenium_screenshots',
+                                                   f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.png'))
     state.driver.get_screenshot_as_file(screenshot_path)
     state.driver.quit()
 
