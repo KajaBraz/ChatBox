@@ -91,15 +91,15 @@ def test_recent_chats_display(state):
 def test_active_users_display(state):
     users = [state.user_name] + [helper_functions.generate_random_string(10) for i in range(4)]
     for user in users:
-        state.driver.execute_script("window.open('');")
-        state.driver.switch_to.window(state.driver.window_handles[-1])
-        state.driver.get(f'file:///{state.absolute_path}')
-
+        # todo fix the below version to open tabs instead of new windows
+        # state.driver.execute_script("window.open('');")
         # state.driver.execute_script(f"window.open('file:///{state.absolute_path}', '_blank');")
         # state.driver.switch_to.window(state.driver.window_handles[-1])
+        # state.driver.get(f'file:///{state.absolute_path}')
 
         new_driver = webdriver.Firefox(options=state.options)
         new_driver.get(f'file:///{state.absolute_path}')
+
         login_elem = new_driver.find_element_by_id('login')
         chat_elem = new_driver.find_element_by_id('findChat')
         connect_button_elem = new_driver.find_element_by_id('connectButton')
@@ -108,5 +108,6 @@ def test_active_users_display(state):
         connect_button_elem.click()
         time.sleep(1)
 
+    time.sleep(1)
     resulting_active_users = set([user.text for user in new_driver.find_elements_by_class_name('chatUser')])
     assert set(users) == resulting_active_users
