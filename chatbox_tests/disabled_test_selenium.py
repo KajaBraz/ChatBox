@@ -1,12 +1,12 @@
 import datetime
 import os
-import random
-import string
 import time
 
 import pytest
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+
+from src import helper_functions
 
 
 class TestState:
@@ -16,17 +16,17 @@ class TestState:
 @pytest.fixture
 def state():
     state = TestState()
-    options = Options()
-    options.add_argument('--headless')  # don't use when you want to actually open and see the browser window
-    state.driver = webdriver.Firefox(options=options)
+    state.options = Options()
+    state.options.add_argument('--headless')  # don't use when you want to actually open and see the browser window
+    state.driver = webdriver.Firefox(options=state.options)
 
     relative_path = os.path.join(os.pardir, 'javascript', 'index.html')
-    absolute_path = os.path.abspath(relative_path)
+    state.absolute_path = os.path.abspath(relative_path)
 
-    state.driver.get(f'file:///{absolute_path}')
+    state.driver.get(f'file:///{state.absolute_path}')
 
-    state.user_name = ''.join(random.sample(string.ascii_letters, 10))
-    state.chat_room = ''.join(random.sample(string.ascii_letters, 10))
+    state.user_name = helper_functions.generate_random_string(10)
+    state.chat_room = helper_functions.generate_random_string(10)
 
     yield state
     screenshot_path = os.path.join('selenium_screenshots',
@@ -71,3 +71,42 @@ def test_sending_message(state):
     send_button.click()
     time.sleep(1)
     assert message == message_box.find_elements_by_class_name('message')[-1].text[-message_span:]
+
+
+def test_recent_chats_display(state):
+    chat_rooms = [state.chat_room] + [helper_functions.generate_random_string(10) for i in range(4)]
+    login_elem = state.driver.find_element_by_id('login')
+    chat_elem = state.driver.find_element_by_id('findChat')
+    connect_button_elem = state.driver.find_element_by_id('connectButton')
+    login_elem.send_keys(state.user_name)
+    for chat_room in chat_rooms:
+        chat_elem.send_keys(chat_room)
+        connect_button_elem.click()
+        time.sleep(1)
+        chat_elem.clear()
+    resulting_chat_names = [elem.text for elem in state.driver.find_elements_by_class_name('availableChat')]
+    assert chat_rooms[::-1] == resulting_chat_names
+
+
+def test_active_users_display(state):
+    users = [state.user_name] + [helper_functions.generate_random_string(10) for i in range(4)]
+    for user in users:
+        state.driver.execute_script("window.open('');")
+        state.driver.switch_to.window(state.driver.window_handles[-1])
+        state.driver.get(f'file:///{state.absolute_path}')
+
+        # state.driver.execute_script(f"window.open('file:///{state.absolute_path}', '_blank');")
+        # state.driver.switch_to.window(state.driver.window_handles[-1])
+
+        new_driver = webdriver.Firefox(options=state.options)
+        new_driver.get(f'file:///{state.absolute_path}')
+        login_elem = new_driver.find_element_by_id('login')
+        chat_elem = new_driver.find_element_by_id('findChat')
+        connect_button_elem = new_driver.find_element_by_id('connectButton')
+        login_elem.send_keys(user)
+        chat_elem.send_keys(state.chat_room)
+        connect_button_elem.click()
+        time.sleep(1)
+
+    resulting_active_users = set([user.text for user in new_driver.find_elements_by_class_name('chatUser')])
+    assert set(users) == resulting_active_users

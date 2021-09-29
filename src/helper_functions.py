@@ -1,6 +1,8 @@
 import json
 import logging
+import random
 import re
+import string
 from datetime import datetime
 
 from src.enums import JsonFields, MessageTypes
@@ -83,3 +85,7 @@ def detect_hyperlink(text: str):
                 replace_link = f'<a href="https://{link}">{link}</a>'
             updated_text = re.sub(re.escape(link), replace_link, updated_text)
     return updated_text
+
+
+def generate_random_string(n: int):
+    return ''.join(random.sample(string.ascii_letters, n))
