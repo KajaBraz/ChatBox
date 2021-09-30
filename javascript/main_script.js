@@ -7,8 +7,8 @@ function append_div_messages(my_name, timestamp, message, message_box_element, c
     let name = retrieve_display_login(my_name);
     append_div(name, message_header_div, "divAuthor");
     let date = new Date(timestamp);
-    new_div = append_div(date.toLocaleDateString() + " - " + date.toLocaleTimeString(), message_header_div, "divTimestamp");
-    div.innerHTML += message;
+    let timestamp_div = append_div(date.toLocaleDateString() + " - " + date.toLocaleTimeString(), message_header_div, "divTimestamp");
+    let message_text_div = append_div(message, div, "messageText");
     return div;
 }
 

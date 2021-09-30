@@ -51,7 +51,7 @@ def test_first_connection(state):
     assert user_list_elem.find_element_by_class_name('chatUser').text == state.user_name
 
 
-def test_sending_message(state):
+def test_sending_and_displaying_messages(state):
     # CONNECTION
     login_elem = state.driver.find_element_by_id('login')
     chat_elem = state.driver.find_element_by_id('findChat')
@@ -59,18 +59,21 @@ def test_sending_message(state):
     login_elem.send_keys(state.user_name)
     chat_elem.send_keys(state.chat_room)
     connect_button_elem.click()
-    time.sleep(1)
+    time.sleep(0.5)
 
-    # MESSAGE
-    message = 'This is a message'
-    message_span = len(message)
-    new_message = state.driver.find_element_by_id('newMessage')
-    send_button = state.driver.find_element_by_id('sendMessageButton')
-    message_box = state.driver.find_element_by_id('receivedMessages')
-    new_message.send_keys(message)
-    send_button.click()
-    time.sleep(1)
-    assert message == message_box.find_elements_by_class_name('message')[-1].text[-message_span:]
+    # SENDING MESSAGES
+    messages = [helper_functions.generate_random_string(15) for i in range(5)]
+    for message in messages:
+        new_message_box = state.driver.find_element_by_id('newMessage')
+        send_button = state.driver.find_element_by_id('sendMessageButton')
+        new_message_box.send_keys(message)
+        send_button.click()
+        time.sleep(0.5)
+
+    # CHECKING RECEIVED MESSAGES
+    received_messages_box = state.driver.find_element_by_id('receivedMessages')
+    received_messages = [m.text for m in received_messages_box.find_elements_by_class_name('messageText')]
+    assert messages == received_messages
 
 
 def test_recent_chats_display(state):
