@@ -1,8 +1,8 @@
 import asyncio
-from unittest.mock import patch, ANY
 
 import pytest
 
+from chatbox_tests.integration import mocked_database
 from chatbox_tests.integration.virtual_websocket_client import VirtualClient
 from src import chatbox_websocket_server, helper_functions, database
 from src.enums import JsonFields
@@ -68,29 +68,23 @@ async def test_client1_sends_participants_receive(state):
 
 
 @pytest.mark.asyncio
-async def DISABLED_test_when_client_sends_message_is_added_to_database(state):
-    with patch('src.chatbox_websocket_server.add_message') as add_message_mock:
-        # GIVEN
-        message = "hello darkness, my old friend"
-        await state.client.connect()
-        await state.client2.connect()
+async def test_when_client_sends_message_is_added_to_database(state):
+    # GIVEN
+    state.server_obj.chatbox_database = mocked_database.MockedDatabase()
+    messages = [helper_functions.generate_random_string(15), helper_functions.generate_random_string(15),
+                helper_functions.generate_random_string(15)]
+    await state.client.connect()
+    await state.client2.connect()
 
-        # WHEN
-        await state.client.send(message)
-        await asyncio.sleep(0.5)
+    # WHEN
+    await state.client.send(messages[0])
+    await state.client.send_not_a_json(messages[1])
+    await state.client.send_wrong_message(messages[2])
+    await asyncio.sleep(0.5)
 
-        # THEN
-        add_message_mock.assert_called_once_with(state.client.user_name, state.client.chat_name, message, ANY, ANY)
-        add_message_mock.reset_mock()
-
-        await state.client.send_not_a_json(message)
-        await asyncio.sleep(0.5)
-        add_message_mock.assert_not_called()
-        add_message_mock.reset_mock()
-
-        await state.client.send_wrong_message(message)
-        await asyncio.sleep(0.5)
-        add_message_mock.assert_not_called()
+    # THEN
+    assert len(state.server_obj.chatbox_database.messages) == 1
+    assert state.server_obj.chatbox_database.messages[0] == messages[0]
 
 
 @pytest.mark.asyncio
