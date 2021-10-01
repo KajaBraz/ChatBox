@@ -13,7 +13,6 @@ class Server:
         self.chat_participants = {}
         self.server: websockets.WebSocketServer = None
         self.chatbox_database = None
-        self.conn = None
         logs_file = config_data['logs']['log_file_name']
         self.log = helper_functions.set_logger(logs_file, config_data['logs']['to_console'])
 
