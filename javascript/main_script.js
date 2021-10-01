@@ -2,6 +2,8 @@ function append_div_messages(my_name, timestamp, message, message_box_element, c
     var div = append_div("", message_box_element, class_name);
     if (my_name === login) {
         div.style.float = "right";
+    } else {
+        div.style.float = "left";
     }
     let message_header_div = append_div("", div, "messageHeader");
     let name = retrieve_display_login(my_name);

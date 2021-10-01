@@ -114,3 +114,68 @@ def test_active_users_display(state):
     time.sleep(1)
     resulting_active_users = set([user.text for user in new_driver.find_elements_by_class_name('chatUser')])
     assert set(users) == resulting_active_users
+
+
+def test_messages_position(state):
+    # CONNECTION USER 1
+    login_elem = state.driver.find_element_by_id('login')
+    chat_elem = state.driver.find_element_by_id('findChat')
+    connect_button_elem = state.driver.find_element_by_id('connectButton')
+    login_elem.send_keys(state.user_name)
+    chat_elem.send_keys(state.chat_room)
+    connect_button_elem.click()
+    time.sleep(0.5)
+
+    # CONNECTION USER 2
+    new_driver = webdriver.Firefox(options=state.options)
+    new_driver.get(f'file:///{state.absolute_path}')
+    user2_login = helper_functions.generate_random_string(10)
+    login_elem = new_driver.find_element_by_id('login')
+    chat_elem = new_driver.find_element_by_id('findChat')
+    connect_button_elem = new_driver.find_element_by_id('connectButton')
+    login_elem.send_keys(user2_login)
+    chat_elem.send_keys(state.chat_room)
+    connect_button_elem.click()
+    time.sleep(0.5)
+
+    # PREPARING MESSAGES USER1
+    messages_user1 = [helper_functions.generate_random_string(15) for i in range(2)]
+    new_message_box_user1 = state.driver.find_element_by_id('newMessage')
+    send_button_user1 = state.driver.find_element_by_id('sendMessageButton')
+
+    # PREPARING MESSAGES USER2
+    messages_user2 = [helper_functions.generate_random_string(15) for i in range(2)]
+    new_message_box_user2 = new_driver.find_element_by_id('newMessage')
+    send_button_user2 = new_driver.find_element_by_id('sendMessageButton')
+
+    # SENDING MESSAGES
+    new_message_box_user1.send_keys(messages_user1[0])
+    send_button_user1.click()
+    time.sleep(0.5)
+
+    new_message_box_user2.send_keys(messages_user2[0])
+    send_button_user2.click()
+    time.sleep(0.5)
+
+    new_message_box_user1.send_keys(messages_user1[1])
+    send_button_user1.click()
+    time.sleep(0.5)
+
+    new_message_box_user2.send_keys(messages_user2[1])
+    send_button_user2.click()
+    time.sleep(0.5)
+
+    # GATHERING OF THE MESSAGES
+    new_message_box_user1.click()
+    new_message_box_user2.click()
+    received_messages_user1 = state.driver.find_elements_by_class_name('message')
+    received_messages_user2 = new_driver.find_elements_by_class_name('message')
+
+    # CHECKING MESSAGES STYLE
+    messages_style_user1 = [m.get_attribute('style') for m in received_messages_user1]
+    messages_style_user2 = [m.get_attribute('style') for m in received_messages_user2]
+
+    assert all(['right' in messages_style_user1[i] for i in range(len(messages_style_user1)) if i % 2 == 0])
+    assert all(['right' in messages_style_user2[i] for i in range(len(messages_style_user2)) if i % 2 == 1])
+    assert all(['left' in messages_style_user1[i] for i in range(len(messages_style_user1)) if i % 2 == 1])
+    assert all(['left' in messages_style_user2[i] for i in range(len(messages_style_user2)) if i % 2 == 0])
