@@ -42,12 +42,18 @@ class VirtualClient:
 
     async def start_receiving(self):
         async for data in self.ws:
-            print('received', data)
             msg = from_json(data)
             if msg[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
                 self.received_messages.append(msg[JsonFields.MESSAGE_VALUE])
                 self.received_jsons.append(msg)
-        # r = await self.ws.recv()
+            elif msg[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES:
+                self.received_messages.extend(m['message'] for m in msg[JsonFields.MULTIPLE_MESSAGES])
+                self.received_jsons.append(msg)
+
+    async def request_last_messages(self):
+        json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES, JsonFields.MESSAGE_SENDER: 'sender1',
+                        JsonFields.MESSAGE_DESTINATION: 'room1'}
+        await self.ws.send(to_json(json_message))
 
     async def disconnect(self):
         await self.ws.close()

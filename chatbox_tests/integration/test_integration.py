@@ -4,7 +4,7 @@ import pytest
 
 from chatbox_tests.integration import mocked_database
 from chatbox_tests.integration.virtual_websocket_client import VirtualClient
-from src import chatbox_websocket_server, helper_functions, database
+from src import chatbox_websocket_server, helper_functions, database, message
 from src.enums import JsonFields
 
 
@@ -170,3 +170,23 @@ async def test_server_adds_timestamp_to_message(state):
     # THEN
     assert 1 == len(state.client.received_jsons)
     assert JsonFields.MESSAGE_TIMESTAMP in state.client.received_jsons[0]
+
+
+@pytest.mark.asyncio
+async def test_sending_previous_messages(state):
+    # GIVEN
+    database_mock = mocked_database.MockedDatabase()
+    m1 = message.Message(1, 'sender', 'message1', 'room1', 123)
+    m2 = message.Message(2, 'sender', 'message2', 'room1', 123)
+    m3 = message.Message(3, 'sender', 'message3', 'room1', 123)
+    database_mock.set_return_value('fetch_last_messages', [m1, m2, m3])
+    state.server_obj.chatbox_database = database_mock
+    await state.client.connect()
+    asyncio.create_task(state.client.start_receiving())
+
+    # WHEN
+    await state.client.request_last_messages()
+    await asyncio.sleep(1)
+
+    # THEN
+    assert state.client.received_messages == [m1.message, m2.message, m3.message]
