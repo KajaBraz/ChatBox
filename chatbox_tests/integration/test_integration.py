@@ -75,6 +75,8 @@ async def test_when_client_sends_message_is_added_to_database(state):
                 helper_functions.generate_random_string(15)]
     await state.client.connect()
     await state.client2.connect()
+    asyncio.create_task(state.client.start_receiving())
+    asyncio.create_task(state.client2.start_receiving())
 
     # WHEN
     await state.client.send(messages[0])
@@ -85,6 +87,9 @@ async def test_when_client_sends_message_is_added_to_database(state):
     # THEN
     assert len(state.server_obj.chatbox_database.messages) == 1
     assert state.server_obj.chatbox_database.messages[0] == messages[0]
+    assert len(state.client.sent_messages) == 3
+    assert len(state.client.received_messages) == 1
+    assert len(state.client2.received_messages) == 1
 
 
 @pytest.mark.asyncio
@@ -169,7 +174,7 @@ async def test_server_adds_timestamp_to_message(state):
 
     # THEN
     assert 1 == len(state.client.received_jsons)
-    assert JsonFields.MESSAGE_TIMESTAMP in state.client.received_jsons[0]
+    assert 'timestamp' in state.client.received_jsons[0][JsonFields.MESSAGE_VALUE]
 
 
 @pytest.mark.asyncio

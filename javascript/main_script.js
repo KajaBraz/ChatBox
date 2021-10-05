@@ -38,11 +38,13 @@ function insert_div(child, parent, class_name) {
 function handle_receive(message, message_box_element, class_name) {
     var m = JSON.parse(message);
     if (m["message_type"] == "message") {
-        var name = m["message_sender"];
-        var val = detect_hyperlink(m["message_value"]);
-        var timestamp = m["message_timestamp"];
-        console.log('message val', val);
-        var new_message = append_div_messages(name, timestamp, val, message_box_element, class_name);
+        val = m["message_value"];
+        var name = val["sender_login"];
+        var message_text = detect_hyperlink(val["message"]);
+        var timestamp = val["timestamp"];
+        console.log('message val', message_text);
+        var new_message = append_div_messages(name, timestamp, message_text, message_box_element, class_name);
+        new_message.id = val["id"];
         message_box_element.scrollTo(0, message_box_element.scrollHeight);
         if (class_name === "message messageUnread") {
             new_message.id = generate_unique_id(5);
@@ -53,10 +55,11 @@ function handle_receive(message, message_box_element, class_name) {
     else if (m["message_type"] == "previous_messages") {
         m["multiple_messages"].forEach(single_message => {
             var name = single_message["sender_login"];
-            var val = detect_hyperlink(single_message["message"]);
+            var message_text = detect_hyperlink(single_message["message"]);
             var timestamp = single_message["timestamp"];
             var status = assign_read_unread_class(timestamp);
-            var new_message = append_div_messages(name, timestamp, val, message_box_element, status);
+            var new_message = append_div_messages(name, timestamp, message_text, message_box_element, status);
+            new_message.id = single_message["id"];
             message_box_element.scrollTo(0, message_box_element.scrollHeight);
             if (status === "message messageUnread") {
                 new_message.id = generate_unique_id(5);

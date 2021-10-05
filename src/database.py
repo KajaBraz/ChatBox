@@ -38,12 +38,14 @@ class ChatBoxDatabase:
                                           salt=new_salt, registration_date=datetime.now())
         self.connection.execute(stm)
 
-    def add_message(self, login, chat, message, date_time):
+    def add_message(self, login, chat, mes, date_time) -> message.Message:
         if self.connection:
             messages = self.metadata.tables['messages']
-            stm = messages.insert().values(sender_login=login, chat_name=chat, message=message, date_time=date_time)
-            self.connection.execute(stm)
-            self.log.debug(f'adding message "{message}" to the database, sent by {login} in chat {chat}')
+            stm = messages.insert().values(sender_login=login, chat_name=chat, message=mes, date_time=date_time)
+            entry = self.connection.execute(stm)
+            self.log.debug(f'adding message "{mes}" to the database, sent by {login} in chat {chat}')
+            entry_id = entry.inserted_primary_key[0]
+            return message.Message(entry_id, login, mes, chat, date_time)
         else:
             self.log.error('cannot add message to database')
 

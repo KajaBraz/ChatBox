@@ -25,9 +25,9 @@ class VirtualClient:
                      JsonFields.MESSAGE_VALUE: message,
                      JsonFields.MESSAGE_DESTINATION: self.chat_name,
                      JsonFields.MESSAGE_SENDER: self.user_name}
-        print('sent', json_mess)
         self.sent_messages.append(message)
-        await self.ws.send(to_json(json_mess))
+        json = to_json(json_mess)
+        await self.ws.send(json)
         # self.ws.send(to_json(json_mess))
 
     async def send_wrong_message(self, message):
@@ -38,13 +38,14 @@ class VirtualClient:
         await self.ws.send(to_json(json_mess))
 
     async def send_not_a_json(self, message):
+        self.sent_messages.append(message)
         await self.ws.send(message)
 
     async def start_receiving(self):
         async for data in self.ws:
             msg = from_json(data)
             if msg[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
-                self.received_messages.append(msg[JsonFields.MESSAGE_VALUE])
+                self.received_messages.append(msg[JsonFields.MESSAGE_VALUE]['message'])
                 self.received_jsons.append(msg)
             elif msg[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES:
                 self.received_messages.extend(m['message'] for m in msg[JsonFields.MULTIPLE_MESSAGES])

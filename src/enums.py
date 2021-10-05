@@ -11,3 +11,7 @@ class MessageTypes(object):
     MESSAGE = "message"
     PREVIOUS_MESSAGES = "previous_messages"
     USERS_UPDATE = "users_update"
+
+
+class Constants:
+    DEFAULT_NO_DATABASE_MESSAGE_ID = -1

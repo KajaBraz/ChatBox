@@ -4,8 +4,8 @@ from datetime import datetime, timezone
 from sys import argv
 
 import src.my_json as my_json
-from src import helper_functions, database
-from src.enums import JsonFields, MessageTypes
+from src import helper_functions, database, message
+from src.enums import JsonFields, MessageTypes, Constants
 
 
 class Server:
@@ -39,15 +39,17 @@ class Server:
             f'number of participants in chat {chat_name} - {len(self.chat_participants[chat_name])}:'
             f'{self.chat_participants[chat_name]}')
 
-    def update_and_save_message(self, message, chat_name, login, websocket):
-        updated_message = message.copy()
+    def update_and_save_message(self, mes, chat_name, login, websocket) -> message.Message:
         date_time = datetime.now(timezone.utc)
         time_millis = helper_functions.date_time_to_millis(date_time)
         if self.chatbox_database:
-            self.chatbox_database.add_message(login, chat_name, updated_message[JsonFields.MESSAGE_VALUE], date_time)
+            updated_message = self.chatbox_database.add_message(login, chat_name, mes[JsonFields.MESSAGE_VALUE],
+                                                                date_time)
             self.log.info(f'{websocket} - message {updated_message} added to db, room {chat_name}')
-        updated_message[JsonFields.MESSAGE_TIMESTAMP] = time_millis
-        return updated_message
+            updated_message.timestamp = time_millis
+            return updated_message
+        return message.Message(Constants.DEFAULT_NO_DATABASE_MESSAGE_ID, login, mes[JsonFields.MESSAGE_VALUE],
+                               chat_name, time_millis)
 
     async def send_new_user_notification(self, user_name_list: list, receivers_logins: list, chat_name: str):
         self.log.info('sending new user notification')
@@ -100,15 +102,20 @@ class Server:
                     elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
                         if helper_functions.check_message_json(data):
                             self.log.info(f'{websocket} - messages json correct')
-                            updated_message = self.update_and_save_message(message, chat_name, login, websocket)
-                            self.log.info(f'message after hyperlink control: {message[JsonFields.MESSAGE_VALUE]}')
+                            message_details = self.update_and_save_message(message, chat_name, login, websocket)
+                            self.log.info(f'message after hyperlink control: {message_details}')
+
+                            json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.MESSAGE,
+                                            JsonFields.MESSAGE_VALUE: message_details.__dict__}
+
                             destination_chat_participants = self.chat_participants.get(
                                 message[JsonFields.MESSAGE_DESTINATION], {})
                             for participant_sock in destination_chat_participants.values():
                                 self.log.info(
-                                    f'{websocket} - sending message to {participant_sock} in '
-                                    f'{updated_message[JsonFields.MESSAGE_DESTINATION]}')
-                                await participant_sock.send(my_json.to_json(updated_message))
+                                    f'{websocket} - sending message to {participant_sock} in {message_details.chat_name}')
+                                await participant_sock.send(my_json.to_json(json_message))
+                        else:
+                            self.log.info(f'server received an incorrect json: {data}')
                         # todo add test, when database connection is down, message is sent anyway
                         #  (that is why this must be after sending)
                 except KeyError:
