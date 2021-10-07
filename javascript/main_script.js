@@ -135,6 +135,13 @@ function connect(user_name, chat_name) {
             document.getElementById("activeUsers").innerHTML = "";
             console.log(webSocket.readyState);
             message_element.focus();
+            if (localStorage.getItem(LEAVING_LOCAL_STORAGE)) {
+                leaving_times_dict = JSON.parse(localStorage.getItem(LEAVING_LOCAL_STORAGE));
+            }
+            if (chat_name in leaving_times_dict) {
+                last_active_in_chat = leaving_times_dict[chat_name];
+            }
+            console.log("retrieved leaving times", leaving_times_dict);
         };
         webSocket.onmessage = (event) => {
             console.log(event.data);
@@ -152,6 +159,12 @@ function connect(user_name, chat_name) {
             if (e.code === 4000) {
                 window.alert(e.reason);
             }
+            let t = new Date().getTime();
+            leaving_times_dict[chat_name] = t;
+            console.log("saved leaving times", leaving_times_dict);
+            let leaving_times_json = JSON.stringify(leaving_times_dict);
+            localStorage.setItem(LEAVING_LOCAL_STORAGE, leaving_times_json);
+            last_active_in_chat = -1;
         };
         webSocket.onerror = (e) => {
             console.log('ws error');
@@ -247,13 +260,11 @@ function retrieve_messages(user_name, chat_name, ws) {
 
 
 function assign_read_unread_class(sending_time) {
-    console.log("sending time", sending_time);
-    console.log("leaving time", previous_leaving_time);
-    if (sending_time > previous_leaving_time) {
-        console.log("message messageUnread");
+    if (last_active_in_chat > 0 && sending_time > last_active_in_chat) {
+        console.log("assigning class: message messageUnread");
         return "message messageUnread";
     }
-    console.log("message");
+    console.log("assigning class: message");
     return "message";
 }
 
@@ -385,7 +396,10 @@ var active_recent_chats = [];
 var recently_used_chats = [];
 var unread_messages_ids = [];
 var chat_participants = new Set();
-var previous_leaving_time;
+var leaving_times_dict = {};
+var last_active_in_chat = -1;
+
+const LEAVING_LOCAL_STORAGE = "chatbox_stored_leaving_times";
 
 
 window.onload = function () {
@@ -396,12 +410,6 @@ window.onload = function () {
         chat_destination_element.value = localStorage.getItem("active_chat");
         retrieve_recent_chats();
     }
-}
-
-
-window.onunload = () => {
-    let leaving_time = new Date().getTime();
-    localStorage.setItem("leaving_time", leaving_time);
 }
 
 
@@ -417,8 +425,6 @@ connect_button.onclick = () => {
     chat_change(chat_destination_element.value);
     add_chat(chat);
     console.log(login, chat);
-
-    previous_leaving_time = localStorage.getItem("leaving_time");
 }
 
 
