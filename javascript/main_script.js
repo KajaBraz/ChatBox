@@ -47,9 +47,8 @@ function handle_receive(message, message_box_element, class_name) {
         new_message.id = val["id"];
         message_box_element.scrollTo(0, message_box_element.scrollHeight);
         if (class_name === "message messageUnread") {
-            new_message.id = generate_unique_id(5);
-            console.log("pushing");
             unread_messages_ids.push(new_message.id);
+            console.log("unread messages pushed:", unread_messages_ids);
         }
     }
     else if (m["message_type"] == "previous_messages") {
@@ -57,14 +56,13 @@ function handle_receive(message, message_box_element, class_name) {
             var name = single_message["sender_login"];
             var message_text = detect_hyperlink(single_message["message"]);
             var timestamp = single_message["timestamp"];
-            var status = assign_read_unread_class(timestamp);
+            var status = assign_read_unread_class(single_message["id"]);
             var new_message = append_div_messages(name, timestamp, message_text, message_box_element, status);
             new_message.id = single_message["id"];
             message_box_element.scrollTo(0, message_box_element.scrollHeight);
             if (status === "message messageUnread") {
-                new_message.id = generate_unique_id(5);
-                console.log("pushing");
                 unread_messages_ids.push(new_message.id);
+                console.log("unread messages pushed:", unread_messages_ids);
             }
         })
     }
@@ -122,6 +120,7 @@ function connect(user_name, chat_name) {
     if (webSocket != null) {
         console.log('not nnull');
         webSocket.close(1000);
+        store_last_msgs_ids();
     }
     let short_name = retrieve_display_login(user_name);
     if (not_blank(short_name) && not_blank(chat_name)) {
@@ -135,13 +134,14 @@ function connect(user_name, chat_name) {
             document.getElementById("activeUsers").innerHTML = "";
             console.log(webSocket.readyState);
             message_element.focus();
-            if (localStorage.getItem(LEAVING_LOCAL_STORAGE)) {
-                leaving_times_dict = JSON.parse(localStorage.getItem(LEAVING_LOCAL_STORAGE));
+            if (localStorage.getItem(LAST_MSG_IDS_STORAGE)) {
+                last_msg_ids_dict = JSON.parse(localStorage.getItem(LAST_MSG_IDS_STORAGE));
             }
-            if (chat_name in leaving_times_dict) {
-                last_active_in_chat = leaving_times_dict[chat_name];
+            console.log("retrieved messages ids", last_msg_ids_dict);
+
+            if (chat_name in last_msg_ids_dict) {
+                last_seen_message_id = last_msg_ids_dict[chat_name];
             }
-            console.log("retrieved leaving times", leaving_times_dict);
         };
         webSocket.onmessage = (event) => {
             console.log(event.data);
@@ -153,23 +153,23 @@ function connect(user_name, chat_name) {
             }
             handle_receive(event.data, all_messages_element, class_name);
         };
-        webSocket.onclose = (e) => {
-            console.log(`ws closed (${user_name}, ${chat_name}), code: ${e.code}, reason: ${e.reason}`);
-            console.log(webSocket.readyState);
-            if (e.code === 4000) {
-                window.alert(e.reason);
-            }
-            let t = new Date().getTime();
-            leaving_times_dict[chat_name] = t;
-            console.log("saved leaving times", leaving_times_dict);
-            let leaving_times_json = JSON.stringify(leaving_times_dict);
-            localStorage.setItem(LEAVING_LOCAL_STORAGE, leaving_times_json);
-            last_active_in_chat = -1;
-        };
         webSocket.onerror = (e) => {
             console.log('ws error');
         };
     }
+}
+
+
+function store_last_msgs_ids() {
+    if (all_messages_element.children.length) {
+        last_seen_message_id = all_messages_element.lastChild.id
+        last_msg_ids_dict[chat] = last_seen_message_id;
+        console.log("saved dict: last message ids", last_msg_ids_dict);
+        let last_msg_ids_json = JSON.stringify(last_msg_ids_dict);
+        localStorage.setItem(LAST_MSG_IDS_STORAGE, last_msg_ids_json);
+        last_seen_message_id = -1;
+    }
+    clear_message_element(all_messages_element);
 }
 
 
@@ -181,6 +181,7 @@ function remove_redundant_chat(chat_array, max_num) {
         console.log("removed", to_remove);
     }
 }
+
 
 function remove_given_chat(chat_array, chat_name) {
     let to_remove = document.getElementById(chat_name);
@@ -242,14 +243,12 @@ function update_user_list(new_users_array, active_users_element, class_name) {
 
 
 function chat_change(chat_name) {
-    clear_message_element(all_messages_element);
     chat = chat_name;
     chat_name_header.innerHTML = chat;
     chat_destination_element.value = chat;
     localStorage.setItem("active_chat", chat);
     connect(login, chat);
     localStorage.setItem("recent_chats", active_recent_chats);
-
 }
 
 
@@ -259,8 +258,8 @@ function retrieve_messages(user_name, chat_name, ws) {
 }
 
 
-function assign_read_unread_class(sending_time) {
-    if (last_active_in_chat > 0 && sending_time > last_active_in_chat) {
+function assign_read_unread_class(msg_id) {
+    if (last_seen_message_id != -1 && last_seen_message_id < msg_id) {
         console.log("assigning class: message messageUnread");
         return "message messageUnread";
     }
@@ -307,6 +306,7 @@ function read_message() {
     for (let i = 0; i < unread_messages_ids.length; i++) {
         var div = document.getElementById(unread_messages_ids[i]);
         div.className = "message";
+        console.log("qqq READING - READING - READING");
     }
     unread_messages_ids = [];
 }
@@ -396,10 +396,10 @@ var active_recent_chats = [];
 var recently_used_chats = [];
 var unread_messages_ids = [];
 var chat_participants = new Set();
-var leaving_times_dict = {};
-var last_active_in_chat = -1;
+var last_msg_ids_dict = {};
+var last_seen_message_id = -1
 
-const LEAVING_LOCAL_STORAGE = "chatbox_stored_leaving_times";
+const LAST_MSG_IDS_STORAGE = "chatbox_stored_last_msg_ids";
 
 
 window.onload = function () {
@@ -410,6 +410,11 @@ window.onload = function () {
         chat_destination_element.value = localStorage.getItem("active_chat");
         retrieve_recent_chats();
     }
+}
+
+window.onunload = function () {
+    webSocket.close(1000);
+    store_last_msgs_ids();
 }
 
 
