@@ -134,8 +134,9 @@ function connect(user_name, chat_name) {
             document.getElementById("activeUsers").innerHTML = "";
             console.log(webSocket.readyState);
             message_element.focus();
-            if (localStorage.getItem(LAST_MSG_IDS_STORAGE)) {
-                last_msg_ids_dict = JSON.parse(localStorage.getItem(LAST_MSG_IDS_STORAGE));
+            let stored_msg_id = localStorage.getItem(LAST_MSG_IDS_STORAGE);
+            if (stored_msg_id) {
+                last_msg_ids_dict = JSON.parse(stored_msg_id);
             }
             console.log("retrieved messages ids", last_msg_ids_dict);
 
@@ -246,9 +247,9 @@ function chat_change(chat_name) {
     chat = chat_name;
     chat_name_header.innerHTML = chat;
     chat_destination_element.value = chat;
-    localStorage.setItem("active_chat", chat);
+    localStorage.setItem(ACTIVE_CHAT_STORAGE, chat);
     connect(login, chat);
-    localStorage.setItem("recent_chats", active_recent_chats);
+    localStorage.setItem(RECENT_CHATS_STORAGE, active_recent_chats);
 }
 
 
@@ -269,7 +270,7 @@ function assign_read_unread_class(msg_id) {
 
 
 function retrieve_recent_chats() {
-    recently_used_chats = localStorage.getItem("recent_chats").split(",");
+    recently_used_chats = localStorage.getItem(RECENT_CHATS_STORAGE).split(",");
     console.log(recently_used_chats);
     for (let i = 0; i < recently_used_chats.length; i++) {
         add_chat(recently_used_chats[i]);
@@ -400,14 +401,19 @@ var last_msg_ids_dict = {};
 var last_seen_message_id = -1
 
 const LAST_MSG_IDS_STORAGE = "chatbox_stored_last_msg_ids";
+const ACTIVE_CHAT_STORAGE = "chatbox_stored_active_chat";
+const ACTIVE_USER_STORAGE = "chatbox_stored_active_user";
+const RECENT_CHATS_STORAGE = "chatbox_stored_recent_chats";
 
 
 window.onload = function () {
     console.log("onload");
-    if (localStorage.getItem("active_user") && localStorage.getItem("active_chat")) {
-        let short_name = retrieve_display_login(localStorage.getItem("active_user"));
+    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
+    let stored_chat_name = localStorage.getItem(ACTIVE_CHAT_STORAGE);
+    if (stored_user_name && stored_chat_name) {
+        let short_name = retrieve_display_login(stored_user_name);
         my_name_element.value = short_name;
-        chat_destination_element.value = localStorage.getItem("active_chat");
+        chat_destination_element.value = stored_chat_name;
         retrieve_recent_chats();
     }
 }
@@ -419,13 +425,14 @@ window.onunload = function () {
 
 
 connect_button.onclick = () => {
-    if (localStorage.getItem("active_user") && my_name_element.value === retrieve_display_login(localStorage.getItem("active_user"))) {
-        login = localStorage.getItem("active_user");
+    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
+    if (stored_user_name && my_name_element.value === retrieve_display_login(stored_user_name)) {
+        login = stored_user_name;
         console.log('equal logins');
     } else {
         var id = generate_unique_id(id_length);
         login = my_name_element.value + id;
-        localStorage.setItem("active_user", login);
+        localStorage.setItem(ACTIVE_USER_STORAGE, login);
     }
     chat_change(chat_destination_element.value);
     add_chat(chat);
