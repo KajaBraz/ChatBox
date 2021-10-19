@@ -286,7 +286,7 @@ function clear_message_element(message_box) {
 
 
 function not_blank(variable) {
-    if (variable == false) {
+    if (variable === false) {
         console.log("blank field");
         return false;
     }
