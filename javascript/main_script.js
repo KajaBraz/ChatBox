@@ -480,5 +480,14 @@ message_element.onpaste = function (e) {
 }
 
 
+all_messages_element.addEventListener('scroll', function (event) {
+    let elem = event.target;
+    if (elem.scrollTop === 0) {
+        console.log('SCROLLED - reached the top');
+        // retrieve_messages(login, chat, ws);
+    }
+})
+
+
 document.addEventListener('click', read_message);
 document.addEventListener('keypress', read_message);
