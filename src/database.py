@@ -75,7 +75,7 @@ class ChatBoxDatabase:
             message_table.c.date_time <= date_to).where(message_table.c.message.contains(str_to_search)))
         return entries.fetchall()
 
-    def fetch_last_messages(self, chat_name, n=100, start_from_id=-1) -> [message.Message]:
+    def fetch_last_messages(self, chat_name, n=10, start_from_id=-1) -> [message.Message]:
         message_table = self.metadata.tables['messages']
         if start_from_id == -1:
             inner_query = (select([message_table])
@@ -85,7 +85,7 @@ class ChatBoxDatabase:
                            .alias('inner_query'))
         else:
             inner_query = (select([message_table])
-                           .where(message_table.c.id <= start_from_id)
+                           .where(message_table.c.id < start_from_id)
                            .where(message_table.c.chat_name == chat_name)
                            .order_by(message_table.c.id.desc())
                            .limit(n)

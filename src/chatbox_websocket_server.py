@@ -84,14 +84,18 @@ class Server:
                     self.log.info(f'{websocket} - raw data received: {data}')
                     self.log.info(f'{websocket} - message: {message}')
 
-                    if message[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES:
-                        if helper_functions.check_previous_messages_json(data):
+                    if message[JsonFields.MESSAGE_TYPE] in [MessageTypes.PREVIOUS_MESSAGES,
+                                                            MessageTypes.MORE_PREVIOUS_MESSAGES]:
+                        self.log.info(f'{websocket} - received message type: {message[JsonFields.MESSAGE_TYPE]}')
+                        if helper_functions.check_previous_messages_json(
+                                data) or helper_functions.check_more_previous_messages_json(data):
                             self.log.info(f'{websocket} - previous messages json correct')
                             chat = message[JsonFields.MESSAGE_DESTINATION]
+                            msg_id = int(message[JsonFields.MESSAGE_VALUE])
                             participants = list(self.chat_participants.get(chat, {}).keys())
-                            past_messages = self.chatbox_database.fetch_last_messages(chat)
+                            past_messages = self.chatbox_database.fetch_last_messages(chat, start_from_id=msg_id)
 
-                            json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES,
+                            json_message = {JsonFields.MESSAGE_TYPE: message[JsonFields.MESSAGE_TYPE],
                                             JsonFields.MULTIPLE_MESSAGES: [m.__dict__ for m in past_messages]}
 
                             await websocket.send(my_json.to_json(json_message))

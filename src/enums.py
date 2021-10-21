@@ -10,6 +10,7 @@ class JsonFields(object):
 class MessageTypes(object):
     MESSAGE = "message"
     PREVIOUS_MESSAGES = "previous_messages"
+    MORE_PREVIOUS_MESSAGES = "more_previous_messages"
     USERS_UPDATE = "users_update"
 
 

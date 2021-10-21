@@ -1,5 +1,5 @@
-function append_div_messages(my_name, timestamp, message, message_box_element, class_name) {
-    var div = append_div("", message_box_element, class_name);
+function append_div_messages(append_insert_func, my_name, timestamp, message, message_box_element, class_name) {
+    var div = append_insert_func("", message_box_element, class_name);
     if (my_name === login) {
         div.style.float = "right";
     } else {
@@ -43,7 +43,7 @@ function handle_receive(message, message_box_element, class_name) {
         var message_text = detect_hyperlink(val["message"]);
         var timestamp = val["timestamp"];
         console.log('message val', message_text);
-        var new_message = append_div_messages(name, timestamp, message_text, message_box_element, class_name);
+        var new_message = append_div_messages(append_div, name, timestamp, message_text, message_box_element, class_name);
         new_message.id = val["id"];
         message_box_element.scrollTo(0, message_box_element.scrollHeight);
         if (class_name === "message messageUnread") {
@@ -57,9 +57,27 @@ function handle_receive(message, message_box_element, class_name) {
             var message_text = detect_hyperlink(single_message["message"]);
             var timestamp = single_message["timestamp"];
             var status = assign_read_unread_class(single_message["id"]);
-            var new_message = append_div_messages(name, timestamp, message_text, message_box_element, status);
+            var new_message = append_div_messages(append_div, name, timestamp, message_text, message_box_element, status);
             new_message.id = single_message["id"];
             message_box_element.scrollTo(0, message_box_element.scrollHeight);
+            if (status === "message messageUnread") {
+                unread_messages_ids.push(new_message.id);
+                console.log("unread messages pushed:", unread_messages_ids);
+            }
+        })
+    }
+    else if (m["message_type"] == "more_previous_messages") {
+        messages_array = m["multiple_messages"].reverse();
+        console.log('QQ MORE PREVIOUS');
+        console.log(messages_array);
+        messages_array.forEach(single_message => {
+            var name = single_message["sender_login"];
+            var message_text = detect_hyperlink(single_message["message"]);
+            var timestamp = single_message["timestamp"];
+            var status = assign_read_unread_class(single_message["id"]);
+            var new_message = append_div_messages(insert_div, name, timestamp, message_text, message_box_element, status);
+            new_message.id = single_message["id"];
+            // message_box_element.scrollTo(0, message_box_element.scrollHeight);
             if (status === "message messageUnread") {
                 unread_messages_ids.push(new_message.id);
                 console.log("unread messages pushed:", unread_messages_ids);
@@ -254,7 +272,15 @@ function chat_change(chat_name) {
 
 
 function retrieve_messages(user_name, chat_name, ws) {
-    send_websocket("previous_messages", "", user_name, chat_name, ws);
+    if (all_messages_element.children.length) {
+        var from_id = all_messages_element.firstChild.id;
+        var mes_type = "more_previous_messages"
+    } else {
+        var from_id = -1;
+        var mes_type = "previous_messages";
+    }
+    console.log("from id", from_id, mes_type);
+    send_websocket(mes_type, from_id, user_name, chat_name, ws);
     console.log("retrieving old messages");
 }
 
@@ -484,7 +510,7 @@ all_messages_element.addEventListener('scroll', function (event) {
     let elem = event.target;
     if (elem.scrollTop === 0) {
         console.log('SCROLLED - reached the top');
-        // retrieve_messages(login, chat, ws);
+        retrieve_messages(login, chat, webSocket);
     }
 })
 
