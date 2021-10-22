@@ -77,7 +77,7 @@ function handle_receive(message, message_box_element, class_name) {
             var status = assign_read_unread_class(single_message["id"]);
             var new_message = append_div_messages(insert_div, name, timestamp, message_text, message_box_element, status);
             new_message.id = single_message["id"];
-            // message_box_element.scrollTo(0, message_box_element.scrollHeight);
+            message_box_element.scrollTo(0, message_box_element.offsetHeight);
             if (status === "message messageUnread") {
                 unread_messages_ids.push(new_message.id);
                 console.log("unread messages pushed:", unread_messages_ids);
