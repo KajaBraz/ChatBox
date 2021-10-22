@@ -95,6 +95,7 @@ def test_check_message_json():
 
 def test_check_previous_messages_json():
     message1 = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES,
+                JsonFields.MESSAGE_VALUE: -1,
                 JsonFields.MESSAGE_SENDER: 'user name',
                 JsonFields.MESSAGE_DESTINATION: 'chat name'}
     message2 = {JsonFields.MESSAGE_SENDER: 'user name',
@@ -127,7 +128,17 @@ def test_check_previous_messages_json():
     message12 = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES,
                  JsonFields.MESSAGE_SENDER: 'user name',
                  'MESSAGE_DESTINATION': 'chat name'}
-
+    message13 = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES,
+                 JsonFields.MESSAGE_SENDER: 'user name',
+                 JsonFields.MESSAGE_DESTINATION: 'chat name'}
+    message14 = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES,
+                 JsonFields.MESSAGE_VALUE: '10',
+                 JsonFields.MESSAGE_SENDER: 'user name',
+                 JsonFields.MESSAGE_DESTINATION: 'chat name'}
+    message15 = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES,
+                 JsonFields.MESSAGE_VALUE: '-1',
+                 JsonFields.MESSAGE_SENDER: 'user name',
+                 JsonFields.MESSAGE_DESTINATION: 'chat name'}
     assert check_previous_messages_json(to_json(message1))
     assert not check_previous_messages_json(to_json(message2))
     assert not check_previous_messages_json(to_json(message3))
@@ -140,3 +151,6 @@ def test_check_previous_messages_json():
     assert not check_previous_messages_json(to_json(message10))
     assert not check_previous_messages_json(to_json(message11))
     assert not check_previous_messages_json(to_json(message12))
+    assert not check_previous_messages_json(to_json(message13))
+    assert not check_previous_messages_json(to_json(message14))
+    assert not check_previous_messages_json(to_json(message15))

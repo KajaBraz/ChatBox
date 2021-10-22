@@ -21,6 +21,7 @@ class VirtualClient:
         # self.ws = websockets.connect(url)
 
     async def send(self, message):
+        # TODO hardcoded data, even if the function is used also for previous messages type
         json_mess = {JsonFields.MESSAGE_TYPE: MessageTypes.MESSAGE,
                      JsonFields.MESSAGE_VALUE: message,
                      JsonFields.MESSAGE_DESTINATION: self.chat_name,
@@ -52,8 +53,8 @@ class VirtualClient:
                 self.received_jsons.append(msg)
 
     async def request_last_messages(self):
-        json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES, JsonFields.MESSAGE_SENDER: 'sender1',
-                        JsonFields.MESSAGE_DESTINATION: 'room1'}
+        json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES, JsonFields.MESSAGE_VALUE: -1,
+                        JsonFields.MESSAGE_SENDER: 'sender1', JsonFields.MESSAGE_DESTINATION: 'room1'}
         await self.ws.send(to_json(json_message))
 
     async def disconnect(self):

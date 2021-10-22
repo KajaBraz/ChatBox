@@ -16,5 +16,5 @@ class MockedDatabase:
         if method == 'fetch_last_messages':
             self.fetched_messages = return_value
 
-    def fetch_last_messages(self, _chat_name):
+    def fetch_last_messages(self, _chat_name, start_from_id=-1):
         return self.fetched_messages
