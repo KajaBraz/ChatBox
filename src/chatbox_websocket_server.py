@@ -91,7 +91,7 @@ class Server:
                                 data) or helper_functions.check_more_previous_messages_json(data):
                             self.log.info(f'{websocket} - previous messages json correct')
                             chat = message[JsonFields.MESSAGE_DESTINATION]
-                            msg_id = int(message[JsonFields.MESSAGE_VALUE])
+                            msg_id = message[JsonFields.MESSAGE_VALUE]
                             participants = list(self.chat_participants.get(chat, {}).keys())
                             past_messages = self.chatbox_database.fetch_last_messages(chat, start_from_id=msg_id)
 

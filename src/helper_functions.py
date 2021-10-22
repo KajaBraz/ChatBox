@@ -48,7 +48,7 @@ def check_previous_messages_json(json_message: str) -> bool:
             JsonFields.MESSAGE_VALUE in dict_message and
             JsonFields.MESSAGE_SENDER in dict_message):
         if (dict_message[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES and
-                dict_message[JsonFields.MESSAGE_VALUE] == '-1' and
+                dict_message[JsonFields.MESSAGE_VALUE] == -1 and
                 dict_message[JsonFields.MESSAGE_DESTINATION] != '' and
                 dict_message[JsonFields.MESSAGE_SENDER] != ''):
             return True
@@ -63,7 +63,7 @@ def check_more_previous_messages_json(json_message: str) -> bool:
             JsonFields.MESSAGE_SENDER in dict_message):
         if (dict_message[JsonFields.MESSAGE_TYPE] == MessageTypes.MORE_PREVIOUS_MESSAGES and
                 dict_message[JsonFields.MESSAGE_VALUE] != '' and
-                dict_message[JsonFields.MESSAGE_VALUE] != '-1' and
+                dict_message[JsonFields.MESSAGE_VALUE] != -1 and
                 dict_message[JsonFields.MESSAGE_DESTINATION] != '' and
                 dict_message[JsonFields.MESSAGE_SENDER] != ''):
             return True
