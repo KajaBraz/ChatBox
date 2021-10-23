@@ -35,6 +35,8 @@ def state():
     state.chat_elem.send_keys(state.chat_room)
     state.connect_button_elem.click()
     time.sleep(0.5)
+    state.login_elem.clear()
+    state.chat_elem.clear()
 
     yield state
     screenshot_path = os.path.abspath(os.path.join(os.pardir, 'test_results', 'selenium_screenshots',
@@ -69,7 +71,7 @@ def test_sending_and_displaying_messages(state):
 
 
 def test_recent_chats_display(state):
-    state.chat_elem.clear()
+    # state.chat_elem.clear()
     chat_rooms = [helper_functions.generate_random_string(10) for i in range(4)]
     for chat_room in chat_rooms:
         state.chat_elem.send_keys(chat_room)
@@ -77,7 +79,7 @@ def test_recent_chats_display(state):
         time.sleep(1)
         state.chat_elem.clear()
     resulting_chat_names = [elem.text for elem in state.driver.find_elements_by_class_name('availableChat')]
-    assert chat_rooms[::-1] + [state.chat_room]== resulting_chat_names
+    assert chat_rooms[::-1] + [state.chat_room] == resulting_chat_names
 
 
 def test_active_users_display(state):
@@ -159,3 +161,30 @@ def test_messages_position(state):
     assert all(['right' in messages_style_user2[i] for i in range(len(messages_style_user2)) if i % 2 == 1])
     assert all(['left' in messages_style_user1[i] for i in range(len(messages_style_user1)) if i % 2 == 1])
     assert all(['left' in messages_style_user2[i] for i in range(len(messages_style_user2)) if i % 2 == 0])
+
+
+def test_previous_messages(state):
+    # works for displaying 10 messages on the client's connection
+
+    # USER 1 SENDS MESSAGES
+    messages = [helper_functions.generate_random_string(5) for i in range(20)]
+    new_msg_box = state.driver.find_element_by_id('newMessage')
+    send_button = state.driver.find_element_by_id('sendMessageButton')
+    for message in messages:
+        new_msg_box.send_keys(message)
+        send_button.click()
+        new_msg_box.clear()
+
+    # USER 2 CONNECTS
+    state.login_elem.send_keys(helper_functions.generate_random_string(5))
+    state.chat_elem.send_keys(state.chat_room)
+    state.connect_button_elem.click()
+
+    received_messages_box = state.driver.find_element_by_id('receivedMessages')
+    previous_messages_loaded_on_connection = received_messages_box.find_elements_by_class_name('messageText')
+    assert messages[10:] == [m.text for m in previous_messages_loaded_on_connection]
+
+    state.driver.execute_script("receivedMessages.scrollTo(0, -receivedMessages.offsetHeight)")
+    time.sleep(3)
+    more_previous_messages_loaded_after_scoll = received_messages_box.find_elements_by_class_name('messageText')
+    assert messages == [m.text for m in more_previous_messages_loaded_after_scoll]
