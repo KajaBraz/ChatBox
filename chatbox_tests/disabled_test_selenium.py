@@ -25,8 +25,16 @@ def state():
 
     state.driver.get(f'file:///{state.absolute_path}')
 
+    # USER'S CONNECTION
     state.user_name = helper_functions.generate_random_string(10)
     state.chat_room = helper_functions.generate_random_string(10)
+    state.login_elem = state.driver.find_element_by_id('login')
+    state.chat_elem = state.driver.find_element_by_id('findChat')
+    state.connect_button_elem = state.driver.find_element_by_id('connectButton')
+    state.login_elem.send_keys(state.user_name)
+    state.chat_elem.send_keys(state.chat_room)
+    state.connect_button_elem.click()
+    time.sleep(0.5)
 
     yield state
     screenshot_path = os.path.abspath(os.path.join(os.pardir, 'test_results', 'selenium_screenshots',
@@ -36,31 +44,15 @@ def state():
 
 
 def test_first_connection(state):
-    login_elem = state.driver.find_element_by_id('login')
-    chat_elem = state.driver.find_element_by_id('findChat')
-    connect_button_elem = state.driver.find_element_by_id('connectButton')
     header_elem = state.driver.find_element_by_id('chatNameHeader')
     chat_list_elem = state.driver.find_element_by_id('recentlyUsedChats')
     user_list_elem = state.driver.find_element_by_id('activeUsers')
-    login_elem.send_keys(state.user_name)
-    chat_elem.send_keys(state.chat_room)
-    connect_button_elem.click()
-    time.sleep(1)
     assert header_elem.text == state.chat_room
     assert chat_list_elem.find_element_by_id(state.chat_room).text == state.chat_room
     assert user_list_elem.find_element_by_class_name('chatUser').text == state.user_name
 
 
 def test_sending_and_displaying_messages(state):
-    # CONNECTION
-    login_elem = state.driver.find_element_by_id('login')
-    chat_elem = state.driver.find_element_by_id('findChat')
-    connect_button_elem = state.driver.find_element_by_id('connectButton')
-    login_elem.send_keys(state.user_name)
-    chat_elem.send_keys(state.chat_room)
-    connect_button_elem.click()
-    time.sleep(0.5)
-
     # SENDING MESSAGES
     messages = [helper_functions.generate_random_string(15) for i in range(5)]
     for message in messages:
@@ -77,22 +69,19 @@ def test_sending_and_displaying_messages(state):
 
 
 def test_recent_chats_display(state):
-    chat_rooms = [state.chat_room] + [helper_functions.generate_random_string(10) for i in range(4)]
-    login_elem = state.driver.find_element_by_id('login')
-    chat_elem = state.driver.find_element_by_id('findChat')
-    connect_button_elem = state.driver.find_element_by_id('connectButton')
-    login_elem.send_keys(state.user_name)
+    state.chat_elem.clear()
+    chat_rooms = [helper_functions.generate_random_string(10) for i in range(4)]
     for chat_room in chat_rooms:
-        chat_elem.send_keys(chat_room)
-        connect_button_elem.click()
+        state.chat_elem.send_keys(chat_room)
+        state.connect_button_elem.click()
         time.sleep(1)
-        chat_elem.clear()
+        state.chat_elem.clear()
     resulting_chat_names = [elem.text for elem in state.driver.find_elements_by_class_name('availableChat')]
-    assert chat_rooms[::-1] == resulting_chat_names
+    assert chat_rooms[::-1] + [state.chat_room]== resulting_chat_names
 
 
 def test_active_users_display(state):
-    users = [state.user_name] + [helper_functions.generate_random_string(10) for i in range(4)]
+    users = [helper_functions.generate_random_string(10) for i in range(4)]
     for user in users:
         # todo fix the below version to open tabs instead of new windows
         # state.driver.execute_script("window.open('');")
@@ -113,19 +102,10 @@ def test_active_users_display(state):
 
     time.sleep(1)
     resulting_active_users = set([user.text for user in new_driver.find_elements_by_class_name('chatUser')])
-    assert set(users) == resulting_active_users
+    assert set(users) | {state.user_name} == resulting_active_users
 
 
 def test_messages_position(state):
-    # CONNECTION USER 1
-    login_elem = state.driver.find_element_by_id('login')
-    chat_elem = state.driver.find_element_by_id('findChat')
-    connect_button_elem = state.driver.find_element_by_id('connectButton')
-    login_elem.send_keys(state.user_name)
-    chat_elem.send_keys(state.chat_room)
-    connect_button_elem.click()
-    time.sleep(0.5)
-
     # CONNECTION USER 2
     new_driver = webdriver.Firefox(options=state.options)
     new_driver.get(f'file:///{state.absolute_path}')
