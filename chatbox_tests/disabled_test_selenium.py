@@ -1,29 +1,39 @@
 import datetime
 import os
-import time
 
 import pytest
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.support.wait import WebDriverWait
 
 from src import helper_functions
 
 
 class TestState:
-    pass
+    def __init__(self):
+        self.driver: webdriver.Firefox = None
+        self.chat_room = ''
+        self.user_name = ''
+        self.chat_elem = None
+        self.connect_button_elem = None
+        self.login_elem = None
+
+
+def create_driver():
+    options = Options()
+    options.add_argument('--headless')  # don't use when you want to actually open and see the browser window
+    driver = webdriver.Firefox(options=options)
+    relative_path = os.path.join(os.pardir, 'javascript', 'index.html')
+    absolute_path = os.path.abspath(relative_path)
+    driver.get(f'file:///{absolute_path}')
+    driver.implicitly_wait(10)
+    return driver
 
 
 @pytest.fixture
 def state():
     state = TestState()
-    state.options = Options()
-    state.options.add_argument('--headless')  # don't use when you want to actually open and see the browser window
-    state.driver = webdriver.Firefox(options=state.options)
-
-    relative_path = os.path.join(os.pardir, 'javascript', 'index.html')
-    state.absolute_path = os.path.abspath(relative_path)
-
-    state.driver.get(f'file:///{state.absolute_path}')
+    state.driver = create_driver()
 
     # USER'S CONNECTION
     state.user_name = helper_functions.generate_random_string(10)
@@ -34,7 +44,6 @@ def state():
     state.login_elem.send_keys(state.user_name)
     state.chat_elem.send_keys(state.chat_room)
     state.connect_button_elem.click()
-    time.sleep(0.5)
     state.login_elem.clear()
     state.chat_elem.clear()
 
@@ -45,7 +54,7 @@ def state():
     state.driver.quit()
 
 
-def test_first_connection(state):
+def test_first_connection(state: TestState):
     header_elem = state.driver.find_element_by_id('chatNameHeader')
     chat_list_elem = state.driver.find_element_by_id('recentlyUsedChats')
     user_list_elem = state.driver.find_element_by_id('activeUsers')
@@ -54,7 +63,7 @@ def test_first_connection(state):
     assert user_list_elem.find_element_by_class_name('chatUser').text == state.user_name
 
 
-def test_sending_and_displaying_messages(state):
+def test_sending_and_displaying_messages(state: TestState):
     # SENDING MESSAGES
     messages = [helper_functions.generate_random_string(15) for i in range(5)]
     for message in messages:
@@ -62,37 +71,31 @@ def test_sending_and_displaying_messages(state):
         send_button = state.driver.find_element_by_id('sendMessageButton')
         new_message_box.send_keys(message)
         send_button.click()
-        time.sleep(0.5)
-
     # CHECKING RECEIVED MESSAGES
     received_messages_box = state.driver.find_element_by_id('receivedMessages')
     received_messages = [m.text for m in received_messages_box.find_elements_by_class_name('messageText')]
     assert messages == received_messages
 
 
-def test_recent_chats_display(state):
-    # state.chat_elem.clear()
+def test_recent_chats_display(state: TestState):
     chat_rooms = [helper_functions.generate_random_string(10) for i in range(4)]
     for chat_room in chat_rooms:
         state.chat_elem.send_keys(chat_room)
         state.connect_button_elem.click()
-        time.sleep(1)
         state.chat_elem.clear()
     resulting_chat_names = [elem.text for elem in state.driver.find_elements_by_class_name('availableChat')]
     assert chat_rooms[::-1] + [state.chat_room] == resulting_chat_names
 
 
-def test_active_users_display(state):
-    users = [helper_functions.generate_random_string(10) for i in range(4)]
-    for user in users:
+def test_active_users_display(state: TestState):
+    def make_drivers(user):
         # todo fix the below version to open tabs instead of new windows
         # state.driver.execute_script("window.open('');")
         # state.driver.execute_script(f"window.open('file:///{state.absolute_path}', '_blank');")
         # state.driver.switch_to.window(state.driver.window_handles[-1])
         # state.driver.get(f'file:///{state.absolute_path}')
 
-        new_driver = webdriver.Firefox(options=state.options)
-        new_driver.get(f'file:///{state.absolute_path}')
+        new_driver = create_driver()
 
         login_elem = new_driver.find_element_by_id('login')
         chat_elem = new_driver.find_element_by_id('findChat')
@@ -100,17 +103,18 @@ def test_active_users_display(state):
         login_elem.send_keys(user)
         chat_elem.send_keys(state.chat_room)
         connect_button_elem.click()
-        time.sleep(1)
+        return new_driver
 
-    time.sleep(1)
-    resulting_active_users = set([user.text for user in new_driver.find_elements_by_class_name('chatUser')])
+    users = [helper_functions.generate_random_string(10) for i in range(4)]
+    drivers = [make_drivers(u) for u in users]
+
+    resulting_active_users = set([user.text for user in drivers[-1].find_elements_by_class_name('chatUser')])
     assert set(users) | {state.user_name} == resulting_active_users
 
 
-def test_messages_position(state):
+def test_messages_position(state: TestState):
     # CONNECTION USER 2
-    new_driver = webdriver.Firefox(options=state.options)
-    new_driver.get(f'file:///{state.absolute_path}')
+    new_driver = create_driver()
     user2_login = helper_functions.generate_random_string(10)
     login_elem = new_driver.find_element_by_id('login')
     chat_elem = new_driver.find_element_by_id('findChat')
@@ -118,7 +122,6 @@ def test_messages_position(state):
     login_elem.send_keys(user2_login)
     chat_elem.send_keys(state.chat_room)
     connect_button_elem.click()
-    time.sleep(0.5)
 
     # PREPARING MESSAGES USER1
     messages_user1 = [helper_functions.generate_random_string(15) for i in range(2)]
@@ -133,19 +136,15 @@ def test_messages_position(state):
     # SENDING MESSAGES
     new_message_box_user1.send_keys(messages_user1[0])
     send_button_user1.click()
-    time.sleep(0.5)
 
     new_message_box_user2.send_keys(messages_user2[0])
     send_button_user2.click()
-    time.sleep(0.5)
 
     new_message_box_user1.send_keys(messages_user1[1])
     send_button_user1.click()
-    time.sleep(0.5)
 
     new_message_box_user2.send_keys(messages_user2[1])
     send_button_user2.click()
-    time.sleep(0.5)
 
     # GATHERING OF THE MESSAGES
     new_message_box_user1.click()
@@ -163,8 +162,10 @@ def test_messages_position(state):
     assert all(['left' in messages_style_user2[i] for i in range(len(messages_style_user2)) if i % 2 == 0])
 
 
-def test_previous_messages(state):
+def test_previous_messages(state: TestState):
     # works for displaying 10 messages on the client's connection
+
+    received_messages_box = state.driver.find_element_by_id('receivedMessages')
 
     # USER 1 SENDS MESSAGES
     messages = [helper_functions.generate_random_string(5) for i in range(20)]
@@ -175,16 +176,29 @@ def test_previous_messages(state):
         send_button.click()
         new_msg_box.clear()
 
+    wait = WebDriverWait(state.driver, 10)
+    wait.until(
+        lambda d: [m.text for m in received_messages_box.find_elements_by_class_name('messageText')] == messages,
+        "Message not found"
+    )
+
     # USER 2 CONNECTS
     state.login_elem.send_keys(helper_functions.generate_random_string(5))
     state.chat_elem.send_keys(state.chat_room)
     state.connect_button_elem.click()
+    wait.until(
+        lambda d: messages[10:] == [m.text for m in received_messages_box.find_elements_by_class_name('messageText')],
+        "Message not found"
+    )
 
-    received_messages_box = state.driver.find_element_by_id('receivedMessages')
     previous_messages_loaded_on_connection = received_messages_box.find_elements_by_class_name('messageText')
     assert messages[10:] == [m.text for m in previous_messages_loaded_on_connection]
 
     state.driver.execute_script("receivedMessages.scrollTo(0, -receivedMessages.offsetHeight)")
-    time.sleep(3)
+    wait.until(
+        lambda d: messages == [m.text for m in received_messages_box.find_elements_by_class_name('messageText')],
+        "Message not found"
+    )
     more_previous_messages_loaded_after_scoll = received_messages_box.find_elements_by_class_name('messageText')
+
     assert messages == [m.text for m in more_previous_messages_loaded_after_scoll]
