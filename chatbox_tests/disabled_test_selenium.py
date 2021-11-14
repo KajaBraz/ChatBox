@@ -111,6 +111,10 @@ def test_active_users_display(state: TestState):
     resulting_active_users = set([user.text for user in drivers[-1].find_elements_by_class_name('chatUser')])
     assert set(users) | {state.user_name} == resulting_active_users
 
+    # todo, temporary to remove, use separate windows instead, not drivers
+    for d in drivers:
+        d.quit()
+
 
 def test_messages_position(state: TestState):
     # CONNECTION USER 2
@@ -161,6 +165,9 @@ def test_messages_position(state: TestState):
     assert all(['left' in messages_style_user1[i] for i in range(len(messages_style_user1)) if i % 2 == 1])
     assert all(['left' in messages_style_user2[i] for i in range(len(messages_style_user2)) if i % 2 == 0])
 
+    # todo temporary, to remove, make seperate windows not drivers
+    new_driver.quit()
+
 
 def test_previous_messages(state: TestState):
     # works for displaying 10 messages on the client's connection
@@ -179,7 +186,7 @@ def test_previous_messages(state: TestState):
     wait = WebDriverWait(state.driver, 10)
     wait.until(
         lambda d: [m.text for m in received_messages_box.find_elements_by_class_name('messageText')] == messages,
-        "Message not found"
+        f"Message not found - wait 1, {[m.text for m in received_messages_box.find_elements_by_class_name('messageText')]}"
     )
 
     # USER 2 CONNECTS
@@ -188,7 +195,7 @@ def test_previous_messages(state: TestState):
     state.connect_button_elem.click()
     wait.until(
         lambda d: messages[10:] == [m.text for m in received_messages_box.find_elements_by_class_name('messageText')],
-        "Message not found"
+        f"Message not found - wait 2, {[m.text for m in received_messages_box.find_elements_by_class_name('messageText')]}"
     )
 
     previous_messages_loaded_on_connection = received_messages_box.find_elements_by_class_name('messageText')
@@ -197,7 +204,7 @@ def test_previous_messages(state: TestState):
     state.driver.execute_script("receivedMessages.scrollTo(0, -receivedMessages.offsetHeight)")
     wait.until(
         lambda d: messages == [m.text for m in received_messages_box.find_elements_by_class_name('messageText')],
-        "Message not found"
+        f"Message not found, wait 3 {[m.text for m in received_messages_box.find_elements_by_class_name('messageText')]}"
     )
     more_previous_messages_loaded_after_scoll = received_messages_box.find_elements_by_class_name('messageText')
 

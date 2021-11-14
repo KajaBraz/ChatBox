@@ -305,9 +305,14 @@ function retrieve_recent_chats() {
 
 
 function clear_message_element(message_box) {
+    all_messages_element.removeEventListener('scroll', activate_scroll_event);
     while (message_box.firstChild) {
         message_box.removeChild(message_box.firstChild);
     }
+    setTimeout(() => {
+        all_messages_element.addEventListener('scroll', activate_scroll_event);
+        activate_scroll_event();
+    }, 100);
 }
 
 
@@ -405,6 +410,18 @@ function prepare_image_message(img_as_file, my_name) {
 }
 
 
+function activate_scroll_event(scroll_event = null) {
+    if (scroll_event) {
+        var elem = scroll_event.target;
+    } else {
+        var elem = all_messages_element;
+    }
+    if (elem.scrollTop === 0) {
+        retrieve_messages(login, chat, webSocket);
+    }
+}
+
+
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
 var all_messages_element = document.getElementById("receivedMessages");
@@ -424,7 +441,8 @@ var recently_used_chats = [];
 var unread_messages_ids = [];
 var chat_participants = new Set();
 var last_msg_ids_dict = {};
-var last_seen_message_id = -1
+var last_seen_message_id = -1;
+
 
 const LAST_MSG_IDS_STORAGE = "chatbox_stored_last_msg_ids";
 const ACTIVE_CHAT_STORAGE = "chatbox_stored_active_chat";
@@ -506,14 +524,6 @@ message_element.onpaste = function (e) {
 }
 
 
-all_messages_element.addEventListener('scroll', function (event) {
-    let elem = event.target;
-    if (elem.scrollTop === 0) {
-        console.log('SCROLLED - reached the top');
-        retrieve_messages(login, chat, webSocket);
-    }
-})
-
-
+all_messages_element.addEventListener('scroll', activate_scroll_event);
 document.addEventListener('click', read_message);
 document.addEventListener('keypress', read_message);

@@ -94,13 +94,15 @@ class Server:
                             msg_id = message[JsonFields.MESSAGE_VALUE]
                             participants = list(self.chat_participants.get(chat, {}).keys())
                             past_messages = self.chatbox_database.fetch_last_messages(chat, start_from_id=msg_id)
-
+                            self.log.info(f'PAST OR MORE PAST MESSAGES: {past_messages}')
                             json_message = {JsonFields.MESSAGE_TYPE: message[JsonFields.MESSAGE_TYPE],
                                             JsonFields.MULTIPLE_MESSAGES: [m.__dict__ for m in past_messages]}
 
                             await websocket.send(my_json.to_json(json_message))
 
                             self.log.info(f'{websocket} - past messages sent')
+
+                            # todo, probably to remove, users are notified before, just after joining
                             await self.send_new_user_notification(participants, [login], chat)
 
                     elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
