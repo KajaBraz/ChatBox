@@ -527,3 +527,4 @@ message_element.onpaste = function (e) {
 all_messages_element.addEventListener('scroll', activate_scroll_event);
 document.addEventListener('click', read_message);
 document.addEventListener('keypress', read_message);
+new lc_emoji_picker('textarea#newMessage');
