@@ -50,6 +50,7 @@ function handle_receive(message, message_box_element, class_name) {
             unread_messages_ids.push(new_message.id);
             console.log("unread messages pushed:", unread_messages_ids);
         }
+        adjust_displayed_messages();
     }
     else if (m["message_type"] == "previous_messages") {
         m["multiple_messages"].forEach(single_message => {
@@ -422,6 +423,15 @@ function activate_scroll_event(scroll_event = null) {
 }
 
 
+function adjust_displayed_messages() {
+    console.log('removing or not', all_messages_element.children.length);
+    while (all_messages_element.children.length >= MAX_MSGS_ON_PAGE_NUM) {
+        console.log(all_messages_element.childNodes[0], 'removing')
+        all_messages_element.removeChild(all_messages_element.childNodes[0]);
+    }
+}
+
+
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
 var all_messages_element = document.getElementById("receivedMessages");
@@ -448,6 +458,7 @@ const LAST_MSG_IDS_STORAGE = "chatbox_stored_last_msg_ids";
 const ACTIVE_CHAT_STORAGE = "chatbox_stored_active_chat";
 const ACTIVE_USER_STORAGE = "chatbox_stored_active_user";
 const RECENT_CHATS_STORAGE = "chatbox_stored_recent_chats";
+const MAX_MSGS_ON_PAGE_NUM = 20;
 
 
 window.onload = function () {
