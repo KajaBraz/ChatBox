@@ -64,11 +64,12 @@ def test_first_connection(state: TestState):
 
 
 def test_sending_and_displaying_messages(state: TestState):
+    new_message_box = state.driver.find_element_by_id('newMessage')
+    send_button = state.driver.find_element_by_id('sendMessageButton')
+
     # SENDING MESSAGES
     messages = [helper_functions.generate_random_string(15) for i in range(5)]
     for message in messages:
-        new_message_box = state.driver.find_element_by_id('newMessage')
-        send_button = state.driver.find_element_by_id('sendMessageButton')
         new_message_box.send_keys(message)
         send_button.click()
     # CHECKING RECEIVED MESSAGES
@@ -209,3 +210,30 @@ def test_previous_messages(state: TestState):
     more_previous_messages_loaded_after_scoll = received_messages_box.find_elements_by_class_name('messageText')
 
     assert messages == [m.text for m in more_previous_messages_loaded_after_scoll]
+
+
+def test_adjust_number_of_displayed_messages(state: TestState):
+    # works for max num of messgaes in messages box set to 20
+    max_msgs_on_page_num = 20
+
+    received_messages_box = state.driver.find_element_by_id('receivedMessages')
+    new_message_box = state.driver.find_element_by_id('newMessage')
+    send_button = state.driver.find_element_by_id('sendMessageButton')
+
+    messages = [helper_functions.generate_random_string(5) for x in range(25)]
+    for message in messages[:max_msgs_on_page_num]:
+        new_message_box.send_keys(message)
+        send_button.click()
+
+    displayed_messages = received_messages_box.find_elements_by_class_name('messageText')
+    assert len(displayed_messages) == max_msgs_on_page_num
+    assert messages[:max_msgs_on_page_num] == [m.text for m in displayed_messages]
+
+    i_start = 1
+    for message in messages[max_msgs_on_page_num:]:
+        new_message_box.send_keys(message)
+        send_button.click()
+        displayed_messages = received_messages_box.find_elements_by_class_name('messageText')
+        assert len(displayed_messages) == max_msgs_on_page_num
+        assert messages[i_start:i_start + max_msgs_on_page_num] == [m.text for m in displayed_messages]
+        i_start += 1
