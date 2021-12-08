@@ -365,21 +365,6 @@ function detect_hyperlink(text) {
 }
 
 
-// function append_div_messages(my_name, timestamp, message, message_box_element, class_name) {
-//     var div = append_div("", message_box_element, class_name);
-//     if (my_name === login) {
-//         div.style.float = "right";
-//     }
-//     let message_header_div = append_div("", div, "messageHeader");
-//     let name = retrieve_display_login(my_name);
-//     append_div(name, message_header_div, "divAuthor");
-//     let date = new Date(timestamp);
-//     new_div = append_div(date.toLocaleDateString() + " - " + date.toLocaleTimeString(), message_header_div, "divTimestamp");
-//     div.innerHTML += message;
-//     return div;
-// }
-
-
 function prepare_image_message(img_as_file, my_name) {
     var reader = new FileReader();
     reader.onload = function (event) {
@@ -425,7 +410,7 @@ function activate_scroll_event(scroll_event = null) {
 
 function adjust_displayed_messages() {
     console.log('removing or not', all_messages_element.children.length);
-    while (all_messages_element.children.length >= MAX_MSGS_ON_PAGE_NUM) {
+    while (all_messages_element.children.length > MAX_MSGS_ON_PAGE_NUM) {
         console.log(all_messages_element.childNodes[0], 'removing')
         all_messages_element.removeChild(all_messages_element.childNodes[0]);
     }
