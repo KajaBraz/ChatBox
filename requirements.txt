@@ -4,4 +4,3 @@ SQLAlchemy==1.3.23
 pandas==2.0.0
 websockets==9.1
 selenium==3.141.0
-dataclasses==0.8
