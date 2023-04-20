@@ -5,7 +5,7 @@ import pytest
 from chatbox_tests.integration import mocked_database
 from chatbox_tests.integration.virtual_websocket_client import VirtualClient
 from src import chatbox_websocket_server, helper_functions, database, message
-from src.enums import JsonFields
+from src.enums import JsonFields, MessageTypes
 
 
 class TestState:
@@ -195,3 +195,32 @@ async def test_sending_previous_messages(state):
 
     # THEN
     assert state.client.received_messages == [m1.message, m2.message, m3.message]
+
+
+@pytest.mark.asyncio
+async def test_scroll_up_to_see_more_messages_no_active_users_list_update(state):
+    # GIVEN
+    database_mock = mocked_database.MockedDatabase()
+    database_mock.set_return_value('fetch_last_messages',
+                                   [message.Message(i, 'sender', 'some message', 'room1', 123) for i in range(3)])
+    state.server_obj.chatbox_database = database_mock
+
+    await state.client.connect()
+    await state.client2.connect()
+    asyncio.create_task(state.client.start_receiving())
+    asyncio.create_task(state.client2.start_receiving())
+
+    # WHEN
+    await state.client.scroll_and_request_more_messages()
+    await asyncio.sleep(10)
+
+    # THEN
+    received_jsons = state.client.received_jsons
+    received_jsons2 = state.client2.received_jsons
+
+    assert len(received_jsons) == 3 and \
+           JsonFields.MESSAGE_TYPE in received_jsons[2] and \
+           [rj[JsonFields.MESSAGE_TYPE] == [MessageTypes.USERS_UPDATE, MessageTypes.USERS_UPDATE,
+                                            MessageTypes.MORE_PREVIOUS_MESSAGES] for rj in received_jsons] and \
+           len(received_jsons2) == 1 and \
+           received_jsons2[0][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
