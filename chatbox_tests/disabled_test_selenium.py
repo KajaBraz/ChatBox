@@ -96,24 +96,34 @@ def test_active_users_display(state: TestState):
         # state.driver.switch_to.window(state.driver.window_handles[-1])
         # state.driver.get(f'file:///{state.absolute_path}')
 
-        new_driver = create_driver()
+        new_dr = create_driver()
 
-        login_elem = new_driver.find_element_by_id('login')
-        chat_elem = new_driver.find_element_by_id('findChat')
-        connect_button_elem = new_driver.find_element_by_id('connectButton')
+        login_elem = new_dr.find_element_by_id('login')
+        chat_elem = new_dr.find_element_by_id('findChat')
+        connect_button_elem = new_dr.find_element_by_id('connectButton')
         login_elem.send_keys(user)
         chat_elem.send_keys(state.chat_room)
         connect_button_elem.click()
-        return new_driver
+        return new_dr
 
-    users = [helper_functions.generate_random_string(10) for i in range(4)]
-    drivers = [make_drivers(u) for u in users]
+    activer_users = state.driver.find_elements_by_class_name('chatUser')
+    assert {state.user_name} == {active_user.text for active_user in activer_users}
 
-    resulting_active_users = set([user.text for user in drivers[-1].find_elements_by_class_name('chatUser')])
-    assert set(users) | {state.user_name} == resulting_active_users
+    new_users = {helper_functions.generate_random_string(10) for _ in range(4)}
+    new_drivers = set()
+    temp_users = {state.user_name}
+    temp_drivers = {state.driver}
+
+    for new_user in new_users:
+        new_driver = make_drivers(new_user)
+        new_drivers.add(new_driver)
+        temp_users.add(new_user)
+        temp_drivers.add(new_driver)
+        temp_active_users = [{u.text for u in dr.find_elements_by_class_name('chatUser')} for dr in temp_drivers]
+        assert all(temp_users == displayed for displayed in temp_active_users)
 
     # todo, temporary to remove, use separate windows instead, not drivers
-    for d in drivers:
+    for d in new_drivers:
         d.quit()
 
 

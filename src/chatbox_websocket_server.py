@@ -29,12 +29,18 @@ class Server:
 
     async def join_chat(self, user_name, chat_name, user_websocket):
         self.log.info(f'{user_websocket} - joining')
+
+        await self.send_new_user_notification([user_name], list(self.chat_participants.get(chat_name, [])), chat_name)
+        self.log.info(f'Group members notified about new users')
+
         if chat_name in self.chat_participants:
             self.chat_participants[chat_name][user_name] = user_websocket
-            await self.send_new_user_notification([user_name], list(self.chat_participants.get(chat_name, [])),
-                                                  chat_name)
         else:
             self.chat_participants[chat_name] = {user_name: user_websocket}
+
+        await self.send_new_user_notification(list(self.chat_participants.get(chat_name, [])), [user_name], chat_name)
+        self.log.info(f'New user notified about group members')
+
         self.log.info(
             f'number of participants in chat {chat_name} - {len(self.chat_participants[chat_name])}:'
             f'{self.chat_participants[chat_name]}')
@@ -92,7 +98,6 @@ class Server:
                             self.log.info(f'{websocket} - previous messages json correct')
                             chat = message[JsonFields.MESSAGE_DESTINATION]
                             msg_id = message[JsonFields.MESSAGE_VALUE]
-                            participants = list(self.chat_participants.get(chat, {}).keys())
                             past_messages = self.chatbox_database.fetch_last_messages(chat, start_from_id=msg_id)
                             self.log.info(f'PAST OR MORE PAST MESSAGES: {past_messages}')
                             json_message = {JsonFields.MESSAGE_TYPE: message[JsonFields.MESSAGE_TYPE],
@@ -101,9 +106,6 @@ class Server:
                             await websocket.send(my_json.to_json(json_message))
 
                             self.log.info(f'{websocket} - past messages sent')
-
-                            # todo, probably to remove, users are notified before, just after joining
-                            await self.send_new_user_notification(participants, [login], chat)
 
                     elif message[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
                         if helper_functions.check_message_json(data):

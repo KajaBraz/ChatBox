@@ -48,12 +48,19 @@ class VirtualClient:
             if msg[JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE:
                 self.received_messages.append(msg[JsonFields.MESSAGE_VALUE]['message'])
                 self.received_jsons.append(msg)
-            elif msg[JsonFields.MESSAGE_TYPE] == MessageTypes.PREVIOUS_MESSAGES:
+            elif msg[JsonFields.MESSAGE_TYPE] in [MessageTypes.PREVIOUS_MESSAGES, MessageTypes.MORE_PREVIOUS_MESSAGES]:
                 self.received_messages.extend(m['message'] for m in msg[JsonFields.MULTIPLE_MESSAGES])
+                self.received_jsons.append(msg)
+            else:
                 self.received_jsons.append(msg)
 
     async def request_last_messages(self):
         json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.PREVIOUS_MESSAGES, JsonFields.MESSAGE_VALUE: -1,
+                        JsonFields.MESSAGE_SENDER: 'sender1', JsonFields.MESSAGE_DESTINATION: 'room1'}
+        await self.ws.send(to_json(json_message))
+
+    async def scroll_and_request_more_messages(self):
+        json_message = {JsonFields.MESSAGE_TYPE: MessageTypes.MORE_PREVIOUS_MESSAGES, JsonFields.MESSAGE_VALUE: 1,
                         JsonFields.MESSAGE_SENDER: 'sender1', JsonFields.MESSAGE_DESTINATION: 'room1'}
         await self.ws.send(to_json(json_message))
 
