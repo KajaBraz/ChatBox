@@ -170,6 +170,7 @@ function connect(user_name, chat_name) {
             }
             else {
                 var class_name = "message messageUnread";
+                audio.play();
             }
             handle_receive(event.data, all_messages_element, class_name);
         };
@@ -444,7 +445,7 @@ const ACTIVE_CHAT_STORAGE = "chatbox_stored_active_chat";
 const ACTIVE_USER_STORAGE = "chatbox_stored_active_user";
 const RECENT_CHATS_STORAGE = "chatbox_stored_recent_chats";
 const MAX_MSGS_ON_PAGE_NUM = 20;
-
+const audio = new Audio("sheep-122256.mp3");
 
 window.onload = function () {
     console.log("onload");
@@ -523,4 +524,3 @@ message_element.onpaste = function (e) {
 all_messages_element.addEventListener('scroll', activate_scroll_event);
 document.addEventListener('click', read_message);
 document.addEventListener('keypress', read_message);
-new lc_emoji_picker('textarea#newMessage');
