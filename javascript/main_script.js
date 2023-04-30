@@ -51,6 +51,10 @@ function handle_receive(message, message_box_element, class_name) {
             console.log("unread messages pushed:", unread_messages_ids);
         }
         adjust_displayed_messages();
+        if (!check_focus()){
+            new_msgs_count ++;
+            activate_on_message();
+        }
     }
     else if (m["message_type"] == "previous_messages") {
         m["multiple_messages"].forEach(single_message => {
@@ -170,7 +174,6 @@ function connect(user_name, chat_name) {
             }
             else {
                 var class_name = "message messageUnread";
-                audio.play();
             }
             handle_receive(event.data, all_messages_element, class_name);
         };
@@ -346,6 +349,18 @@ function read_message() {
 }
 
 
+function activate_on_message(){
+    audio.play();
+    document.title = (`${TAB_TITLE} - New Messages (${new_msgs_count})`);
+}
+
+
+function deactivate_on_focus(){
+    document.title = TAB_TITLE;
+    new_msgs_count = 0;
+}
+
+
 function detect_hyperlink(text) {
     let link_pattern = /(www\.\S+\.\S+|https?:\/\/\S+)/g;
     let links = text.match(link_pattern);
@@ -438,6 +453,7 @@ var unread_messages_ids = [];
 var chat_participants = new Set();
 var last_msg_ids_dict = {};
 var last_seen_message_id = -1;
+var new_msgs_count = 0;
 
 
 const LAST_MSG_IDS_STORAGE = "chatbox_stored_last_msg_ids";
@@ -445,6 +461,7 @@ const ACTIVE_CHAT_STORAGE = "chatbox_stored_active_chat";
 const ACTIVE_USER_STORAGE = "chatbox_stored_active_user";
 const RECENT_CHATS_STORAGE = "chatbox_stored_recent_chats";
 const MAX_MSGS_ON_PAGE_NUM = 20;
+const TAB_TITLE = 'ChatBox'
 const audio = new Audio("sheep-122256.mp3");
 
 window.onload = function () {
@@ -520,7 +537,9 @@ message_element.onpaste = function (e) {
     }
 }
 
-
 all_messages_element.addEventListener('scroll', activate_scroll_event);
 document.addEventListener('click', read_message);
 document.addEventListener('keypress', read_message);
+
+document.onclick = deactivate_on_focus;
+document.onkeydown = deactivate_on_focus;
