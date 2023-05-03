@@ -417,6 +417,22 @@ function adjust_displayed_messages() {
 }
 
 
+function activate_actions_on_entering_chat() {
+    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
+    if (stored_user_name && my_name_element.value === retrieve_display_login(stored_user_name)) {
+        login = stored_user_name;
+        console.log('equal logins');
+    } else {
+        var id = generate_unique_id(id_length);
+        login = my_name_element.value + id;
+        localStorage.setItem(ACTIVE_USER_STORAGE, login);
+    }
+    chat_change(chat_destination_element.value);
+    add_chat(chat);
+    console.log(login, chat);
+}
+
+
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
 var all_messages_element = document.getElementById("receivedMessages");
@@ -437,6 +453,7 @@ var unread_messages_ids = [];
 var chat_participants = new Set();
 var last_msg_ids_dict = {};
 var last_seen_message_id = -1;
+var new_msgs_count = 0;
 
 
 const LAST_MSG_IDS_STORAGE = "chatbox_stored_last_msg_ids";
@@ -444,7 +461,8 @@ const ACTIVE_CHAT_STORAGE = "chatbox_stored_active_chat";
 const ACTIVE_USER_STORAGE = "chatbox_stored_active_user";
 const RECENT_CHATS_STORAGE = "chatbox_stored_recent_chats";
 const MAX_MSGS_ON_PAGE_NUM = 20;
-
+const TAB_TITLE = 'ChatBox'
+const audio = new Audio("sheep-122256.mp3");
 
 window.onload = function () {
     console.log("onload");
@@ -465,18 +483,21 @@ window.onunload = function () {
 
 
 connect_button.onclick = () => {
-    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
-    if (stored_user_name && my_name_element.value === retrieve_display_login(stored_user_name)) {
-        login = stored_user_name;
-        console.log('equal logins');
-    } else {
-        var id = generate_unique_id(id_length);
-        login = my_name_element.value + id;
-        localStorage.setItem(ACTIVE_USER_STORAGE, login);
+    activate_actions_on_entering_chat();
+}
+
+
+my_name_element.onkeydown = (e) => {
+    if (e.code == 'Enter') {
+        activate_actions_on_entering_chat();
     }
-    chat_change(chat_destination_element.value);
-    add_chat(chat);
-    console.log(login, chat);
+}
+
+
+chat_destination_element.onkeydown = (e) => {
+    if (e.code == 'Enter') {
+        activate_actions_on_entering_chat();
+    }
 }
 
 
@@ -519,8 +540,9 @@ message_element.onpaste = function (e) {
     }
 }
 
-
 all_messages_element.addEventListener('scroll', activate_scroll_event);
 document.addEventListener('click', read_message);
 document.addEventListener('keypress', read_message);
-new lc_emoji_picker('textarea#newMessage');
+
+document.onclick = deactivate_on_focus;
+document.onkeydown = deactivate_on_focus;
