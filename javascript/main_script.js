@@ -51,6 +51,10 @@ function handle_receive(message, message_box_element, class_name) {
             console.log("unread messages pushed:", unread_messages_ids);
         }
         adjust_displayed_messages();
+        if (!check_focus()) {
+            new_msgs_count++;
+            activate_on_message();
+        }
     }
     else if (m["message_type"] == "previous_messages") {
         m["multiple_messages"].forEach(single_message => {
@@ -139,7 +143,6 @@ function connect(user_name, chat_name) {
     if (webSocket != null) {
         console.log('not nnull');
         webSocket.close(1000);
-        store_last_msgs_ids();
     }
     let short_name = retrieve_display_login(user_name);
     if (not_blank(short_name) && not_blank(chat_name)) {
@@ -181,13 +184,17 @@ function connect(user_name, chat_name) {
 
 
 function store_last_msgs_ids() {
+    console.log('storing last message id');
     if (all_messages_element.children.length) {
-        last_seen_message_id = all_messages_element.lastChild.id
+        last_seen_message_id = all_messages_element.lastChild.id;
+        console.log('storing', chat, last_seen_message_id);
         last_msg_ids_dict[chat] = last_seen_message_id;
         console.log("saved dict: last message ids", last_msg_ids_dict);
         let last_msg_ids_json = JSON.stringify(last_msg_ids_dict);
         localStorage.setItem(LAST_MSG_IDS_STORAGE, last_msg_ids_json);
         last_seen_message_id = -1;
+    } else {
+        console.log('no messages detected; nothing stored');
     }
     clear_message_element(all_messages_element);
 }
@@ -262,8 +269,10 @@ function update_user_list(new_users_array, active_users_element, class_name) {
 }
 
 
-function chat_change(chat_name) {
-    chat = chat_name;
+function chat_change(new_chat) {
+    console.log(`chat_change: old - ${chat}; new - ${new_chat}`);
+    store_last_msgs_ids();
+    chat = new_chat;
     chat_name_header.innerHTML = chat;
     chat_destination_element.value = chat;
     localStorage.setItem(ACTIVE_CHAT_STORAGE, chat);
@@ -342,6 +351,18 @@ function read_message() {
         console.log("qqq READING - READING - READING");
     }
     unread_messages_ids = [];
+}
+
+
+function activate_on_message() {
+    audio.play();
+    document.title = (`${TAB_TITLE} - New Messages (${new_msgs_count})`);
+}
+
+
+function deactivate_on_focus() {
+    document.title = TAB_TITLE;
+    new_msgs_count = 0;
 }
 
 
