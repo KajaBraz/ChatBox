@@ -1,36 +1,29 @@
-function append_div_messages(append_insert_func, my_name, timestamp, message, message_box_element, class_name) {
-    var div = append_insert_func("", message_box_element, class_name);
+function append_div_messages(append_insert_func, my_name, timestamp, message, message_box_element, class_name, as_first_div = false) {
+    var div = append_insert_func("", message_box_element, class_name, as_first_div);
     if (my_name === login) {
         div.style.float = "right";
     } else {
         div.style.float = "left";
     }
-    let message_header_div = append_div("", div, "messageHeader");
+    let message_header_div = add_div("", div, "messageHeader");
     let name = retrieve_display_login(my_name);
-    append_div(name, message_header_div, "divAuthor");
+    add_div(name, message_header_div, "divAuthor");
     let date = new Date(timestamp);
-    let timestamp_div = append_div(date.toLocaleDateString() + " - " + date.toLocaleTimeString(), message_header_div, "divTimestamp");
-    let message_text_div = append_div(message, div, "messageText");
+    let timestamp_div = add_div(`${date.toLocaleDateString()} - ${date.toLocaleTimeString()}`, message_header_div, "divTimestamp");
+    let message_text_div = add_div(message, div, "messageText");
     return div;
 }
 
 
-function append_div(child, parent, class_name) {
-    var node = document.createTextNode(child);
+function add_div(text, parent, class_name, as_first = false) {
     var div = document.createElement("div");
     div.className = class_name;
-    div.appendChild(node);
-    parent.appendChild(div);
-    return div;
-}
-
-
-function insert_div(child, parent, class_name) {
-    var node = document.createTextNode(child);
-    var div = document.createElement("div");
-    div.className = class_name;
-    div.appendChild(node);
-    parent.insertBefore(div, parent.firstChild);
+    div.innerHTML = text;
+    if (!as_first) {
+        parent.appendChild(div);
+    } else {
+        parent.insertBefore(div, parent.firstChild);
+    }
     return div;
 }
 
@@ -43,7 +36,7 @@ function handle_receive(message, message_box_element, class_name) {
         var message_text = detect_hyperlink(val["message"]);
         var timestamp = val["timestamp"];
         console.log('message val', message_text);
-        var new_message = append_div_messages(append_div, name, timestamp, message_text, message_box_element, class_name);
+        var new_message = append_div_messages(add_div, name, timestamp, message_text, message_box_element, class_name);
         new_message.id = val["id"];
         message_box_element.scrollTo(0, message_box_element.scrollHeight);
         if (class_name === "message messageUnread") {
@@ -62,7 +55,7 @@ function handle_receive(message, message_box_element, class_name) {
             var message_text = detect_hyperlink(single_message["message"]);
             var timestamp = single_message["timestamp"];
             var status = assign_read_unread_class(single_message["id"]);
-            var new_message = append_div_messages(append_div, name, timestamp, message_text, message_box_element, status);
+            var new_message = append_div_messages(add_div, name, timestamp, message_text, message_box_element, status);
             new_message.id = single_message["id"];
             message_box_element.scrollTo(0, message_box_element.scrollHeight);
             if (status === "message messageUnread") {
@@ -80,7 +73,7 @@ function handle_receive(message, message_box_element, class_name) {
             var message_text = detect_hyperlink(single_message["message"]);
             var timestamp = single_message["timestamp"];
             var status = assign_read_unread_class(single_message["id"]);
-            var new_message = append_div_messages(insert_div, name, timestamp, message_text, message_box_element, status);
+            var new_message = append_div_messages(add_div, name, timestamp, message_text, message_box_element, status, true);
             new_message.id = single_message["id"];
             message_box_element.scrollTo(0, message_box_element.offsetHeight);
             if (status === "message messageUnread") {
@@ -223,8 +216,8 @@ function add_chat(new_chat) {
         console.log("IF");
         console.log(active_recent_chats);
         active_recent_chats.push(new_chat);
-        // var new_div = append_div(new_chat, recent_chats, "availableChat");
-        var new_div = insert_div(new_chat, recent_chats, "availableChat");
+        // var new_div = add_div(new_chat, recent_chats, "availableChat");
+        var new_div = add_div(new_chat, recent_chats, "availableChat", true);
         new_div.id = new_chat;
         new_div.onclick = () => {
             chat_change(new_chat);
@@ -238,8 +231,8 @@ function add_chat(new_chat) {
         active_recent_chats.splice(elem_ind, 1);
         active_recent_chats.push(new_chat);
         remove_given_chat(active_recent_chats, new_chat);
-        // var new_div = append_div(new_chat, recent_chats, "availableChat");
-        var new_div = insert_div(new_chat, recent_chats, "availableChat");
+        // var new_div = add_div(new_chat, recent_chats, "availableChat");
+        var new_div = add_div(new_chat, recent_chats, "availableChat", true);
         new_div.id = new_chat;
         new_div.onclick = () => {
             chat_change(new_chat);
@@ -255,7 +248,7 @@ function update_user_list(new_users_array, active_users_element, class_name) {
         let short_name = retrieve_display_login(user_name);
         console.log("updating:", user_name);
         if (!chat_participants.has(user_name)) {
-            var child_div = append_div(short_name, active_users_element, class_name);
+            var child_div = add_div(short_name, active_users_element, class_name);
             child_div.id = user_name;
             chat_participants.add(user_name);
         }
@@ -374,14 +367,17 @@ function detect_hyperlink(text) {
     if (links != null) {
         links.forEach(link => {
             if (link.includes("http")) {
-                var replace_link = '<a href="' + link + '" target="_blank">' + link + '</a>';
+                // var replace_link = '<a href="' + link + '" target="_blank">' + link + '</a>';
+                var replace_link = `<a href="${link}" target="_blank">${link}</a>`;
             }
             else {
-                var replace_link = '<a href="https://' + link + '" target="_blank">' + link + '</a>';
+                var replace_link = `<a href="https://${link}" target="_blank">${link}</a>`;
+                // var replace_link = '<a href="https://' + link + '" target="_blank">' + link + '</a>';
             }
             updated_text = updated_text.replace(link, replace_link);
         });
     }
+    console.log('***', updated_text);
     return updated_text;
 }
 
@@ -402,11 +398,11 @@ function prepare_image_message(img_as_file, my_name) {
         if (my_name === login) {
             img_elem.style.float = "right";
         }
-        let message_header_div = append_div("", img_elem, "messageHeader");
+        let message_header_div = add_div("", img_elem, "messageHeader");
         let name = retrieve_display_login(my_name);
-        append_div(name, message_header_div, "divAuthor");
+        add_div(name, message_header_div, "divAuthor");
         // let date = new Date(timestamp);
-        // new_div = append_div(date.toLocaleDateString() + " - " + date.toLocaleTimeString(), message_header_div, "divTimestamp");
+        // new_div = add_div(date.toLocaleDateString() + " - " + date.toLocaleTimeString(), message_header_div, "divTimestamp");
 
         // img_elem.appendChild(node);
         all_messages_element.appendChild(img_elem)
