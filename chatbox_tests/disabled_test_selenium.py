@@ -253,7 +253,8 @@ def test_adjust_number_of_displayed_messages(state: TestState):
 
 def test_send_and_open_link(state: TestState):
     message_1 = 'www.rai.it'
-    message_2 = 'https://www.gazzetta.it/Calcio/Serie-A/Napoli/04-05-2023/scudetto-napoli-campione-d-italia-la-terza-volta-4601354295987.shtml'
+    message_2 = 'https://www.gazzetta.it/Calcio/Serie-A/Napoli/' \
+                '04-05-2023/scudetto-napoli-campione-d-italia-la-terza-volta-4601354295987.shtml'
     new_message_box = state.driver.find_element_by_id('newMessage')
     send_button = state.driver.find_element_by_id('sendMessageButton')
 
@@ -269,3 +270,14 @@ def test_send_and_open_link(state: TestState):
     messages[-2].click()
 
     assert len(state.driver.window_handles) == 3
+
+    # SEND MESSAGE
+    message_3 = 'abc abc https://www.italia.it/it/sicilia/agrigento abc abc'
+    new_message_box.send_keys(message_3)
+    send_button.click()
+
+    # CLICK LINKS
+    a = state.driver.find_elements_by_tag_name('a')
+    a[-1].click()
+
+    assert len(state.driver.window_handles) == 4
