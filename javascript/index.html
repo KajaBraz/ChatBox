@@ -5,151 +5,14 @@
     <title>ChatBox</title>
 </head>
 
-<style>
-    body {
-        background-color: rgba(210, 255, 127, 0.685);
-        /* background-color: rgb(250, 250, 196) ; */
-    }
-
-    button {
-        background-color: rgba(87, 87, 87, 0.445);
-        cursor: pointer;
-        border-radius: 10px;
-    }
-
-    input {
-        border: 1px solid black;
-        border-radius: 5px;
-        resize: none;
-        width: 100%;
-    }
-
-    .gridContainer {
-        display: grid;
-        grid-template-columns: 0.5fr 2.5fr 0.5fr 0.5fr;
-        grid-gap: 10px;
-        grid-template-areas:
-            "..................  header-area    header-area         .............."
-            "..................  search-area    search-button-area  .............."
-            "connect-area        messages-area  messages-area       user-list-area"
-            "recent-chats-area   messages-area  messages-area       user-list-area"
-            "recent-chats-area   messages-area  messages-area       user-list-area"
-            "..................  messages-area  messages-area       .............."
-            "..................  send-area      send-button-area    ..............";
-        padding-left: 5%;
-        padding-right: 5%;
-        text-align: center;
-    }
-
-    .chatUsers {
-        grid-area: user-list-area;
-    }
-
-    .chatNameHeaderGrid {
-        grid-area: header-area;
-    }
-
-    .searchGrid {
-        grid-area: search-area;
-    }
-
-    .connectGrid {
-        grid-area: connect-area;
-    }
-
-    .searchButtonGrid {
-        grid-area: search-button-area;
-    }
-
-    .messagesGrid {
-        grid-area: messages-area;
-        width: 100%;
-        height: 500px;
-        border: 1px solid black;
-        background-color: white;
-        border-radius: 5px;
-        resize: none;
-        overflow: auto;
-    }
-
-    .chatNameGrid {
-        grid-area: chat-name-area;
-    }
-
-    .recentlyUsedChatsGrid {
-        grid-area: recent-chats-area;
-    }
-
-    .sendGrid {
-        grid-area: send-area;
-        border: 1px solid black;
-        border-radius: 5px;
-        resize: none;
-    }
-
-    .sendButtonGrid {
-        grid-area: send-button-area;
-    }
-
-    .availableChat {
-        background-color: rgba(87, 87, 87, 0.445);
-        border: 1px solid rgba(0, 0, 0, 0.8);
-        border-radius: 5px;
-        cursor: pointer;
-        margin-bottom: 1%;
-    }
-
-    .chatUser {
-        background-color: rgba(87, 87, 87, 0.445);
-        border: 1px solid rgba(0, 0, 0, 0.8);
-        border-radius: 5px;
-        margin-bottom: 1%;
-    }
-
-    .message {
-        margin: 1.5%;
-        width: 40%;
-        padding: 2%;
-        padding-top: 1%;
-        padding-bottom: 1%;
-        border: 1px solid rgba(0, 0, 0, 0.8);
-        border-radius: 5px;
-        clear: both;
-        font-size: large;
-        word-wrap: break-word;
-    }
-
-    .messageUnread {
-        background-color: chartreuse;
-    }
-
-    .messageHeader {
-        font-size: small;
-        border-bottom: 2px solid rgb(220, 220, 220);
-        margin-bottom: 10px;
-    }
-
-    .divAuthor {
-        float: left;
-        text-align: left;
-    }
-
-    .divTimestamp {
-        text-align: right;
-        color: DimGray;
-    }
-</style>
+<link rel="stylesheet" href="chatbox_style.css">
 
 <body>
     <div class="gridContainer">
 
-        <div class="connectGrid">
-            Your Name:
-            <input id="login">
-            Chat Name:
-            <input id="findChat">
-            <button id="connectButton">Connect</button>
-        </div>
+        <div class="usernameGrid">Name:</div><input class="nameInputGrid" id="login">
+        <div class="chatNameGrid">Chat:</div><input class="chatInputGrid" id="findChat">
+        <button class="connectGrid" id="connectButton">Connect</button>
 
         <div class="recentlyUsedChatsGrid">
             <h3>Recent Chats</h3>
@@ -157,10 +20,6 @@
         </div>
 
         <h1 id="chatNameHeader" class="chatNameHeaderGrid">Your Chat</h1>
-
-        <input class="searchGrid">
-
-        <button class="searchButtonGrid">Filter</button>
 
         <div id="receivedMessages" class="messagesGrid"></div>
 
