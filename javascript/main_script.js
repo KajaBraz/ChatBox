@@ -438,6 +438,22 @@ function adjust_displayed_messages() {
 }
 
 
+function activate_actions_on_entering_chat() {
+    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
+    if (stored_user_name && my_name_element.value === retrieve_display_login(stored_user_name)) {
+        login = stored_user_name;
+        console.log('equal logins');
+    } else {
+        var id = generate_unique_id(id_length);
+        login = my_name_element.value + id;
+        localStorage.setItem(ACTIVE_USER_STORAGE, login);
+    }
+    chat_change(chat_destination_element.value);
+    add_chat(chat);
+    console.log(login, chat);
+}
+
+
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
 var all_messages_element = document.getElementById("receivedMessages");
@@ -488,18 +504,21 @@ window.onunload = function () {
 
 
 connect_button.onclick = () => {
-    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
-    if (stored_user_name && my_name_element.value === retrieve_display_login(stored_user_name)) {
-        login = stored_user_name;
-        console.log('equal logins');
-    } else {
-        var id = generate_unique_id(id_length);
-        login = my_name_element.value + id;
-        localStorage.setItem(ACTIVE_USER_STORAGE, login);
+    activate_actions_on_entering_chat();
+}
+
+
+my_name_element.onkeydown = (e) => {
+    if (e.code == 'Enter') {
+        activate_actions_on_entering_chat();
     }
-    chat_change(chat_destination_element.value);
-    add_chat(chat);
-    console.log(login, chat);
+}
+
+
+chat_destination_element.onkeydown = (e) => {
+    if (e.code == 'Enter') {
+        activate_actions_on_entering_chat();
+    }
 }
 
 
