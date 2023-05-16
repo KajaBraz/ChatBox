@@ -173,8 +173,10 @@ async def test_server_adds_timestamp_to_message(state):
     await asyncio.sleep(0.5)
 
     # THEN
-    assert 1 == len(state.client.received_jsons)
-    assert 'timestamp' in state.client.received_jsons[0][JsonFields.MESSAGE_VALUE]
+    assert len(state.client.received_jsons) == 2
+    assert state.client.received_jsons[0][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
+    assert state.client.received_jsons[1][JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE
+    assert 'timestamp' in state.client.received_jsons[1][JsonFields.MESSAGE_VALUE]
 
 
 @pytest.mark.asyncio
