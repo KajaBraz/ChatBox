@@ -1,13 +1,17 @@
 import asyncio
 import os
+import time
 from datetime import datetime
 
 import pytest
+import pytest_asyncio
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
 
 from src import helper_functions, chatbox_websocket_server
 
@@ -15,7 +19,8 @@ from src import helper_functions, chatbox_websocket_server
 def create_driver():
     options = Options()
     options.add_argument('--headless')  # don't use when you want to actually open and see the browser window
-    driver = webdriver.Firefox(options=options)
+    # driver = webdriver.Firefox(options=options)
+    driver = webdriver.Firefox(executable_path=GeckoDriverManager().install(), options=options)
     relative_path = os.path.join(os.pardir, 'javascript', 'index.html')
     absolute_path = os.path.abspath(relative_path)
     driver.get(f'file:///{absolute_path}')
@@ -23,21 +28,19 @@ def create_driver():
     return driver
 
 
-class TestState:
+class TestUser:
     def __init__(self):
         self.chat_room = helper_functions.generate_random_string(10)
         self.user_name = helper_functions.generate_random_string(10)
         self.driver: webdriver.Firefox = None
 
 
-client = TestState()
-
-
-@pytest.fixture
+@pytest_asyncio.fixture
 async def server():
     # config_path = '../chatbox_tests_config.json'
     # await chatbox_websocket_server.main(config_path, True)
     # yield
+    # print('\nserver')
 
     config_path = '../chatbox_tests_config.json'
     data = helper_functions.read_config(config_path)
@@ -46,73 +49,78 @@ async def server():
     chatbox_server = chatbox_websocket_server.Server(data)
     await chatbox_server.start(address, port)
     yield
-    chatbox_server.stop()
     await chatbox_server.wait_stop()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def user():
+    client = TestUser()
     client.driver = create_driver()
-    login_elem = client.driver.find_element_by_id('login')
-    chat_elem = client.driver.find_element_by_id('findChat')
-    connect_button_elem = client.driver.find_element_by_id('connectButton')
+    login_elem = client.driver.find_element(By.ID, 'login')
+    chat_elem = client.driver.find_element(By.ID, 'findChat')
+    connect_button_elem = client.driver.find_element(By.ID, 'connectButton')
     login_elem.send_keys(client.user_name)
     chat_elem.send_keys(client.chat_room)
     connect_button_elem.click()
     login_elem.clear()
     chat_elem.clear()
 
-    yield
-    screenshot_path = os.path.abspath(os.path.join(os.pardir, 'test_results', 'selenium_screenshots',
-                                                   f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.png'))
-    client.driver.get_screenshot_as_file(screenshot_path)
+    yield client
+    # folder = os.path.join(os.pardir, 'test_results', 'selenium_screenshots')
+    # os.makedirs(folder, exist_ok=True)
+    # screenshot_path = os.path.join(folder, f'{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.png')
+    # client.driver.get_screenshot_as_file(screenshot_path)
+    # client.driver.get('https://www.google.com')
+    await asyncio.sleep(2)
     client.driver.quit()
 
 
 @pytest.mark.asyncio
 async def test_first_connection(server, user):
-    header_elem = client.driver.find_element_by_id('chatNameHeader')
-    chat_list_elem = client.driver.find_element_by_id('recentlyUsedChats')
-    user_list_elem = client.driver.find_element_by_id('activeUsers')
+    print('\ntest')
+    header_elem = user.driver.find_element(By.ID, 'chatNameHeader')
+    chat_list_elem = user.driver.find_element(By.ID, 'recentlyUsedChats')
+    user_list_elem = user.driver.find_element(By.ID, 'activeUsers')
     await asyncio.sleep(2)
     # WebDriverWait(client.driver, timeout=10).until(lambda d: d.find_element(By.CLASS_NAME, 'chatUser').text != 'User 1')
     # WebDriverWait(client.driver, timeout=10).until(EC.text_to_be_present_in_element_value((By.CLASS_NAME, 'chatUser'), client.user_name))
-    assert header_elem.text == client.chat_room
-    assert chat_list_elem.find_element_by_id(client.chat_room).text == client.chat_room
-    assert user_list_elem.find_element_by_class_name('chatUser').text == client.user_name
+    assert header_elem.text == user.chat_room
+    assert chat_list_elem.find_element(By.ID, user.chat_room).text == user.chat_room
+    assert user_list_elem.find_element(By.CLASS_NAME, 'chatUser').text == user.user_name
 
 
 @pytest.mark.asyncio
 async def test_sending_and_displaying_messages(server, user):
-    new_message_box = client.driver.find_element_by_id('newMessage')
-    send_button = client.driver.find_element_by_id('sendMessageButton')
+    new_message_box = user.driver.find_element(By.ID, 'newMessage')
+    send_button = user.driver.find_element(By.ID, 'sendMessageButton')
     await asyncio.sleep(2)
 
     # SEND MESSAGES
-    messages = [helper_functions.generate_random_string(15) for i in range(5)]
+    messages = [helper_functions.generate_random_string(15) for _ in range(5)]
     for message in messages:
         new_message_box.send_keys(message)
         send_button.click()
         await asyncio.sleep(2)
 
     # CHECK RECEIVED MESSAGES
-    received_messages_box = client.driver.find_element_by_id('receivedMessages')
-    received_messages = [m.text for m in received_messages_box.find_elements_by_class_name('messageText')]
+    received_messages_box = user.driver.find_element(By.ID, 'receivedMessages')
+    received_messages = [m.text for m in received_messages_box.find_elements(By.CLASS_NAME, 'messageText')]
     assert messages == received_messages
 
 
 @pytest.mark.asyncio
 async def test_recent_chats_display(server, user):
     chat_rooms = [helper_functions.generate_random_string(10) for _ in range(4)]
-    chat_elem = client.driver.find_element_by_id('findChat')
-    connect_button_elem = client.driver.find_element_by_id('connectButton')
+    chat_elem = user.driver.find_element(By.ID, 'findChat')
+    connect_button_elem = user.driver.find_element(By.ID, 'connectButton')
     await asyncio.sleep(2)
     for chat_room in chat_rooms:
         chat_elem.send_keys(chat_room)
         connect_button_elem.click()
+        await asyncio.sleep(1)
         chat_elem.clear()
-    resulting_chat_names = [elem.text for elem in client.driver.find_elements_by_class_name('availableChat')]
-    assert chat_rooms[::-1] + [client.chat_room] == resulting_chat_names
+    resulting_chat_names = [elem.text for elem in user.driver.find_elements(By.CLASS_NAME, 'availableChat')]
+    assert chat_rooms[::-1] + [user.chat_room] == resulting_chat_names
     # todo fix: test passes and then hangs indefinitely
 
 
@@ -128,22 +136,22 @@ async def test_active_users_display(server, user):
 
         new_dr = create_driver()
 
-        login_elem = new_dr.find_element_by_id('login')
-        chat_elem = new_dr.find_element_by_id('findChat')
-        connect_button_elem = new_dr.find_element_by_id('connectButton')
+        login_elem = new_dr.find_element(By.ID, 'login')
+        chat_elem = new_dr.find_element(By.ID, 'findChat')
+        connect_button_elem = new_dr.find_element(By.ID, 'connectButton')
         login_elem.send_keys(username)
-        chat_elem.send_keys(client.chat_room)
+        chat_elem.send_keys(user.chat_room)
         connect_button_elem.click()
         return new_dr
 
     await asyncio.sleep(2)
-    activer_users = client.driver.find_elements_by_class_name('chatUser')
-    assert {client.user_name} == {active_user.text for active_user in activer_users}
+    activer_users = user.driver.find_elements(By.CLASS_NAME, 'chatUser')
+    assert {user.user_name} == {active_user.text for active_user in activer_users}
 
     new_users = {helper_functions.generate_random_string(10) for _ in range(4)}
     new_drivers = set()
-    temp_users = {client.user_name}
-    temp_drivers = {client.driver}
+    temp_users = {user.user_name}
+    temp_drivers = {user.driver}
 
     for new_user in new_users:
         new_driver = make_drivers(new_user)
@@ -151,7 +159,7 @@ async def test_active_users_display(server, user):
         temp_users.add(new_user)
         temp_drivers.add(new_driver)
         await asyncio.sleep(2)
-        temp_active_users = [{u.text for u in dr.find_elements_by_class_name('chatUser')} for dr in temp_drivers]
+        temp_active_users = [{u.text for u in dr.find_elements(By.CLASS_NAME, 'chatUser')} for dr in temp_drivers]
         assert all(temp_users == displayed for displayed in temp_active_users)
 
     # todo, temporary to remove, use separate windows instead, not drivers
@@ -164,24 +172,24 @@ async def test_messages_position(server, user):
     # CONNECT USER 2
     new_driver = create_driver()
     user2_login = helper_functions.generate_random_string(10)
-    login_elem = new_driver.find_element_by_id('login')
-    chat_elem = new_driver.find_element_by_id('findChat')
-    connect_button_elem = new_driver.find_element_by_id('connectButton')
+    login_elem = new_driver.find_element(By.ID, 'login')
+    chat_elem = new_driver.find_element(By.ID, 'findChat')
+    connect_button_elem = new_driver.find_element(By.ID, 'connectButton')
     login_elem.send_keys(user2_login)
-    chat_elem.send_keys(client.chat_room)
+    chat_elem.send_keys(user.chat_room)
     connect_button_elem.click()
     await asyncio.sleep(2)
     # todo move into a connection function
 
     # PREPARE MESSAGES USER1
     messages_user1 = [helper_functions.generate_random_string(15) for i in range(2)]
-    new_message_box_user1 = client.driver.find_element_by_id('newMessage')
-    send_button_user1 = client.driver.find_element_by_id('sendMessageButton')
+    new_message_box_user1 = user.driver.find_element(By.ID, 'newMessage')
+    send_button_user1 = user.driver.find_element(By.ID, 'sendMessageButton')
 
     # PREPARE MESSAGES USER2
     messages_user2 = [helper_functions.generate_random_string(15) for i in range(2)]
-    new_message_box_user2 = new_driver.find_element_by_id('newMessage')
-    send_button_user2 = new_driver.find_element_by_id('sendMessageButton')
+    new_message_box_user2 = new_driver.find_element(By.ID, 'newMessage')
+    send_button_user2 = new_driver.find_element(By.ID, 'sendMessageButton')
 
     # SEND MESSAGES
     new_message_box_user1.send_keys(messages_user1[0])
@@ -203,8 +211,9 @@ async def test_messages_position(server, user):
     # GATHER MESSAGES
     new_message_box_user1.click()
     new_message_box_user2.click()
-    received_messages_user1 = client.driver.find_elements_by_class_name('message')
-    received_messages_user2 = new_driver.find_elements_by_class_name('message')
+    received_messages_user1 = user.driver.find_elements(By.CLASS_NAME, 'message')
+    received_messages_user2 = new_driver.find_elements(By.CLASS_NAME, 'message')
+    await asyncio.sleep(2)
 
     # CHECK MESSAGES STYLE
     messages_style_user1 = [m.get_attribute('style') for m in received_messages_user1]
@@ -214,9 +223,11 @@ async def test_messages_position(server, user):
     assert all(['right' in messages_style_user2[i] for i in range(len(messages_style_user2)) if i % 2 == 1])
     assert all(['left' in messages_style_user1[i] for i in range(len(messages_style_user1)) if i % 2 == 1])
     assert all(['left' in messages_style_user2[i] for i in range(len(messages_style_user2)) if i % 2 == 0])
+    await asyncio.sleep(2)
 
     # todo temporary, to remove, make seperate windows not drivers
     new_driver.quit()
+    await asyncio.sleep(2)
 
 
 # @pytest.mark.asyncio
@@ -274,9 +285,9 @@ async def test_adjust_number_of_displayed_messages(server, user):
     # works for max num of messgaes in messages box set to 20
     max_msgs_on_page_num = 20
 
-    received_messages_box = client.driver.find_element_by_id('receivedMessages')
-    new_message_box = client.driver.find_element_by_id('newMessage')
-    send_button = client.driver.find_element_by_id('sendMessageButton')
+    received_messages_box = user.driver.find_element(By.ID, 'receivedMessages')
+    new_message_box = user.driver.find_element(By.ID, 'newMessage')
+    send_button = user.driver.find_element(By.ID, 'sendMessageButton')
     await asyncio.sleep(2)
 
     messages = [helper_functions.generate_random_string(5) for _ in range(25)]
@@ -286,7 +297,7 @@ async def test_adjust_number_of_displayed_messages(server, user):
         await asyncio.sleep(2)
 
     await asyncio.sleep(2)
-    displayed_messages = received_messages_box.find_elements_by_class_name('messageText')
+    displayed_messages = received_messages_box.find_elements(By.CLASS_NAME, 'messageText')
     assert len(displayed_messages) == max_msgs_on_page_num
     assert messages[:max_msgs_on_page_num] == [m.text for m in displayed_messages]
 
@@ -295,7 +306,10 @@ async def test_adjust_number_of_displayed_messages(server, user):
         new_message_box.send_keys(message)
         send_button.click()
         await asyncio.sleep(2)
-        displayed_messages = received_messages_box.find_elements_by_class_name('messageText')
+        displayed_messages = received_messages_box.find_elements(By.CLASS_NAME, 'messageText')
+        await asyncio.sleep(1)
         assert len(displayed_messages) == max_msgs_on_page_num
         assert messages[i_start:i_start + max_msgs_on_page_num] == [m.text for m in displayed_messages]
         i_start += 1
+        await asyncio.sleep(1)
+    await asyncio.sleep(5)

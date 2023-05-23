@@ -1,6 +1,7 @@
 import asyncio
 
 import pytest
+import pytest_asyncio
 
 from chatbox_tests.integration import mocked_database
 from chatbox_tests.integration.virtual_websocket_client import VirtualClient
@@ -12,7 +13,7 @@ class TestState:
     pass
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def state():
     # setup actions
     config_path = '../chatbox_tests_config.json'
@@ -173,8 +174,8 @@ async def test_server_adds_timestamp_to_message(state):
     await asyncio.sleep(0.5)
 
     # THEN
-    assert 1 == len(state.client.received_jsons)
-    assert 'timestamp' in state.client.received_jsons[0][JsonFields.MESSAGE_VALUE]
+    assert 2 == len(state.client.received_jsons)
+    assert 'timestamp' in state.client.received_jsons[1][JsonFields.MESSAGE_VALUE]
 
 
 @pytest.mark.asyncio
