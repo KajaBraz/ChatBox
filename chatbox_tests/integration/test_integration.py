@@ -285,3 +285,33 @@ async def test_users_join_server_sends_notification_jsons(state):
     assert received_jsons_3[0][JsonFields.MESSAGE_VALUE] == [state.client.user_name, state.client2.user_name,
                                                              state.client3.user_name]
     assert received_jsons_3[0][JsonFields.MESSAGE_DESTINATION] == [state.client3.user_name]
+
+
+@pytest.mark.asyncio
+async def test_users_leave_server_sends_notification_jsons(state):
+    await state.client.connect()
+    await state.client2.connect()
+    asyncio.create_task(state.client2.start_receiving())
+    await state.client3.connect()
+    asyncio.create_task(state.client3.start_receiving())
+    await asyncio.sleep(2)
+
+    await state.client.disconnect()
+    await asyncio.sleep(2)
+    received_jsons_2 = state.client2.received_jsons
+    received_jsons_3 = state.client3.received_jsons
+    assert received_jsons_2[-1].keys() == {JsonFields.MESSAGE_TYPE, JsonFields.MESSAGE_VALUE,
+                                           JsonFields.MESSAGE_DESTINATION}
+    assert received_jsons_2[-1][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
+    assert received_jsons_2[-1][JsonFields.MESSAGE_VALUE] == [state.client.user_name]
+    assert received_jsons_2[-1][JsonFields.MESSAGE_DESTINATION] == [state.client2.user_name, state.client3.user_name]
+    assert received_jsons_3[-1] == received_jsons_2[-1]
+
+    await state.client3.disconnect()
+    await asyncio.sleep(2)
+    received_jsons_2 = state.client2.received_jsons
+    assert received_jsons_2[-1].keys() == {JsonFields.MESSAGE_TYPE, JsonFields.MESSAGE_VALUE,
+                                           JsonFields.MESSAGE_DESTINATION}
+    assert received_jsons_2[-1][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
+    assert received_jsons_2[-1][JsonFields.MESSAGE_VALUE] == [state.client3.user_name]
+    assert received_jsons_2[-1][JsonFields.MESSAGE_DESTINATION] == [state.client2.user_name]
