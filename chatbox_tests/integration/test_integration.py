@@ -3,7 +3,7 @@ import asyncio
 import pytest
 import pytest_asyncio
 
-from chatbox_tests.integration import mocked_database
+from chatbox_tests import mocked_database
 from chatbox_tests.integration.virtual_websocket_client import VirtualClient
 from src import chatbox_websocket_server, helper_functions, database, message
 from src.enums import JsonFields, MessageTypes

@@ -1,9 +1,11 @@
+import asyncio
 import os
 
 import arsenic
 import pytest
 import pytest_asyncio
 
+from chatbox_tests import mocked_database
 from src import helper_functions, chatbox_websocket_server
 
 
@@ -26,6 +28,7 @@ async def server():
     address = data['address']['name']
     port = data['address']['port']
     chatbox_server = chatbox_websocket_server.Server(data)
+    chatbox_server.chatbox_database = mocked_database.MockedDatabase()
     await chatbox_server.start(address, port)
     yield
     chatbox_server.stop()
@@ -37,8 +40,8 @@ async def user():
     client = TestUser()
     relative_path = os.path.join(os.pardir, 'javascript', 'index.html')
     absolute_path = os.path.abspath(relative_path)
-    client.session = await arsenic.start_session(arsenic.services.Geckodriver(), arsenic.browsers.Firefox())
-    # client.session = await arsenic.start_session(arsenic.services.Geckodriver(), arsenic.browsers.Firefox(firefoxOptions={'args': ['-headless']}))
+    client.session = await arsenic.start_session(arsenic.services.Geckodriver(), arsenic.browsers.Firefox(
+        **{'moz:firefoxOptions': {'args': ['-headless']}}))
     await client.session.get(f'file:///{absolute_path}')
     login_elem = await client.session.get_element('#login')
     chat_elem = await client.session.get_element('#findChat')
@@ -46,9 +49,7 @@ async def user():
     await login_elem.send_keys(client.user_name)
     await chat_elem.send_keys(client.chat_room)
     await connect_button_elem.click()
-    # try:
     yield client
-    # finally:
     await arsenic.stop_session(client.session)
 
 
@@ -193,55 +194,36 @@ async def test_messages_position(server, user):
     await arsenic.stop_session(new_session)
 
 
-# @pytest.mark.asyncio
-# async def test_previous_messages(server,user):
-#     # todo enable to work without database
-#     # works for displaying 10 messages on the client's connection
-#
-#     received_messages_box = client.driver.get_element_by_id('receivedMessages')
-#
-#     # USER 1 SENDS MESSAGES
-#     messages = [helper_functions.generate_random_string(5) for i in range(20)]
-#     new_msg_box = client.driver.get_element_by_id('newMessage')
-#     send_button = client.driver.get_element_by_id('sendMessageButton')
-#     for message in messages:
-#         new_msg_box.clear()
-#         new_msg_box.send_keys(message)
-#         send_button.click()
-#
-#     # wait = WebDriverWait(client.driver, 10)
-#     # wait.until(
-#     #     lambda d: [m.text for m in received_messages_box.get_elements_by_class_name('messageText')] == messages,
-#     #     f"Message not found - wait 1, {[m.text for m in received_messages_box.get_elements_by_class_name('messageText')]}"
-#     # )
-#     await asyncio.sleep(10)
-#
-#     # USER 2 CONNECTS
-#     login_elem = client.driver.get_element_by_id('login')
-#     chat_elem = client.driver.get_element_by_id('findChat')
-#     connect_button_elem = client.driver.get_element_by_id('connectButton')
-#     login_elem.send_keys(helper_functions.generate_random_string(5))
-#     chat_elem.send_keys(client.chat_room)
-#     connect_button_elem.click()
-#
-#     # wait.until(
-#     #     lambda d: messages[10:] == [m.text for m in received_messages_box.get_elements_by_class_name('messageText')],
-#     #     f"Message not found - wait 2, {[m.text for m in received_messages_box.get_elements_by_class_name('messageText')]}"
-#     # )
-#     await asyncio.sleep(10)
-#
-#     previous_messages_loaded_on_connection = received_messages_box.get_elements_by_class_name('messageText')
-#     assert messages[10:] == [m.text for m in previous_messages_loaded_on_connection]
-#
-#     client.driver.execute_script("receivedMessages.scrollTo(0, -receivedMessages.offsetHeight)")
-#     # wait.until(
-#     #     lambda d: messages == [m.text for m in received_messages_box.get_elements_by_class_name('messageText')],
-#     #     f"Message not found, wait 3 {[m.text for m in received_messages_box.get_elements_by_class_name('messageText')]}"
-#     # )
-#     await asyncio.sleep(10)
-#     more_previous_messages_loaded_after_scoll = received_messages_box.get_elements_by_class_name('messageText')
-#
-#     assert messages == [m.text for m in more_previous_messages_loaded_after_scoll]
+@pytest.mark.asyncio
+async def test_previous_messages(server, user):
+    # works for displaying 10 messages on the client's connection
+    received_messages_box = await user.session.get_element('#receivedMessages')
+
+    # USER 1 SENDS MESSAGES
+    messages = [helper_functions.generate_random_string(5) for _ in range(20)]
+    new_msg_box = await user.session.get_element('#newMessage')
+    send_button = await user.session.get_element('#sendMessageButton')
+    for message in messages:
+        await new_msg_box.clear()
+        await new_msg_box.send_keys(message)
+        await send_button.click()
+
+    # USER 2 CONNECTS
+    login_elem = await user.session.get_element('#login')
+    await login_elem.clear()
+    await login_elem.send_keys(helper_functions.generate_random_string(5))
+    connect_button_elem = await user.session.get_element('#connectButton')
+    await connect_button_elem.click()
+
+    displayed_messaged_on_connection = await received_messages_box.get_elements('.messageText')
+    displayed_messaged_on_connection = [await m.get_text() for m in displayed_messaged_on_connection]
+    assert messages[10:] == displayed_messaged_on_connection
+    await user.session.execute_script("receivedMessages.scrollTo(0, -receivedMessages.offsetHeight)")
+    displayed_messaged_on_connection_after_scoll = await received_messages_box.get_elements('.messageText')
+    displayed_messaged_on_connection_after_scoll = [await m.get_text() for m in
+                                                    displayed_messaged_on_connection_after_scoll]
+    assert messages == displayed_messaged_on_connection_after_scoll
+
 
 @pytest.mark.asyncio
 async def test_adjust_number_of_displayed_messages(server, user):
