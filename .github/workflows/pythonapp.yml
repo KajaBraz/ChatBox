@@ -30,6 +30,9 @@ jobs:
       - name: Install requirements
         run: |
           pip install -r requirements.txt
+      - name: Print pip libraries
+        run: |
+          pip list
       - name: Test pytest
         run: |
           pytest --junitxml=test_results/results.xml
