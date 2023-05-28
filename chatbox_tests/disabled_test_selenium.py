@@ -1,8 +1,10 @@
 import datetime
 import os
+import time
 
 import pytest
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -44,10 +46,10 @@ def state():
     state.login_elem.send_keys(state.user_name)
     state.chat_elem.send_keys(state.chat_room)
     state.connect_button_elem.click()
-    state.login_elem.clear()
-    state.chat_elem.clear()
 
     yield state
+    state.login_elem.clear()
+    state.chat_elem.clear()
     screenshot_path = os.path.abspath(os.path.join(os.pardir, 'test_results', 'selenium_screenshots',
                                                    f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.png'))
     state.driver.get_screenshot_as_file(screenshot_path)
@@ -247,3 +249,35 @@ def test_adjust_number_of_displayed_messages(state: TestState):
         assert len(displayed_messages) == max_msgs_on_page_num
         assert messages[i_start:i_start + max_msgs_on_page_num] == [m.text for m in displayed_messages]
         i_start += 1
+
+
+def test_send_and_open_link(state: TestState):
+    message_1 = 'www.rai.it'
+    message_2 = 'https://www.gazzetta.it/Calcio/Serie-A/Napoli/' \
+                '04-05-2023/scudetto-napoli-campione-d-italia-la-terza-volta-4601354295987.shtml'
+    new_message_box = state.driver.find_element_by_id('newMessage')
+    send_button = state.driver.find_element_by_id('sendMessageButton')
+
+    # SEND MESSAGES
+    new_message_box.send_keys(message_1)
+    send_button.click()
+    new_message_box.send_keys(message_2)
+    send_button.click()
+
+    # CLICK LINKS
+    messages = state.driver.find_elements_by_class_name('messageText')
+    messages[-1].click()
+    messages[-2].click()
+
+    assert len(state.driver.window_handles) == 3
+
+    # SEND MESSAGE
+    message_3 = 'abc abc https://www.italia.it/it/sicilia/agrigento abc abc'
+    new_message_box.send_keys(message_3)
+    send_button.click()
+
+    # CLICK LINKS
+    a = state.driver.find_elements_by_tag_name('a')
+    a[-1].click()
+
+    assert len(state.driver.window_handles) == 4
