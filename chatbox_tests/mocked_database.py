@@ -20,6 +20,9 @@ class MockedDatabase:
             self.fetched_messages = return_value
 
     def fetch_last_messages(self, chat_name, n=10, start_from_id=-1):
+        # todo always simulate database, don't return previously set values
+        if self.fetched_messages:
+            return self.fetched_messages
         start_from_id = int(start_from_id)
         if start_from_id == -1:
             return self.messages[chat_name][len(self.messages[chat_name]) - n:]

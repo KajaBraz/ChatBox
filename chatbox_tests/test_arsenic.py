@@ -196,11 +196,11 @@ async def test_messages_position(server, user):
 
 @pytest.mark.asyncio
 async def test_previous_messages(server, user):
-    # works for displaying 10 messages on the client's connection
+    messages_displayed_on_connection = 10
     received_messages_box = await user.session.get_element('#receivedMessages')
 
     # USER 1 SENDS MESSAGES
-    messages = [helper_functions.generate_random_string(5) for _ in range(20)]
+    messages = [helper_functions.generate_random_string(5) for _ in range(25)]
     new_msg_box = await user.session.get_element('#newMessage')
     send_button = await user.session.get_element('#sendMessageButton')
     for message in messages:
@@ -217,12 +217,12 @@ async def test_previous_messages(server, user):
 
     displayed_messaged_on_connection = await received_messages_box.get_elements('.messageText')
     displayed_messaged_on_connection = [await m.get_text() for m in displayed_messaged_on_connection]
-    assert messages[10:] == displayed_messaged_on_connection
+    assert messages[-messages_displayed_on_connection:] == displayed_messaged_on_connection
     await user.session.execute_script("receivedMessages.scrollTo(0, -receivedMessages.offsetHeight)")
     displayed_messaged_on_connection_after_scoll = await received_messages_box.get_elements('.messageText')
     displayed_messaged_on_connection_after_scoll = [await m.get_text() for m in
                                                     displayed_messaged_on_connection_after_scoll]
-    assert messages == displayed_messaged_on_connection_after_scoll
+    assert messages[-messages_displayed_on_connection * 2:] == displayed_messaged_on_connection_after_scoll
 
 
 @pytest.mark.asyncio

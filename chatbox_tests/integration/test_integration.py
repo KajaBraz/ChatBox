@@ -86,8 +86,8 @@ async def test_when_client_sends_message_is_added_to_database(state):
     await asyncio.sleep(0.5)
 
     # THEN
-    assert len(state.server_obj.chatbox_database.messages) == 1
-    assert state.server_obj.chatbox_database.messages[0] == messages[0]
+    assert len(state.server_obj.chatbox_database.messages[state.room]) == 1
+    assert [m.message for m in state.server_obj.chatbox_database.messages[state.room]][0] == messages[0]
     assert len(state.client.sent_messages) == 3
     assert len(state.client.received_messages) == 1
     assert len(state.client2.received_messages) == 1
@@ -213,7 +213,7 @@ async def test_scroll_up_to_see_more_messages_no_active_users_list_update(state)
 
     # WHEN
     await state.client.scroll_and_request_more_messages()
-    await asyncio.sleep(10)
+    await asyncio.sleep(2)
 
     # THEN
     received_jsons = state.client.received_jsons
@@ -222,6 +222,6 @@ async def test_scroll_up_to_see_more_messages_no_active_users_list_update(state)
     assert len(received_jsons) == 3 and \
            JsonFields.MESSAGE_TYPE in received_jsons[2] and \
            [rj[JsonFields.MESSAGE_TYPE] == [MessageTypes.USERS_UPDATE, MessageTypes.USERS_UPDATE,
-                                            MessageTypes.MORE_PREVIOUS_MESSAGES] for rj in received_jsons] and \
-           len(received_jsons2) == 1 and \
+                                            MessageTypes.MORE_PREVIOUS_MESSAGES] for rj in received_jsons]
+    assert len(received_jsons2) == 1 and \
            received_jsons2[0][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
