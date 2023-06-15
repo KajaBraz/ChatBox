@@ -1,11 +1,8 @@
-import asyncio
-import os
-
 import arsenic
 import pytest
 import pytest_asyncio
 
-from chatbox_tests import mocked_database
+from chatbox_tests import mocked_database, arsenic_tests_helpers
 from src import helper_functions, chatbox_websocket_server
 
 
@@ -18,11 +15,6 @@ class TestUser:
 
 @pytest_asyncio.fixture
 async def server():
-    # config_path = '../chatbox_tests_config.json'
-    # await chatbox_websocket_server.main(config_path, True)
-    # yield
-    # # print('\nserver')
-
     config_path = '../chatbox_tests_config.json'
     data = helper_functions.read_config(config_path)
     address = data['address']['name']
@@ -30,6 +22,7 @@ async def server():
     chatbox_server = chatbox_websocket_server.Server(data)
     chatbox_server.chatbox_database = mocked_database.MockedDatabase()
     await chatbox_server.start(address, port)
+
     yield
     chatbox_server.stop()
     await chatbox_server.wait_stop()
@@ -38,17 +31,9 @@ async def server():
 @pytest_asyncio.fixture
 async def user():
     client = TestUser()
-    relative_path = os.path.join(os.pardir, 'javascript', 'index.html')
-    absolute_path = os.path.abspath(relative_path)
-    client.session = await arsenic.start_session(arsenic.services.Geckodriver(), arsenic.browsers.Firefox(
-        **{'moz:firefoxOptions': {'args': ['-headless']}}))
-    await client.session.get(f'file:///{absolute_path}')
-    login_elem = await client.session.get_element('#login')
-    chat_elem = await client.session.get_element('#findChat')
-    connect_button_elem = await client.session.get_element('#connectButton')
-    await login_elem.send_keys(client.user_name)
-    await chat_elem.send_keys(client.chat_room)
-    await connect_button_elem.click()
+    client.session = await arsenic_tests_helpers.creaate_session()
+    await arsenic_tests_helpers.connect_user(client.user_name, client.chat_room, client.session)
+
     yield client
     await arsenic.stop_session(client.session)
 
@@ -96,23 +81,7 @@ async def test_recent_chats_display(server, user):
 
 @pytest.mark.asyncio
 async def test_active_users_display(server, user):
-    async def make_drivers(username):
-        # todo move to a general function (connection) and use in other tests
-        # todo fix the below version to open tabs instead of new windows
-
-        new_session = await arsenic.start_session(arsenic.services.Geckodriver(), arsenic.browsers.Firefox())
-        relative_path = os.path.join(os.pardir, 'javascript', 'index.html')
-        absolute_path = os.path.abspath(relative_path)
-        await new_session.get(f'file:///{absolute_path}')
-
-        login_elem = await new_session.get_element('#login')
-        chat_elem = await new_session.get_element('#findChat')
-        connect_button_elem = await new_session.get_element('#connectButton')
-        await login_elem.send_keys(username)
-        await chat_elem.send_keys(user.chat_room)
-        await connect_button_elem.click()
-        return new_session
-
+    # todo fix the below version to open tabs instead of new windows
     activer_users = await user.session.get_elements('.chatUser')
     assert {user.user_name} == {await active_user.get_text() for active_user in activer_users}
 
@@ -122,10 +91,11 @@ async def test_active_users_display(server, user):
     temp_drivers = {user.session}
 
     for new_user in new_users:
-        new_sessioniver = await make_drivers(new_user)
-        new_sessions.add(new_sessioniver)
+        new_session = await arsenic_tests_helpers.creaate_session()
+        await arsenic_tests_helpers.connect_user(new_user, user.chat_room, new_session)
+        new_sessions.add(new_session)
         temp_users.add(new_user)
-        temp_drivers.add(new_sessioniver)
+        temp_drivers.add(new_session)
         temp_active_users = [{await u.get_text() for u in await dr.get_elements('.chatUser')} for dr in temp_drivers]
         assert all(temp_users == displayed for displayed in temp_active_users)
 
@@ -137,28 +107,17 @@ async def test_active_users_display(server, user):
 @pytest.mark.asyncio
 async def test_messages_position(server, user):
     # CONNECT USER 2
-    new_session = await arsenic.start_session(arsenic.services.Geckodriver(), arsenic.browsers.Firefox())
-    relative_path = os.path.join(os.pardir, 'javascript', 'index.html')
-    absolute_path = os.path.abspath(relative_path)
-    await new_session.get(f'file:///{absolute_path}')
-
-    user2_login = helper_functions.generate_random_string(10)
-    login_elem = await new_session.get_element('#login')
-    chat_elem = await new_session.get_element('#findChat')
-    connect_button_elem = await new_session.get_element('#connectButton')
-    await login_elem.send_keys(user2_login)
-    await chat_elem.send_keys(user.chat_room)
-    await connect_button_elem.click()
-
-    # todo move into a connection function
+    user2 = helper_functions.generate_random_string(5)
+    new_session = await arsenic_tests_helpers.creaate_session()
+    await arsenic_tests_helpers.connect_user(user2, user.chat_room, new_session)
 
     # PREPARE MESSAGES USER1
-    messages_user1 = [helper_functions.generate_random_string(15) for i in range(2)]
+    messages_user1 = [helper_functions.generate_random_string(15) for _ in range(2)]
     new_message_box_user1 = await user.session.get_element('#newMessage')
     send_button_user1 = await user.session.get_element('#sendMessageButton')
 
     # PREPARE MESSAGES USER2
-    messages_user2 = [helper_functions.generate_random_string(15) for i in range(2)]
+    messages_user2 = [helper_functions.generate_random_string(15) for _ in range(2)]
     new_message_box_user2 = await new_session.get_element('#newMessage')
     send_button_user2 = await new_session.get_element('#sendMessageButton')
 
@@ -208,12 +167,9 @@ async def test_previous_messages(server, user):
         await new_msg_box.send_keys(message)
         await send_button.click()
 
-    # USER 2 CONNECTS
-    login_elem = await user.session.get_element('#login')
-    await login_elem.clear()
-    await login_elem.send_keys(helper_functions.generate_random_string(5))
-    connect_button_elem = await user.session.get_element('#connectButton')
-    await connect_button_elem.click()
+    # USER CHANGES LOGIN AND CONNECTS
+    new_login = helper_functions.generate_random_string(5)
+    await arsenic_tests_helpers.connect_user(new_login, user.chat_room, user.session)
 
     displayed_messaged_on_connection = await received_messages_box.get_elements('.messageText')
     displayed_messaged_on_connection = [await m.get_text() for m in displayed_messaged_on_connection]
