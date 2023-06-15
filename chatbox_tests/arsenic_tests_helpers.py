@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import arsenic
 
@@ -6,8 +7,7 @@ import arsenic
 async def creaate_session() -> arsenic.Session:
     session = await arsenic.start_session(arsenic.services.Geckodriver(),
                                           arsenic.browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}}))
-    relative_path = os.path.join(os.pardir, 'javascript', 'index.html')
-    absolute_path = os.path.abspath(relative_path)
+    absolute_path = os.path.join(Path.home(), 'GitProjects', 'ChatBox', 'javascript', 'index.html')
     await session.get(f'file:///{absolute_path}')
     return session
 

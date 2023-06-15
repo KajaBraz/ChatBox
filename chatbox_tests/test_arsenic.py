@@ -1,3 +1,5 @@
+import os.path
+
 import arsenic
 import pytest
 import pytest_asyncio
@@ -15,8 +17,9 @@ class TestUser:
 
 @pytest_asyncio.fixture
 async def server():
-    config_path = '../chatbox_tests_config.json'
-    data = helper_functions.read_config(config_path)
+    config_relative_path = os.path.join('chatbox_tests', 'chatbox_tests_config.json')
+    config_absolute_path = os.path.abspath(config_relative_path)
+    data = helper_functions.read_config(config_absolute_path)
     address = data['address']['name']
     port = data['address']['port']
     chatbox_server = chatbox_websocket_server.Server(data)
