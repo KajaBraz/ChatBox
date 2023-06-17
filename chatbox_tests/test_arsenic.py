@@ -211,3 +211,36 @@ async def test_adjust_number_of_displayed_messages(server, user):
         assert len(displayed_messages) == max_msgs_on_page_num
         assert messages[i_start:i_start + max_msgs_on_page_num] == [await m.get_text() for m in displayed_messages]
         i_start += 1
+
+
+@pytest.mark.asyncio
+async def test_send_and_open_link(server, user):
+    message_1 = 'www.rai.it'
+    message_2 = 'https://www.gazzetta.it/Calcio/Serie-A/Napoli/' \
+                '04-05-2023/scudetto-napoli-campione-d-italia-la-terza-volta-4601354295987.shtml'
+    new_message_box = await user.session.get_element('#newMessage')
+    send_button = await user.session.get_element('#sendMessageButton')
+
+    # SEND MESSAGES
+    await new_message_box.send_keys(message_1)
+    await send_button.click()
+    await new_message_box.send_keys(message_2)
+    await send_button.click()
+
+    # CLICK LINKS
+    messages = await user.session.get_elements('.messageText')
+    await messages[-1].click()
+    await messages[-2].click()
+
+    assert len(await user.session.get_window_handles()) == 3
+
+    # SEND MESSAGE
+    message_3 = 'abc abc https://www.italia.it/it/sicilia/agrigento abc abc'
+    await new_message_box.send_keys(message_3)
+    await send_button.click()
+
+    # CLICK LINKS
+    a = await user.session.get_elements('a')
+    await a[-1].click()
+
+    assert len(await user.session.get_window_handles()) == 4
