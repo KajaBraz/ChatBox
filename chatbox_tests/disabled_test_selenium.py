@@ -1,7 +1,5 @@
 import asyncio
 import os
-import time
-from datetime import datetime
 
 import pytest
 import pytest_asyncio
@@ -9,8 +7,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
 from src import helper_functions, chatbox_websocket_server
@@ -178,8 +174,6 @@ async def test_messages_position(server, user):
     login_elem.send_keys(user2_login)
     chat_elem.send_keys(user.chat_room)
     connect_button_elem.click()
-    await asyncio.sleep(2)
-    # todo move into a connection function
 
     # PREPARE MESSAGES USER1
     messages_user1 = [helper_functions.generate_random_string(15) for i in range(2)]
@@ -194,19 +188,15 @@ async def test_messages_position(server, user):
     # SEND MESSAGES
     new_message_box_user1.send_keys(messages_user1[0])
     send_button_user1.click()
-    await asyncio.sleep(2)
 
     new_message_box_user2.send_keys(messages_user2[0])
     send_button_user2.click()
-    await asyncio.sleep(2)
 
     new_message_box_user1.send_keys(messages_user1[1])
     send_button_user1.click()
-    await asyncio.sleep(2)
 
     new_message_box_user2.send_keys(messages_user2[1])
     send_button_user2.click()
-    await asyncio.sleep(2)
 
     # GATHER MESSAGES
     new_message_box_user1.click()
@@ -223,11 +213,42 @@ async def test_messages_position(server, user):
     assert all(['right' in messages_style_user2[i] for i in range(len(messages_style_user2)) if i % 2 == 1])
     assert all(['left' in messages_style_user1[i] for i in range(len(messages_style_user1)) if i % 2 == 1])
     assert all(['left' in messages_style_user2[i] for i in range(len(messages_style_user2)) if i % 2 == 0])
-    await asyncio.sleep(2)
 
     # todo temporary, to remove, make seperate windows not drivers
     new_driver.quit()
-    await asyncio.sleep(2)
+
+
+def test_previous_messages(state: TestState):
+    # works for displaying 10 messages on the client's connection
+
+    received_messages_box = state.driver.find_element_by_id('receivedMessages')
+
+    # USER 1 SENDS MESSAGES
+    messages = [helper_functions.generate_random_string(5) for i in range(20)]
+    new_msg_box = state.driver.find_element_by_id('newMessage')
+    send_button = state.driver.find_element_by_id('sendMessageButton')
+    for message in messages:
+        new_msg_box.send_keys(message)
+        send_button.click()
+        new_msg_box.clear()
+
+    wait = WebDriverWait(state.driver, 10)
+    wait.until(
+        lambda d: [m.text for m in received_messages_box.find_elements_by_class_name('messageText')] == messages,
+        f"Message not found - wait 1, {[m.text for m in received_messages_box.find_elements_by_class_name('messageText')]}"
+    )
+
+    # USER 2 CONNECTS
+    state.login_elem.send_keys(helper_functions.generate_random_string(5))
+    state.chat_elem.send_keys(state.chat_room)
+    state.connect_button_elem.click()
+    wait.until(
+        lambda d: messages[10:] == [m.text for m in received_messages_box.find_elements_by_class_name('messageText')],
+        f"Message not found - wait 2, {[m.text for m in received_messages_box.find_elements_by_class_name('messageText')]}"
+    )
+
+    previous_messages_loaded_on_connection = received_messages_box.find_elements_by_class_name('messageText')
+    assert messages[10:] == [m.text for m in previous_messages_loaded_on_connection]
 
 
 # @pytest.mark.asyncio
@@ -313,3 +334,36 @@ async def test_adjust_number_of_displayed_messages(server, user):
         i_start += 1
         await asyncio.sleep(1)
     await asyncio.sleep(5)
+
+
+@pytest.mark.asyncio
+def test_send_and_open_link(server, user):
+    message_1 = 'www.rai.it'
+    message_2 = 'https://www.gazzetta.it/Calcio/Serie-A/Napoli/' \
+                '04-05-2023/scudetto-napoli-campione-d-italia-la-terza-volta-4601354295987.shtml'
+    new_message_box = user.driver.find_element_by_id('newMessage')
+    send_button = user.driver.find_element_by_id('sendMessageButton')
+
+    # SEND MESSAGES
+    new_message_box.send_keys(message_1)
+    send_button.click()
+    new_message_box.send_keys(message_2)
+    send_button.click()
+
+    # CLICK LINKS
+    messages = user.driver.find_elements_by_class_name('messageText')
+    messages[-1].click()
+    messages[-2].click()
+
+    assert len(user.driver.window_handles) == 3
+
+    # SEND MESSAGE
+    message_3 = 'abc abc https://www.italia.it/it/sicilia/agrigento abc abc'
+    new_message_box.send_keys(message_3)
+    send_button.click()
+
+    # CLICK LINKS
+    a = user.driver.find_elements_by_tag_name('a')
+    a[-1].click()
+
+    assert len(user.driver.window_handles) == 4
