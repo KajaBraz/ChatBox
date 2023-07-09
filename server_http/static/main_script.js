@@ -449,6 +449,11 @@ function activate_actions_on_entering_chat() {
     console.log(login, chat);
 }
 
+function get_chat_from_url(urlAddress) {
+    let url = new URL(urlAddress);
+    return url.searchParams.get('chat');
+}
+
 
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
@@ -483,14 +488,16 @@ const audio = new Audio("sheep-122256.mp3");
 
 window.onload = function () {
     console.log("onload");
+    let chat_name = get_chat_from_url(window.location.href);
+    chat_name_header.innerHTML = chat_name;
+    chat_destination_element.value = chat_name;
+
     let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
-    let stored_chat_name = localStorage.getItem(ACTIVE_CHAT_STORAGE);
-    if (stored_user_name && stored_chat_name) {
+    if (stored_user_name) {
         let short_name = retrieve_display_login(stored_user_name);
         my_name_element.value = short_name;
-        chat_destination_element.value = stored_chat_name;
-        retrieve_recent_chats();
     }
+    retrieve_recent_chats();
 }
 
 window.onunload = function () {
