@@ -449,11 +449,6 @@ function activate_actions_on_entering_chat() {
     console.log(login, chat);
 }
 
-function get_chat_from_url(urlAddress) {
-    let url = new URL(urlAddress);
-    return url.searchParams.get('chat');
-}
-
 
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
@@ -484,21 +479,20 @@ const ACTIVE_USER_STORAGE = "chatbox_stored_active_user";
 const RECENT_CHATS_STORAGE = "chatbox_stored_recent_chats";
 const MAX_MSGS_ON_PAGE_NUM = 20;
 const TAB_TITLE = 'ChatBox'
-const audio = new Audio("sheep-122256.mp3");
+const audio = new Audio("static/sheep-122256.mp3");
+
 
 window.onload = function () {
     console.log("onload");
-    let chat_name = get_chat_from_url(window.location.href);
-    chat_name_header.innerHTML = chat_name;
-    chat_destination_element.value = chat_name;
-
     let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
     if (stored_user_name) {
         let short_name = retrieve_display_login(stored_user_name);
         my_name_element.value = short_name;
     }
     retrieve_recent_chats();
+    activate_actions_on_entering_chat();
 }
+
 
 window.onunload = function () {
     webSocket.close(1000);
@@ -564,9 +558,12 @@ message_element.onpaste = function (e) {
     }
 }
 
+
 all_messages_element.addEventListener('scroll', activate_scroll_event);
 document.addEventListener('click', read_message);
 document.addEventListener('keypress', read_message);
 
 document.onclick = deactivate_on_focus;
 document.onkeydown = deactivate_on_focus;
+
+// todo fix special characters (e.g., "_") in chat names which are displayed but break active users list

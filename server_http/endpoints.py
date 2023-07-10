@@ -1,18 +1,15 @@
-from flask import Flask, request, render_template
+import markupsafe
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
 
 @app.route('/', methods=['GET'])
-def open_chatbox():
-    if request.method == 'GET':
-        args = request.args
-        chat_room_name = args.get('chat')
-        print(args)
-        print('chat:', chat_room_name)
-        return render_template('index.html')
-
-    # todo fix no sound on messages (files treated as a GET request: "GET /sheep-122256.mp3 HTTP/1.1" 404 -)
+@app.route('/<chat>', methods=['GET'])
+def open_chatbox(chat='WelcomeInChatBox'):
+    requested_chat = markupsafe.escape(chat)
+    print('chat:', requested_chat)
+    return render_template('index.html', requestedChatName=requested_chat)
 
 
 if __name__ == '__main__':
