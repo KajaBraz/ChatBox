@@ -450,6 +450,38 @@ function activate_actions_on_entering_chat() {
 }
 
 
+function share_chat(platform) {
+    let chat_url = window.location.href;
+    let platform_share_url;
+    switch (platform) {
+        case 'facebook':
+            platform_share_url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(chat_url)}`;
+            break;
+        case 'twitter':
+            platform_share_url = `https://twitter.com/share?url=${encodeURIComponent(chat_url)}`;
+            break;
+        case 'linkedin':
+            platform_share_url = `https://www.linkedin.com/shareArticle?url=${encodeURIComponent(chat_url)}`;
+            break;
+        case 'pinterest':
+            platform_share_url = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(chat_url)}`;
+            break;
+        case 'reddit':
+            platform_share_url = `https://reddit.com/submit?url=${encodeURIComponent(chat_url)}`;
+            break;
+        case 'whatsapp':
+            platform_share_url = `https://api.whatsapp.com/send?text=${encodeURIComponent(chat_url)}`;
+            break;
+    }
+    console.log(`share with ${platform}: ${platform_share_url}`);
+    window.open(platform_share_url, '_blank');
+}
+
+function copy_chat_url() {
+    let chat_url = window.location.href;
+    navigator.clipboard.writeText(chat_url);
+}
+
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
 var all_messages_element = document.getElementById("receivedMessages");
@@ -458,6 +490,9 @@ var connect_button = document.getElementById("connectButton");
 var chat_destination_element = document.getElementById("findChat");
 var chat_name_header = document.getElementById("chatNameHeader");
 var recent_chats = document.getElementById("recentlyUsedChats");
+var share_buttons = document.querySelectorAll(".shareButton");
+
+console.log('*****', share_buttons);
 
 var login = "";
 var chat = "";
@@ -558,6 +593,23 @@ message_element.onpaste = function (e) {
     }
 }
 
+share_buttons.forEach(share_button => {
+    share_button.onclick = () => {
+        let platform = share_button.classList[1];
+        console.log('platform:', platform, typeof platform);
+        switch (platform) {
+            case 'clipboard':
+                copy_chat_url();
+                console.log(window.location.href);
+                break;
+            default:
+                share_chat(platform);
+        }
+    }
+});
+
+
+
 
 all_messages_element.addEventListener('scroll', activate_scroll_event);
 document.addEventListener('click', read_message);
@@ -567,3 +619,4 @@ document.onclick = deactivate_on_focus;
 document.onkeydown = deactivate_on_focus;
 
 // todo fix special characters (e.g., "_") in chat names which are displayed but break active users list
+// todo fix active users in Firefox
