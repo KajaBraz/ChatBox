@@ -1,9 +1,10 @@
 import asyncio
+import os.path
 
 import pytest
 import pytest_asyncio
 
-from chatbox_tests.integration import mocked_database
+from chatbox_tests import mocked_database
 from chatbox_tests.integration.virtual_websocket_client import VirtualClient
 from src import chatbox_websocket_server, helper_functions, database, message
 from src.enums import JsonFields, MessageTypes
@@ -16,8 +17,9 @@ class TestState:
 @pytest_asyncio.fixture
 async def state():
     # setup actions
-    config_path = 'chatbox_tests_config.json'
-    data = helper_functions.read_config(config_path)
+    config_relative_path = os.path.join('chatbox_tests', 'chatbox_tests_config.json')
+    config_absolute_path = os.path.abspath(config_relative_path)
+    data = helper_functions.read_config(config_absolute_path)
     state = TestState()
     state.address = data['address']['name']
     state.port = data['address']['port']
@@ -86,8 +88,8 @@ async def test_when_client_sends_message_is_added_to_database(state):
     await asyncio.sleep(0.5)
 
     # THEN
-    assert len(state.server_obj.chatbox_database.messages) == 1
-    assert state.server_obj.chatbox_database.messages[0] == messages[0]
+    assert len(state.server_obj.chatbox_database.messages[state.room]) == 1
+    assert [m.message for m in state.server_obj.chatbox_database.messages[state.room]][0] == messages[0]
     assert len(state.client.sent_messages) == 3
     assert len(state.client.received_messages) == 1
     assert len(state.client2.received_messages) == 1
@@ -215,7 +217,7 @@ async def test_scroll_up_to_see_more_messages_no_active_users_list_update(state)
 
     # WHEN
     await state.client.scroll_and_request_more_messages()
-    await asyncio.sleep(10)
+    await asyncio.sleep(2)
 
     # THEN
     received_jsons = state.client.received_jsons
@@ -224,8 +226,8 @@ async def test_scroll_up_to_see_more_messages_no_active_users_list_update(state)
     assert len(received_jsons) == 3 and \
            JsonFields.MESSAGE_TYPE in received_jsons[2] and \
            [rj[JsonFields.MESSAGE_TYPE] == [MessageTypes.USERS_UPDATE, MessageTypes.USERS_UPDATE,
-                                            MessageTypes.MORE_PREVIOUS_MESSAGES] for rj in received_jsons] and \
-           len(received_jsons2) == 1 and \
+                                            MessageTypes.MORE_PREVIOUS_MESSAGES] for rj in received_jsons]
+    assert len(received_jsons2) == 1 and \
            received_jsons2[0][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
 
 
