@@ -156,7 +156,7 @@ class Server:
         self.server.close()
 
 
-async def main(config_file_path):
+async def main(config_file_path, is_test=False):
     config_data = helper_functions.read_config(config_file_path)
     address = config_data['address']['name']
     port = config_data['address']['port']
@@ -166,7 +166,9 @@ async def main(config_file_path):
         server.chatbox_database = database.ChatBoxDatabase(config_data)
         server.conn = server.chatbox_database.connect()
     await server.start(address, port)
-    await server.wait_stop()
+
+    if not is_test:
+        await server.wait_stop()
 
 
 if __name__ == '__main__':
