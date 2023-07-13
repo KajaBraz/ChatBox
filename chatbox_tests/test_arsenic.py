@@ -1,3 +1,4 @@
+import multiprocessing
 import os.path
 
 import arsenic
@@ -32,6 +33,15 @@ async def server():
 
 
 @pytest_asyncio.fixture
+async def http_server():
+    p = multiprocessing.Process(target=arsenic_tests_helpers.run_http_server)
+    p.start()
+
+    yield
+    p.terminate()
+
+
+@pytest_asyncio.fixture
 async def user():
     client = TestUser()
     client.session = await arsenic_tests_helpers.creaate_session()
@@ -42,7 +52,7 @@ async def user():
 
 
 @pytest.mark.asyncio
-async def test_first_connection(server, user):
+async def test_first_connection(server, http_server, user):
     header_elem = await user.session.get_element('#chatNameHeader')
     chat_list_elem = await user.session.get_element('#recentlyUsedChats')
     displayed_chat = await chat_list_elem.get_element(f'#{user.chat_room}')
@@ -53,7 +63,7 @@ async def test_first_connection(server, user):
 
 
 @pytest.mark.asyncio
-async def test_sending_and_displaying_messages(server, user):
+async def test_sending_and_displaying_messages(server, http_server, user):
     new_message_box = await user.session.get_element('#newMessage')
     send_button = await user.session.get_element('#sendMessageButton')
 
@@ -70,7 +80,7 @@ async def test_sending_and_displaying_messages(server, user):
 
 
 @pytest.mark.asyncio
-async def test_recent_chats_display(server, user):
+async def test_recent_chats_display(server, http_server, user):
     chat_rooms = [helper_functions.generate_random_string(10) for _ in range(4)]
     chat_elem = await user.session.get_element('#findChat')
     connect_button_elem = await user.session.get_element('#connectButton')
@@ -83,7 +93,7 @@ async def test_recent_chats_display(server, user):
 
 
 @pytest.mark.asyncio
-async def test_active_users_display(server, user):
+async def test_active_users_display(server, http_server, user):
     # todo fix the below version to open tabs instead of new windows
     activer_users = await user.session.get_elements('.chatUser')
     assert {user.user_name} == {await active_user.get_text() for active_user in activer_users}
@@ -108,7 +118,7 @@ async def test_active_users_display(server, user):
 
 
 @pytest.mark.asyncio
-async def test_messages_position(server, user):
+async def test_messages_position(server, http_server, user):
     # CONNECT USER 2
     user2 = helper_functions.generate_random_string(5)
     new_session = await arsenic_tests_helpers.creaate_session()
@@ -157,7 +167,7 @@ async def test_messages_position(server, user):
 
 
 @pytest.mark.asyncio
-async def test_previous_messages(server, user):
+async def test_previous_messages(server, http_server, user):
     messages_displayed_on_connection = 10
     received_messages_box = await user.session.get_element('#receivedMessages')
 
@@ -185,7 +195,7 @@ async def test_previous_messages(server, user):
 
 
 @pytest.mark.asyncio
-async def test_adjust_number_of_displayed_messages(server, user):
+async def test_adjust_number_of_displayed_messages(server, http_server, user):
     # works for max num of messgaes in messages box set to 20
     max_msgs_on_page_num = 20
 
@@ -214,7 +224,7 @@ async def test_adjust_number_of_displayed_messages(server, user):
 
 
 @pytest.mark.asyncio
-async def test_send_and_open_link(server, user):
+async def test_send_and_open_link(server, http_server, user):
     message_1 = 'www.rai.it'
     message_2 = 'https://www.gazzetta.it/Calcio/Serie-A/Napoli/' \
                 '04-05-2023/scudetto-napoli-campione-d-italia-la-terza-volta-4601354295987.shtml'

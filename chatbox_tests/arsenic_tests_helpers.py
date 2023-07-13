@@ -2,12 +2,13 @@ import os
 
 import arsenic
 
+from server_http.endpoints import app
+
 
 async def creaate_session() -> arsenic.Session:
     session = await arsenic.start_session(arsenic.services.Geckodriver(),
                                           arsenic.browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}}))
-    absolute_path = os.path.join(os.getcwd(), 'javascript', 'index.html')
-    await session.get(f'file:///{absolute_path}')
+    await session.get(f'localhost:5000/')
     return session
 
 
@@ -20,3 +21,7 @@ async def connect_user(username: str, chat: str, session: arsenic.Session) -> No
     await login_elem.send_keys(username)
     await chat_elem.send_keys(chat)
     await connect_button_elem.click()
+
+
+def run_http_server():
+    app.run()
