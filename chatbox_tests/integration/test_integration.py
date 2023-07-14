@@ -1,8 +1,10 @@
 import asyncio
+import os.path
 
 import pytest
+import pytest_asyncio
 
-from chatbox_tests.integration import mocked_database
+from chatbox_tests import mocked_database
 from chatbox_tests.integration.virtual_websocket_client import VirtualClient
 from src import chatbox_websocket_server, helper_functions, database, message
 from src.enums import JsonFields, MessageTypes
@@ -12,11 +14,12 @@ class TestState:
     pass
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def state():
     # setup actions
-    config_path = 'chatbox_tests_config.json'
-    data = helper_functions.read_config(config_path)
+    config_relative_path = os.path.join('chatbox_tests', 'chatbox_tests_config.json')
+    config_absolute_path = os.path.abspath(config_relative_path)
+    data = helper_functions.read_config(config_absolute_path)
     state = TestState()
     state.address = data['address']['name']
     state.port = data['address']['port']
@@ -85,8 +88,8 @@ async def test_when_client_sends_message_is_added_to_database(state):
     await asyncio.sleep(0.5)
 
     # THEN
-    assert len(state.server_obj.chatbox_database.messages) == 1
-    assert state.server_obj.chatbox_database.messages[0] == messages[0]
+    assert len(state.server_obj.chatbox_database.messages[state.room]) == 1
+    assert [m.message for m in state.server_obj.chatbox_database.messages[state.room]][0] == messages[0]
     assert len(state.client.sent_messages) == 3
     assert len(state.client.received_messages) == 1
     assert len(state.client2.received_messages) == 1
@@ -173,8 +176,10 @@ async def test_server_adds_timestamp_to_message(state):
     await asyncio.sleep(0.5)
 
     # THEN
-    assert 1 == len(state.client.received_jsons)
-    assert 'timestamp' in state.client.received_jsons[0][JsonFields.MESSAGE_VALUE]
+    assert len(state.client.received_jsons) == 2
+    assert state.client.received_jsons[0][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
+    assert state.client.received_jsons[1][JsonFields.MESSAGE_TYPE] == MessageTypes.MESSAGE
+    assert 'timestamp' in state.client.received_jsons[1][JsonFields.MESSAGE_VALUE]
 
 
 @pytest.mark.asyncio
@@ -212,7 +217,7 @@ async def test_scroll_up_to_see_more_messages_no_active_users_list_update(state)
 
     # WHEN
     await state.client.scroll_and_request_more_messages()
-    await asyncio.sleep(10)
+    await asyncio.sleep(2)
 
     # THEN
     received_jsons = state.client.received_jsons
@@ -221,6 +226,94 @@ async def test_scroll_up_to_see_more_messages_no_active_users_list_update(state)
     assert len(received_jsons) == 3 and \
            JsonFields.MESSAGE_TYPE in received_jsons[2] and \
            [rj[JsonFields.MESSAGE_TYPE] == [MessageTypes.USERS_UPDATE, MessageTypes.USERS_UPDATE,
-                                            MessageTypes.MORE_PREVIOUS_MESSAGES] for rj in received_jsons] and \
-           len(received_jsons2) == 1 and \
+                                            MessageTypes.MORE_PREVIOUS_MESSAGES] for rj in received_jsons]
+    assert len(received_jsons2) == 1 and \
            received_jsons2[0][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
+
+
+@pytest.mark.asyncio
+async def test_users_join_server_sends_notification_jsons(state):
+    await state.client.connect()
+    asyncio.create_task(state.client.start_receiving())
+    await asyncio.sleep(2)
+    received_jsons_1 = state.client.received_jsons
+    assert len(received_jsons_1) == 1
+    assert received_jsons_1[0].keys() == {JsonFields.MESSAGE_TYPE, JsonFields.MESSAGE_VALUE,
+                                          JsonFields.MESSAGE_DESTINATION}
+    assert received_jsons_1[0][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
+    assert received_jsons_1[0][JsonFields.MESSAGE_VALUE] == [state.client.user_name]
+    assert received_jsons_1[0][JsonFields.MESSAGE_DESTINATION] == [state.client.user_name]
+
+    await state.client2.connect()
+    asyncio.create_task(state.client2.start_receiving())
+    await asyncio.sleep(2)
+    received_jsons_1 = state.client.received_jsons
+    received_jsons_2 = state.client2.received_jsons
+    assert len(received_jsons_1) == 2
+    assert received_jsons_1[1].keys() == {JsonFields.MESSAGE_TYPE, JsonFields.MESSAGE_VALUE,
+                                          JsonFields.MESSAGE_DESTINATION}
+    assert received_jsons_1[1][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
+    assert received_jsons_1[1][JsonFields.MESSAGE_VALUE] == [state.client2.user_name]
+    assert received_jsons_1[1][JsonFields.MESSAGE_DESTINATION] == [state.client.user_name]
+    assert len(received_jsons_2) == 1
+    assert received_jsons_2[0].keys() == {JsonFields.MESSAGE_TYPE, JsonFields.MESSAGE_VALUE,
+                                          JsonFields.MESSAGE_DESTINATION}
+    assert received_jsons_2[0][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
+    assert received_jsons_2[0][JsonFields.MESSAGE_VALUE] == [state.client.user_name, state.client2.user_name]
+    assert received_jsons_2[0][JsonFields.MESSAGE_DESTINATION] == [state.client2.user_name]
+
+    await state.client3.connect()
+    asyncio.create_task(state.client3.start_receiving())
+    await asyncio.sleep(2)
+    received_jsons_1 = state.client.received_jsons
+    received_jsons_2 = state.client2.received_jsons
+    received_jsons_3 = state.client3.received_jsons
+    assert len(received_jsons_1) == 3
+    assert len(received_jsons_2) == 2
+    assert len(received_jsons_3) == 1
+    assert received_jsons_1[2].keys() == {JsonFields.MESSAGE_TYPE, JsonFields.MESSAGE_VALUE,
+                                          JsonFields.MESSAGE_DESTINATION}
+    assert received_jsons_1[2][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
+    assert received_jsons_1[2][JsonFields.MESSAGE_VALUE] == [state.client3.user_name]
+    assert received_jsons_1[2][JsonFields.MESSAGE_DESTINATION] == [state.client.user_name, state.client2.user_name]
+    assert received_jsons_2[1].keys() == {JsonFields.MESSAGE_TYPE, JsonFields.MESSAGE_VALUE,
+                                          JsonFields.MESSAGE_DESTINATION}
+    assert received_jsons_2[1][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
+    assert received_jsons_2[1][JsonFields.MESSAGE_VALUE] == [state.client3.user_name]
+    assert received_jsons_2[1][JsonFields.MESSAGE_DESTINATION] == [state.client.user_name, state.client2.user_name]
+    assert received_jsons_3[0].keys() == {JsonFields.MESSAGE_TYPE, JsonFields.MESSAGE_VALUE,
+                                          JsonFields.MESSAGE_DESTINATION}
+    assert received_jsons_3[0][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
+    assert received_jsons_3[0][JsonFields.MESSAGE_VALUE] == [state.client.user_name, state.client2.user_name,
+                                                             state.client3.user_name]
+    assert received_jsons_3[0][JsonFields.MESSAGE_DESTINATION] == [state.client3.user_name]
+
+
+@pytest.mark.asyncio
+async def test_users_leave_server_sends_notification_jsons(state):
+    await state.client.connect()
+    await state.client2.connect()
+    asyncio.create_task(state.client2.start_receiving())
+    await state.client3.connect()
+    asyncio.create_task(state.client3.start_receiving())
+    await asyncio.sleep(2)
+
+    await state.client.disconnect()
+    await asyncio.sleep(2)
+    received_jsons_2 = state.client2.received_jsons
+    received_jsons_3 = state.client3.received_jsons
+    assert received_jsons_2[-1].keys() == {JsonFields.MESSAGE_TYPE, JsonFields.MESSAGE_VALUE,
+                                           JsonFields.MESSAGE_DESTINATION}
+    assert received_jsons_2[-1][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
+    assert received_jsons_2[-1][JsonFields.MESSAGE_VALUE] == [state.client.user_name]
+    assert received_jsons_2[-1][JsonFields.MESSAGE_DESTINATION] == [state.client2.user_name, state.client3.user_name]
+    assert received_jsons_3[-1] == received_jsons_2[-1]
+
+    await state.client3.disconnect()
+    await asyncio.sleep(2)
+    received_jsons_2 = state.client2.received_jsons
+    assert received_jsons_2[-1].keys() == {JsonFields.MESSAGE_TYPE, JsonFields.MESSAGE_VALUE,
+                                           JsonFields.MESSAGE_DESTINATION}
+    assert received_jsons_2[-1][JsonFields.MESSAGE_TYPE] == MessageTypes.USERS_UPDATE
+    assert received_jsons_2[-1][JsonFields.MESSAGE_VALUE] == [state.client3.user_name]
+    assert received_jsons_2[-1][JsonFields.MESSAGE_DESTINATION] == [state.client2.user_name]
