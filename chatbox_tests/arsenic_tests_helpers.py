@@ -1,14 +1,15 @@
-import os
+import asyncio
 
 import arsenic
 
 from server_http.endpoints import app
 
 
-async def creaate_session() -> arsenic.Session:
+async def creaate_session(chat_name='') -> arsenic.Session:
     session = await arsenic.start_session(arsenic.services.Geckodriver(),
                                           arsenic.browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}}))
-    await session.get(f'localhost:5000/')
+    await session.get(f'http://localhost:5000/{chat_name}')
+    await asyncio.sleep(2)
     return session
 
 

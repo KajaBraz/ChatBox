@@ -114,7 +114,7 @@ function send_websocket(message_type, message, sender, chat_destination, websock
 }
 
 
-function generate_unique_id(n) {
+function generate_random_string(n) {
     var s = "qwertyuioopasdfghjklzxcvbnmWERTYUIOPASDFGHJKLZXCVBNM1234567890";
     var id = '';
     for (let i = 0; i < n; i++) {
@@ -299,10 +299,13 @@ function assign_read_unread_class(msg_id) {
 
 
 function retrieve_recent_chats() {
-    recently_used_chats = localStorage.getItem(RECENT_CHATS_STORAGE).split(",");
-    console.log(recently_used_chats);
-    for (let i = 0; i < recently_used_chats.length; i++) {
-        add_chat(recently_used_chats[i]);
+    recently_used_chats = localStorage.getItem(RECENT_CHATS_STORAGE);
+    if (recently_used_chats) {
+        recently_used_chats = recently_used_chats.split(",");
+        console.log(recently_used_chats);
+        for (let i = 0; i < recently_used_chats.length; i++) {
+            add_chat(recently_used_chats[i]);
+        }
     }
 }
 
@@ -440,7 +443,7 @@ function activate_actions_on_entering_chat() {
         login = stored_user_name;
         console.log('equal logins');
     } else {
-        var id = generate_unique_id(id_length);
+        var id = generate_random_string(id_length);
         login = my_name_element.value + id;
         localStorage.setItem(ACTIVE_USER_STORAGE, login);
     }
@@ -520,10 +523,13 @@ const audio = new Audio("static/sheep-122256.mp3");
 window.onload = function () {
     console.log("onload");
     let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
+    let short_name;
     if (stored_user_name) {
-        let short_name = retrieve_display_login(stored_user_name);
-        my_name_element.value = short_name;
+        short_name = retrieve_display_login(stored_user_name);
+    } else {
+        short_name = generate_random_string(5);
     }
+    my_name_element.value = short_name;
     retrieve_recent_chats();
     activate_actions_on_entering_chat();
 }
