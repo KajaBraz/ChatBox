@@ -4,32 +4,51 @@ body {
 }
 
 button {
-    background-color: rgba(87, 87, 87, 0.445);
-    cursor: pointer;
-    border-radius: 5px;
+    border: 1px solid black;
+    border-radius: 2px;
     border: 1px solid black;
 }
 
 input {
     border: 1px solid black;
-    border-radius: 5px;
+    border-radius: 2px;
     resize: none;
     width: 100%;
 }
 
 .gridContainer {
     display: grid;
+    height: 100%;
     grid-template-columns: 0.2fr 0.5fr 3fr 0.5fr 0.5fr;
     grid-gap: 10px;
     grid-template-areas:
-        ".................  .................  header-area    header-area       .............."
-        "username-area      name-input-area    messages-area  messages-area     user-list-area"
-        "chat-name-area     chat-input-area    messages-area  messages-area     user-list-area"
-        "connect-area       connect-area       messages-area  messages-area     user-list-area"
-        "recent-chats-area  recent-chats-area  messages-area  messages-area     user-list-area"
-        "recent-chats-area  recent-chats-area  messages-area  messages-area     user-list-area"
-        ".................  .................  messages-area  messages-area     .............."
-        ".................  .................  send-area      send-button-area  ..............";
+        ".................  .................  header-area        header-area        ................."
+        "username-area      name-input-area    messages-area      messages-area      user-list-area   "
+        "chat-name-area     chat-input-area    messages-area      messages-area      user-list-area   "
+        "connect-area       connect-area       messages-area      messages-area      user-list-area   "
+        "recent-chats-area  recent-chats-area  messages-area      messages-area      user-list-area   "
+        "recent-chats-area  recent-chats-area  messages-area      messages-area      user-list-area   "
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  messages-area      messages-area      ................."
+        ".................  .................  send-area          send-button-area   ................."
+        ".................  .................  send-area          send-button-area   ................."
+        ".................  .................  send-area          send-button-area   ................."
+        ".................  .................  send-area          send-button-area   ................."
+        ".................  .................  send-area          send-button-area   ................."
+        ".................  .................  .................  .................  .................";
     padding-left: 5%;
     padding-right: 5%;
     text-align: center;
@@ -69,11 +88,13 @@ input {
     grid-area: messages-area;
     width: 90%;
     /* width: 800px; */
-    height: 500px;
+    /* height: 500px; */
+    /* height: 80vh; */
+    height: 100%;
     margin: auto;
     border: 1px solid black;
     background-color: white;
-    border-radius: 5px;
+    border-radius: 2px;
     resize: none;
     overflow: auto;
 }
@@ -92,7 +113,7 @@ input {
     margin-right: 0;
     margin-left: auto;
     border: 1px solid black;
-    border-radius: 5px;
+    border-radius: 2px;
     resize: none;
 }
 
@@ -104,18 +125,22 @@ input {
 }
 
 .availableChat {
-    background-color: rgba(87, 87, 87, 0.445);
-    border: 1px solid rgba(0, 0, 0, 0.8);
-    border-radius: 5px;
-    cursor: pointer;
+    /* background-color: rgba(87, 87, 87, 0.445); */
+    /* border: 1px solid rgba(0, 0, 0, 0.8); */
+    /* border-radius: 2px; */
+    /* cursor: pointer; */
     margin-bottom: 1%;
+    display: block;
+    margin-inline: auto;
 }
 
 .chatUser {
-    background-color: rgba(87, 87, 87, 0.445);
-    border: 1px solid rgba(0, 0, 0, 0.8);
-    border-radius: 5px;
+    /* background-color: rgba(87, 87, 87, 0.445); */
+    /* border: 1px solid rgba(0, 0, 0, 0.8); */
+    /* border-radius: 2px; */
     margin-bottom: 1%;
+    display: block;
+    margin-inline: auto;
 }
 
 .message {
@@ -125,7 +150,7 @@ input {
     padding-top: 1%;
     padding-bottom: 1%;
     border: 1px solid rgba(0, 0, 0, 0.8);
-    border-radius: 5px;
+    border-radius: 2px;
     clear: both;
     font-size: large;
     word-wrap: break-word;
