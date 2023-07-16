@@ -447,6 +447,8 @@ function activate_actions_on_entering_chat() {
     chat_change(chat_destination_element.value);
     add_chat(chat);
     console.log(login, chat);
+
+    connect_button.innerHTML = "Connected";
 }
 
 
@@ -514,6 +516,24 @@ my_name_element.onkeydown = (e) => {
 chat_destination_element.onkeydown = (e) => {
     if (e.code == 'Enter') {
         activate_actions_on_entering_chat();
+    }
+}
+
+
+my_name_element.oninput = () => {
+    if (my_name_element.value === login.slice(0, -id_length)) {
+        connect_button.innerHTML = "Connected";
+    } else {
+        connect_button.innerHTML = "Connect";
+    }
+}
+
+
+chat_destination_element.oninput = () => {
+    if (chat_destination_element.value === chat) {
+        connect_button.innerHTML = "Connected";
+    } else {
+        connect_button.innerHTML = "Connect";
     }
 }
 
