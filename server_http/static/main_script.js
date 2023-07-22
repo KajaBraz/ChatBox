@@ -265,13 +265,23 @@ function update_user_list(new_users_array, active_users_element, class_name) {
 
 function chat_change(new_chat) {
     console.log(`chat_change: old - ${chat}; new - ${new_chat}`);
+    leave_chat(chat);
+    enter_chat(new_chat);
+    window.location.href = `${window.location.origin}/${new_chat}`;
+}
+
+
+function leave_chat(old_chat) {
     store_last_msgs_ids();
+    localStorage.setItem(ACTIVE_CHAT_STORAGE, old_chat);
+    localStorage.setItem(RECENT_CHATS_STORAGE, active_recent_chats);
+}
+
+
+function enter_chat(new_chat) {
     chat = new_chat;
     chat_name_header.innerHTML = chat;
     chat_destination_element.value = chat;
-    localStorage.setItem(ACTIVE_CHAT_STORAGE, chat);
-    localStorage.setItem(RECENT_CHATS_STORAGE, active_recent_chats);
-    window.location.href = `${window.location.origin}/${chat}`;
 }
 
 
@@ -454,8 +464,7 @@ function activate_actions_on_entering_chat() {
     } else {
         login = update_save_login();
     }
-    // chat_change(chat_destination_element.value);
-    chat = chat_destination_element.value;
+    enter_chat(chat_destination_element.value)
     connect(login, chat);
     add_chat(chat);
     console.log(login, chat);
