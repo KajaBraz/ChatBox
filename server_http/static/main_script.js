@@ -104,6 +104,7 @@ function send_button(message_type, message_element, my_name, chat_name, websocke
 
 
 function send_websocket(message_type, message, sender, chat_destination, websocket) {
+    console.log("KUBA", chat, chat_destination);
     var json_message = {
         message_type: message_type,
         message_value: message,
@@ -269,8 +270,8 @@ function chat_change(new_chat) {
     chat_name_header.innerHTML = chat;
     chat_destination_element.value = chat;
     localStorage.setItem(ACTIVE_CHAT_STORAGE, chat);
-    connect(login, chat);
     localStorage.setItem(RECENT_CHATS_STORAGE, active_recent_chats);
+    window.location.href = `${window.location.origin}/${chat}`;
 }
 
 
@@ -437,17 +438,25 @@ function adjust_displayed_messages() {
 }
 
 
+function update_save_login() {
+    let id = generate_random_string(id_length);
+    let username = my_name_element.value + id;
+    localStorage.setItem(ACTIVE_USER_STORAGE, username);
+    return username;
+}
+
+
 function activate_actions_on_entering_chat() {
     let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
     if (stored_user_name && my_name_element.value === retrieve_display_login(stored_user_name)) {
         login = stored_user_name;
         console.log('equal logins');
     } else {
-        var id = generate_random_string(id_length);
-        login = my_name_element.value + id;
-        localStorage.setItem(ACTIVE_USER_STORAGE, login);
+        login = update_save_login();
     }
-    chat_change(chat_destination_element.value);
+    // chat_change(chat_destination_element.value);
+    chat = chat_destination_element.value;
+    connect(login, chat);
     add_chat(chat);
     console.log(login, chat);
 }
@@ -535,27 +544,32 @@ window.onload = function () {
 }
 
 
+window.onbeforeunload = () => {
+    store_last_msgs_ids();
+    update_save_login();
+}
+
+
 window.onunload = function () {
     webSocket.close(1000);
-    store_last_msgs_ids();
 }
 
 
 connect_button.onclick = () => {
-    activate_actions_on_entering_chat();
+    chat_change(chat_destination_element.value);
 }
 
 
 my_name_element.onkeydown = (e) => {
     if (e.code == 'Enter') {
-        activate_actions_on_entering_chat();
+        window.location.href = `${window.location.origin}/${chat_destination_element.value}`;
     }
 }
 
 
 chat_destination_element.onkeydown = (e) => {
     if (e.code == 'Enter') {
-        activate_actions_on_entering_chat();
+        chat_change(chat_destination_element.value);
     }
 }
 
