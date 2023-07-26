@@ -6,6 +6,7 @@ import time
 import arsenic
 import pytest
 import pytest_asyncio
+from arsenic import keys
 
 from chatbox_tests import mocked_database, arsenic_tests_helpers
 from src import helper_functions, chatbox_websocket_server, enums
@@ -46,7 +47,7 @@ async def http_server():
 @pytest_asyncio.fixture
 async def user():
     client = User()
-    client.session = await arsenic_tests_helpers.creaate_session(client.chat_room)
+    client.session = await arsenic_tests_helpers.creaate_session(client.chat_room, True)
 
     yield client
     await arsenic.stop_session(client.session)
@@ -58,20 +59,20 @@ async def test_open_chatbox_default_link(chatbox_server, http_server, user):
     await user.session.get(f'localhost:5000/')
     await asyncio.sleep(2)
 
-    login_elem = await user.session.get_element('#login')
     chat_elem = await user.session.get_element('#findChat')
     displayed_url = await user.session.get_url()
     header_elem = await user.session.get_element('#chatNameHeader')
     chat_list_elem = await user.session.get_element('#recentlyUsedChats')
     displayed_chat = await chat_list_elem.get_element(f'#{default_chat_name}')
     active_users = await user.session.get_element('#activeUsers')
+    login = await user.session.execute_script('return document.querySelector("#login").value')
 
     assert await chat_elem.get_attribute('value') == default_chat_name
     assert await header_elem.get_text() == default_chat_name
     assert await displayed_chat.get_text() == default_chat_name
     assert default_chat_name not in displayed_url
-    # assert await login_elem.get_attribute('value') != ''
-    # assert await login_elem.get_attribute('value') == await active_users.get_text()
+    assert login != ''
+    assert login == await active_users.get_text()
 
 
 @pytest.mark.asyncio
@@ -224,9 +225,9 @@ async def test_previous_messages(chatbox_server, http_server, user):
     # USER CHANGES LOGIN AND CONNECTS
     new_login = helper_functions.generate_random_string(5)
     await arsenic_tests_helpers.connect_user(user.session, new_login)
+    time.sleep(2)
 
     received_messages_box = await user.session.get_element('#receivedMessages')
-    time.sleep(2)
 
     displayed_messaged_on_connection = await received_messages_box.get_elements('.messageText')
     displayed_messaged_on_connection = [await m.get_text() for m in displayed_messaged_on_connection]
@@ -236,6 +237,7 @@ async def test_previous_messages(chatbox_server, http_server, user):
     displayed_messaged_on_connection_after_scoll = [await m.get_text() for m in
                                                     displayed_messaged_on_connection_after_scoll]
     assert messages[-messages_displayed_on_connection * 2:] == displayed_messaged_on_connection_after_scoll
+
 
 @pytest.mark.asyncio
 async def test_adjust_number_of_displayed_messages(chatbox_server, http_server, user):
@@ -297,3 +299,18 @@ async def test_send_and_open_link(chatbox_server, http_server, user):
     await a[-1].click()
 
     assert len(await user.session.get_window_handles()) == 4
+
+
+@pytest.mark.asyncio
+async def test_copy_to_clipboard(chatbox_server, http_server, user):
+    # COPY
+    copy_elem = await user.session.get_element('.fa')
+    await copy_elem.click()
+
+    # PASTE
+    new_message_box = await user.session.get_element('#newMessage')
+    await new_message_box.send_keys(f'{keys.CONTROL}v')
+
+    # VERIFY COPIED TEXT
+    pasted_message = await user.session.execute_script('return document.querySelector("#newMessage").value')
+    assert pasted_message == f'http://localhost:5000/{user.chat_room}'
