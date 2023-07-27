@@ -511,9 +511,7 @@ var connect_button = document.getElementById("connectButton");
 var chat_destination_element = document.getElementById("findChat");
 var chat_name_header = document.getElementById("chatNameHeader");
 var recent_chats = document.getElementById("recentlyUsedChats");
-var share_buttons = document.querySelectorAll(".shareButton");
-
-console.log('*****', share_buttons);
+var share_button = document.querySelector("#clipboard");
 
 var login = "";
 var chat = "";
@@ -622,23 +620,8 @@ message_element.onpaste = function (e) {
     }
 }
 
-share_buttons.forEach(share_button => {
-    share_button.onclick = () => {
-        let platform = share_button.classList[1];
-        console.log('platform:', platform, typeof platform);
-        switch (platform) {
-            case 'clipboard':
-                copy_chat_url();
-                console.log(window.location.href);
-                break;
-            default:
-                share_chat(platform);
-        }
-    }
-});
 
-
-
+share_button.onclick = copy_chat_url;
 
 all_messages_element.addEventListener('scroll', activate_scroll_event);
 document.addEventListener('click', read_message);
