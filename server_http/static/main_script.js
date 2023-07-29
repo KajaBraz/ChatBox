@@ -104,7 +104,6 @@ function send_button(message_type, message_element, my_name, chat_name, websocke
 
 
 function send_websocket(message_type, message, sender, chat_destination, websocket) {
-    console.log("KUBA", chat, chat_destination);
     var json_message = {
         message_type: message_type,
         message_value: message,
@@ -470,33 +469,6 @@ function activate_actions_on_entering_chat() {
     console.log(login, chat);
 }
 
-
-function share_chat(platform) {
-    let chat_url = window.location.href;
-    let platform_share_url;
-    switch (platform) {
-        case 'facebook':
-            platform_share_url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(chat_url)}`;
-            break;
-        case 'twitter':
-            platform_share_url = `https://twitter.com/share?url=${encodeURIComponent(chat_url)}`;
-            break;
-        case 'linkedin':
-            platform_share_url = `https://www.linkedin.com/shareArticle?url=${encodeURIComponent(chat_url)}`;
-            break;
-        case 'pinterest':
-            platform_share_url = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(chat_url)}`;
-            break;
-        case 'reddit':
-            platform_share_url = `https://reddit.com/submit?url=${encodeURIComponent(chat_url)}`;
-            break;
-        case 'whatsapp':
-            platform_share_url = `https://api.whatsapp.com/send?text=${encodeURIComponent(chat_url)}`;
-            break;
-    }
-    console.log(`share with ${platform}: ${platform_share_url}`);
-    window.open(platform_share_url, '_blank');
-}
 
 function copy_chat_url() {
     let chat_url = window.location.href;

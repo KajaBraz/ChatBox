@@ -17,6 +17,7 @@ class User:
         self.chat_room = helper_functions.generate_random_string(10)
         self.user_name = helper_functions.generate_random_string(10)
         self.session: arsenic.Session = None
+        self.timeout = 20
 
 
 @pytest_asyncio.fixture
@@ -54,18 +55,20 @@ async def user():
 
 
 @pytest.mark.asyncio
-async def test_open_chatbox_default_link(chatbox_server, http_server, user):
+async def test_open_chatbox_default_link(chatbox_server, http_server):
     default_chat_name = enums.Constants.DEFAULT_CHAT_NAME
-    await user.session.get(f'localhost:5000/')
-    await asyncio.sleep(2)
+    session = await arsenic.start_session(arsenic.services.Geckodriver(),
+                                          arsenic.browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}}))
+    await session.get(f'localhost:5000/')
+    await session.wait_for_element(20, '.gridContainer')
 
-    chat_elem = await user.session.get_element('#findChat')
-    displayed_url = await user.session.get_url()
-    header_elem = await user.session.get_element('#chatNameHeader')
-    chat_list_elem = await user.session.get_element('#recentlyUsedChats')
+    chat_elem = await session.get_element('#findChat')
+    displayed_url = await session.get_url()
+    header_elem = await session.get_element('#chatNameHeader')
+    chat_list_elem = await session.get_element('#recentlyUsedChats')
     displayed_chat = await chat_list_elem.get_element(f'#{default_chat_name}')
-    active_users = await user.session.get_element('#activeUsers')
-    login = await user.session.execute_script('return document.querySelector("#login").value')
+    active_users = await session.get_element('#activeUsers')
+    login = await session.execute_script('return document.querySelector("#login").value')
 
     assert await chat_elem.get_attribute('value') == default_chat_name
     assert await header_elem.get_text() == default_chat_name
@@ -73,6 +76,8 @@ async def test_open_chatbox_default_link(chatbox_server, http_server, user):
     assert default_chat_name not in displayed_url
     assert login != ''
     assert login == await active_users.get_text()
+
+    await arsenic.stop_session(session)
 
 
 @pytest.mark.asyncio
@@ -211,26 +216,26 @@ async def test_messages_position(chatbox_server, http_server, user):
 @pytest.mark.asyncio
 async def test_previous_messages(chatbox_server, http_server, user):
     messages_displayed_on_connection = 10
-    
+
     # USER 1 SENDS MESSAGES
     messages = [helper_functions.generate_random_string(5) for _ in range(25)]
     new_msg_box = await user.session.get_element('#newMessage')
     send_button = await user.session.get_element('#sendMessageButton')
-    for message in messages:
+
+    for i in range(len(messages)):
         await new_msg_box.clear()
-        await new_msg_box.send_keys(message)
+        await new_msg_box.send_keys(messages[i])
         await send_button.click()
-        time.sleep(1)
+        await user.session.wait_for_element(user.timeout, f'[id="{i}"]')
 
     # USER CHANGES LOGIN AND CONNECTS
     new_login = helper_functions.generate_random_string(5)
     await arsenic_tests_helpers.connect_user(user.session, new_login)
-    time.sleep(2)
-
+    await user.session.wait_for_element(user.timeout, f'[id="{len(messages) - 1}"]')
     received_messages_box = await user.session.get_element('#receivedMessages')
-
     displayed_messaged_on_connection = await received_messages_box.get_elements('.messageText')
     displayed_messaged_on_connection = [await m.get_text() for m in displayed_messaged_on_connection]
+
     assert messages[-messages_displayed_on_connection:] == displayed_messaged_on_connection
     await user.session.execute_script("receivedMessages.scrollTo(0, -receivedMessages.offsetHeight)")
     displayed_messaged_on_connection_after_scoll = await received_messages_box.get_elements('.messageText')

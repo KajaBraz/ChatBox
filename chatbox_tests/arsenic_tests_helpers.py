@@ -9,7 +9,7 @@ async def creaate_session(chat_name: str = '', headless: bool = True) -> arsenic
     args = {'moz:firefoxOptions': {'args': ['-headless']}} if headless else {}
     session = await arsenic.start_session(arsenic.services.Geckodriver(), arsenic.browsers.Firefox(**args))
     await session.get(f'http://localhost:5000/{chat_name}')
-    await asyncio.sleep(2)
+    await session.wait_for_element(20, '.gridContainer')
     return session
 
 
