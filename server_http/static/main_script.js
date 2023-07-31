@@ -114,7 +114,7 @@ function send_websocket(message_type, message, sender, chat_destination, websock
 }
 
 
-function generate_unique_id(n) {
+function generate_random_string(n) {
     var s = "qwertyuioopasdfghjklzxcvbnmWERTYUIOPASDFGHJKLZXCVBNM1234567890";
     var id = '';
     for (let i = 0; i < n; i++) {
@@ -264,13 +264,23 @@ function update_user_list(new_users_array, active_users_element, class_name) {
 
 function chat_change(new_chat) {
     console.log(`chat_change: old - ${chat}; new - ${new_chat}`);
+    leave_chat(chat);
+    enter_chat(new_chat);
+    window.location.href = `${window.location.origin}/${new_chat}`;
+}
+
+
+function leave_chat(old_chat) {
     store_last_msgs_ids();
+    localStorage.setItem(ACTIVE_CHAT_STORAGE, old_chat);
+    localStorage.setItem(RECENT_CHATS_STORAGE, active_recent_chats);
+}
+
+
+function enter_chat(new_chat) {
     chat = new_chat;
     chat_name_header.innerHTML = chat;
     chat_destination_element.value = chat;
-    localStorage.setItem(ACTIVE_CHAT_STORAGE, chat);
-    connect(login, chat);
-    localStorage.setItem(RECENT_CHATS_STORAGE, active_recent_chats);
 }
 
 
@@ -299,10 +309,13 @@ function assign_read_unread_class(msg_id) {
 
 
 function retrieve_recent_chats() {
-    recently_used_chats = localStorage.getItem(RECENT_CHATS_STORAGE).split(",");
-    console.log(recently_used_chats);
-    for (let i = 0; i < recently_used_chats.length; i++) {
-        add_chat(recently_used_chats[i]);
+    recently_used_chats = localStorage.getItem(RECENT_CHATS_STORAGE);
+    if (recently_used_chats) {
+        recently_used_chats = recently_used_chats.split(",");
+        console.log(recently_used_chats);
+        for (let i = 0; i < recently_used_chats.length; i++) {
+            add_chat(recently_used_chats[i]);
+        }
     }
 }
 
@@ -434,21 +447,33 @@ function adjust_displayed_messages() {
 }
 
 
+function update_save_login() {
+    let id = generate_random_string(id_length);
+    let username = my_name_element.value + id;
+    localStorage.setItem(ACTIVE_USER_STORAGE, username);
+    return username;
+}
+
+
 function activate_actions_on_entering_chat() {
     let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
     if (stored_user_name && my_name_element.value === retrieve_display_login(stored_user_name)) {
         login = stored_user_name;
         console.log('equal logins');
     } else {
-        var id = generate_unique_id(id_length);
-        login = my_name_element.value + id;
-        localStorage.setItem(ACTIVE_USER_STORAGE, login);
+        login = update_save_login();
     }
-    chat_change(chat_destination_element.value);
+    enter_chat(chat_destination_element.value)
+    connect(login, chat);
     add_chat(chat);
     console.log(login, chat);
 }
 
+
+function copy_chat_url() {
+    let chat_url = window.location.href;
+    navigator.clipboard.writeText(chat_url);
+}
 
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
@@ -458,6 +483,7 @@ var connect_button = document.getElementById("connectButton");
 var chat_destination_element = document.getElementById("findChat");
 var chat_name_header = document.getElementById("chatNameHeader");
 var recent_chats = document.getElementById("recentlyUsedChats");
+var share_button = document.querySelector("#clipboard");
 
 var login = "";
 var chat = "";
@@ -479,41 +505,50 @@ const ACTIVE_USER_STORAGE = "chatbox_stored_active_user";
 const RECENT_CHATS_STORAGE = "chatbox_stored_recent_chats";
 const MAX_MSGS_ON_PAGE_NUM = 20;
 const TAB_TITLE = 'ChatBox'
-const audio = new Audio("sheep-122256.mp3");
+const audio = new Audio("static/sheep-122256.mp3");
+
 
 window.onload = function () {
     console.log("onload");
     let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
-    let stored_chat_name = localStorage.getItem(ACTIVE_CHAT_STORAGE);
-    if (stored_user_name && stored_chat_name) {
-        let short_name = retrieve_display_login(stored_user_name);
-        my_name_element.value = short_name;
-        chat_destination_element.value = stored_chat_name;
-        retrieve_recent_chats();
+    let short_name;
+    if (stored_user_name) {
+        short_name = retrieve_display_login(stored_user_name);
+    } else {
+        short_name = generate_random_string(5);
     }
+    my_name_element.value = short_name;
+    retrieve_recent_chats();
+    activate_actions_on_entering_chat();
 }
+
+
+window.onbeforeunload = () => {
+    store_last_msgs_ids();
+    update_save_login();
+}
+
 
 window.onunload = function () {
     webSocket.close(1000);
-    store_last_msgs_ids();
 }
 
 
 connect_button.onclick = () => {
-    activate_actions_on_entering_chat();
+    chat_change(chat_destination_element.value);
 }
 
 
 my_name_element.onkeydown = (e) => {
     if (e.code == 'Enter') {
-        activate_actions_on_entering_chat();
+        window.location.href = `${window.location.origin}/${chat_destination_element.value}`;
     }
 }
 
 
 chat_destination_element.onkeydown = (e) => {
     if (e.code == 'Enter') {
-        activate_actions_on_entering_chat();
+        chat_change(chat_destination_element.value);
     }
 }
 
@@ -557,9 +592,15 @@ message_element.onpaste = function (e) {
     }
 }
 
+
+share_button.onclick = copy_chat_url;
+
 all_messages_element.addEventListener('scroll', activate_scroll_event);
 document.addEventListener('click', read_message);
 document.addEventListener('keypress', read_message);
 
 document.onclick = deactivate_on_focus;
 document.onkeydown = deactivate_on_focus;
+
+// todo fix special characters (e.g., "_") in chat names which are displayed but break active users list
+// todo fix active users in Firefox

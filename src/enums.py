@@ -16,3 +16,4 @@ class MessageTypes(object):
 
 class Constants:
     DEFAULT_NO_DATABASE_MESSAGE_ID = -1
+    DEFAULT_CHAT_NAME = 'WelcomeInChatBox'
