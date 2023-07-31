@@ -7,7 +7,8 @@ app = Flask(__name__)
 
 
 @app.route('/', methods=['GET'])
-@app.route('/<chat>', methods=['GET'])
+@app.route('/chat/', methods=['GET'])
+@app.route('/chat/<chat>', methods=['GET'])
 def open_chatbox(chat=enums.Constants.DEFAULT_CHAT_NAME):
     requested_chat = markupsafe.escape(chat)
     return render_template('index.html', requestedChatName=requested_chat)

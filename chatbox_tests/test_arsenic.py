@@ -57,27 +57,32 @@ async def user():
 @pytest.mark.asyncio
 async def test_open_chatbox_default_link(chatbox_server, http_server):
     default_chat_name = enums.Constants.DEFAULT_CHAT_NAME
-    session = await arsenic.start_session(arsenic.services.Geckodriver(),
-                                          arsenic.browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}}))
-    await session.get(f'localhost:5000/')
-    await session.wait_for_element(20, '.gridContainer')
+    session1 = await arsenic.start_session(arsenic.services.Geckodriver(),
+                                           arsenic.browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}}))
+    session2 = await arsenic.start_session(arsenic.services.Geckodriver(),
+                                           arsenic.browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}}))
+    await session1.get(f'localhost:5000/')
+    await session2.get(f'localhost:5000/chat/')
 
-    chat_elem = await session.get_element('#findChat')
-    displayed_url = await session.get_url()
-    header_elem = await session.get_element('#chatNameHeader')
-    chat_list_elem = await session.get_element('#recentlyUsedChats')
-    displayed_chat = await chat_list_elem.get_element(f'#{default_chat_name}')
-    active_users = await session.get_element('#activeUsers')
-    login = await session.execute_script('return document.querySelector("#login").value')
+    for session in [session1, session2]:
+        await session.wait_for_element(20, '.gridContainer')
+        chat_elem = await session.get_element('#findChat')
+        displayed_url = await session.get_url()
+        header_elem = await session.get_element('#chatNameHeader')
+        chat_list_elem = await session.get_element('#recentlyUsedChats')
+        displayed_chat = await chat_list_elem.get_element(f'#{default_chat_name}')
+        active_users = await session.get_element('#activeUsers')
+        login = await session.execute_script('return document.querySelector("#login").value')
 
-    assert await chat_elem.get_attribute('value') == default_chat_name
-    assert await header_elem.get_text() == default_chat_name
-    assert await displayed_chat.get_text() == default_chat_name
-    assert default_chat_name not in displayed_url
-    assert login != ''
-    assert login == await active_users.get_text()
+        assert await chat_elem.get_attribute('value') == default_chat_name
+        assert await header_elem.get_text() == default_chat_name
+        assert await displayed_chat.get_text() == default_chat_name
+        assert default_chat_name not in displayed_url
+        assert login != ''
+        assert login in await active_users.get_text()
 
-    await arsenic.stop_session(session)
+    await arsenic.stop_session(session1)
+    await arsenic.stop_session(session2)
 
 
 @pytest.mark.asyncio
@@ -318,4 +323,4 @@ async def test_copy_to_clipboard(chatbox_server, http_server, user):
 
     # VERIFY COPIED TEXT
     pasted_message = await user.session.execute_script('return document.querySelector("#newMessage").value')
-    assert pasted_message == f'http://localhost:5000/{user.chat_room}'
+    assert pasted_message == f'http://localhost:5000/chat/{user.chat_room}'
