@@ -602,5 +602,9 @@ document.addEventListener('keypress', read_message);
 document.onclick = deactivate_on_focus;
 document.onkeydown = deactivate_on_focus;
 
+document.onkeydown = () => {
+    console.log(window.location.origin);
+}
+
 // todo fix special characters (e.g., "_") in chat names which are displayed but break active users list
 // todo fix active users in Firefox
