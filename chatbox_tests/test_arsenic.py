@@ -44,6 +44,9 @@ async def http_server():
     yield
     p.terminate()
 
+    # make sure there's enough time between server's stop / start (to avoid tests failures) 
+    await asyncio.sleep(2)
+
 
 @pytest_asyncio.fixture
 async def user():
