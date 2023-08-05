@@ -266,7 +266,7 @@ function chat_change(new_chat) {
     console.log(`chat_change: old - ${chat}; new - ${new_chat}`);
     leave_chat(chat);
     enter_chat(new_chat);
-    window.location.href = `${window.location.origin}/${new_chat}`;
+    window.location.href = `${window.location.origin}/chat/${new_chat}`;
 }
 
 
@@ -541,7 +541,7 @@ connect_button.onclick = () => {
 
 my_name_element.onkeydown = (e) => {
     if (e.code == 'Enter') {
-        window.location.href = `${window.location.origin}/${chat_destination_element.value}`;
+        window.location.href = `${window.location.origin}/chat/${chat_destination_element.value}`;
     }
 }
 

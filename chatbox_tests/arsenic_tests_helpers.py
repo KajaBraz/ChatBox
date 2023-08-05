@@ -6,9 +6,10 @@ from server_http.endpoints import app
 
 
 async def creaate_session(chat_name: str = '', headless: bool = True) -> arsenic.Session:
+    chat_in_lint = f'chat/{chat_name}'
     args = {'moz:firefoxOptions': {'args': ['-headless']}} if headless else {}
     session = await arsenic.start_session(arsenic.services.Geckodriver(), arsenic.browsers.Firefox(**args))
-    await session.get(f'http://localhost:5000/{chat_name}')
+    await session.get(f'http://localhost:5000/{chat_in_lint}')
     await session.wait_for_element(20, '.gridContainer')
     return session
 
