@@ -3,7 +3,7 @@
 # ChatBox
 Client-Server Messaging Application written in Python (server side) and JavaScript (client side) with the use of websockets for sending/receiving messages and SQLAlchemy (PostgreSQL) for storing/handling the database.
 
-The chat rooms can be created and accessed in the browser (http://13.58.103.103:11333/). No installation and no registration needed.
+The chat rooms can be created and accessed in the browser (http://77.255.187.145:13297/). No installation and no registration needed.
 
 The chats are open and can be viewed by all the users who enter them.
 

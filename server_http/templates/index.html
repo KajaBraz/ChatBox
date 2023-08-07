@@ -3,6 +3,7 @@
 <head>
     <!-- <meta charset=“UTF-8”> -->
     <title>ChatBox</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <link rel="stylesheet" href="chatbox_style.css">
@@ -19,7 +20,15 @@
             <div id="recentlyUsedChats"></div>
         </div>
 
-        <h1 id="chatNameHeader" class="chatNameHeaderGrid">Your Chat</h1>
+
+        <div class="chatNameHeaderGrid">
+            <h1 id="chatNameHeader"> {{ requestedChatName }} </h1>
+            <i class="fa fa-clone" id="clipboard"></i>
+        </div>
+
+        <input class="searchGrid">
+
+        <button class="searchButtonGrid">Filter</button>
 
         <div id="receivedMessages" class="messagesGrid"></div>
 
@@ -34,8 +43,8 @@
         </div>
     </div>
 
-    <script src="lc_emoji_picker.min.js" type="text/javascript"></script>
-    <script src="main_script.js"></script>
+    <!-- <script src="lc_emoji_picker.min.js" type="text/javascript"></script> -->
+    <script src="{{ url_for('static', filename='main_script.js') }}"></script>
 
 </body>
 
