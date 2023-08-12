@@ -296,7 +296,7 @@ async def test_send_and_open_link(chatbox_server, http_server, user):
     await send_button.click()
 
     # CLICK LINKS
-    messages = await user.session.get_elements('.messageText')
+    messages = await user.session.get_elements('a')
     await messages[-1].click()
     await messages[-2].click()
 

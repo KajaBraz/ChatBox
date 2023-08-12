@@ -6,13 +6,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
-<link rel="stylesheet" href="chatbox_style.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='chatbox_style.css') }}">
+<audio id="audioSheep" src="{{ url_for('static', filename='sheep-122256.mp3') }}"></audio>
 
 <body>
     <div class="gridContainer">
 
         <div class="usernameGrid">Name:</div><input class="nameInputGrid" id="login">
-        <div class="chatNameGrid">Chat:</div><input class="chatInputGrid" id="findChat">
+        <div class="chatNameGrid">Chat:</div><input class="chatInputGrid" id="findChat" value="{{ requestedChatName }}">
         <button class="connectGrid" id="connectButton">Connect</button>
 
         <div class="recentlyUsedChatsGrid">
@@ -25,10 +26,6 @@
             <h1 id="chatNameHeader"> {{ requestedChatName }} </h1>
             <i class="fa fa-clone" id="clipboard"></i>
         </div>
-
-        <input class="searchGrid">
-
-        <button class="searchButtonGrid">Filter</button>
 
         <div id="receivedMessages" class="messagesGrid"></div>
 

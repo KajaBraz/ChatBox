@@ -507,7 +507,7 @@ const ACTIVE_USER_STORAGE = "chatbox_stored_active_user";
 const RECENT_CHATS_STORAGE = "chatbox_stored_recent_chats";
 const MAX_MSGS_ON_PAGE_NUM = 20;
 const TAB_TITLE = 'ChatBox'
-const audio = new Audio("static/sheep-122256.mp3");
+const audio = document.getElementById('audioSheep');
 
 
 window.onload = function () {
