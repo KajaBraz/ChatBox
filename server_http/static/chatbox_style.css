@@ -19,36 +19,36 @@ input {
 .gridContainer {
     display: grid;
     height: 100%;
-    grid-template-columns: 0.2fr 0.5fr 3fr 0.5fr 0.5fr;
+    grid-template-columns: 0.5fr 3fr 0.5fr;
     grid-template-areas:
-        ".................  .................  .................  .................  ................."
-        ".................  .................  header-area        header-area        ................."
-        ".................  .................  header-area        header-area        ................."
-        "username-area      name-input-area    messages-area      messages-area      user-list-area   "
-        "chat-name-area     chat-input-area    messages-area      messages-area      user-list-area   "
-        ".................  connect-area       messages-area      messages-area      user-list-area   "
-        ".................  .................  messages-area      messages-area      user-list-area   "
-        "recent-chats-area  recent-chats-area  messages-area      messages-area      user-list-area   "
-        "recent-chats-area  recent-chats-area  messages-area      messages-area      user-list-area   "
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  send-area          send-area          ................."
-        ".................  .................  send-area          send-area          ................."
-        ".................  .................  send-area          send-area          ................."
-        ".................  .................  send-button-area   send-button-area   ................."
-        ".................  .................  .................  .................  .................";
+        ".................  .................  ................."
+        ".................  header-area        ................."
+        ".................  header-area        ................."
+        "name-input-area    messages-area      user-list-area   "
+        "chat-input-area    messages-area      user-list-area   "
+        "connect-area       messages-area      user-list-area   "
+        ".................  messages-area      user-list-area   "
+        "recent-chats-area  messages-area      user-list-area   "
+        "recent-chats-area  messages-area      user-list-area   "
+        ".................  messages-area      ................."
+        ".................  messages-area      ................."
+        ".................  messages-area      ................."
+        ".................  messages-area      ................."
+        ".................  messages-area      ................."
+        ".................  messages-area      ................."
+        ".................  messages-area      ................."
+        ".................  messages-area      ................."
+        ".................  messages-area      ................."
+        ".................  messages-area      ................."
+        ".................  messages-area      ................."
+        ".................  messages-area      ................."
+        ".................  messages-area      ................."
+        ".................  messages-area      ................."
+        ".................  send-area          ................"
+        ".................  send-area          ................."
+        ".................  send-area          ................."
+        ".................  send-button-area   ................."
+        ".................  .................  .................";
     padding-left: 5%;
     padding-right: 5%;
     text-align: center;
@@ -62,18 +62,8 @@ input {
     grid-area: header-area;
 }
 
-.usernameGrid {
-    grid-area: username-area;
-    margin: auto;
-}
-
 .nameInputGrid {
     grid-area: name-input-area;
-}
-
-.chatNameGrid {
-    grid-area: chat-name-area;
-    margin: auto;
 }
 
 .chatInputGrid {
@@ -84,7 +74,7 @@ input {
     grid-area: connect-area;
     width: 100%;
     height: 80%;
-    margin:auto;
+    margin: auto;
 }
 
 .messagesGrid {
