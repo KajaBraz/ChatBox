@@ -1,5 +1,5 @@
 body {
-    background-color: rgba(210, 255, 127, 0.529);
+    background-color: rgba(210, 255, 127, 0.685);
     /* background-color: rgb(250, 250, 196) ; */
 }
 
@@ -13,18 +13,21 @@ input {
     border-radius: 2px;
     resize: none;
     width: 100%;
+    height: 90%;
 }
 
 .gridContainer {
     display: grid;
     height: 100%;
     grid-template-columns: 0.2fr 0.5fr 3fr 0.5fr 0.5fr;
-    grid-gap: 10px;
     grid-template-areas:
+        ".................  .................  .................  .................  ................."
+        ".................  .................  header-area        header-area        ................."
         ".................  .................  header-area        header-area        ................."
         "username-area      name-input-area    messages-area      messages-area      user-list-area   "
         "chat-name-area     chat-input-area    messages-area      messages-area      user-list-area   "
-        "connect-area       connect-area       messages-area      messages-area      user-list-area   "
+        ".................  connect-area       messages-area      messages-area      user-list-area   "
+        ".................  .................  messages-area      messages-area      user-list-area   "
         "recent-chats-area  recent-chats-area  messages-area      messages-area      user-list-area   "
         "recent-chats-area  recent-chats-area  messages-area      messages-area      user-list-area   "
         ".................  .................  messages-area      messages-area      ................."
@@ -41,12 +44,10 @@ input {
         ".................  .................  messages-area      messages-area      ................."
         ".................  .................  messages-area      messages-area      ................."
         ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  messages-area      messages-area      ................."
-        ".................  .................  send-area          send-button-area   ................."
-        ".................  .................  send-area          send-button-area   ................."
-        ".................  .................  send-area          send-button-area   ................."
-        ".................  .................  send-area          send-button-area   ................."
-        ".................  .................  send-area          send-button-area   ................."
+        ".................  .................  send-area          send-area          ................."
+        ".................  .................  send-area          send-area          ................."
+        ".................  .................  send-area          send-area          ................."
+        ".................  .................  send-button-area   send-button-area   ................."
         ".................  .................  .................  .................  .................";
     padding-left: 5%;
     padding-right: 5%;
@@ -63,6 +64,7 @@ input {
 
 .usernameGrid {
     grid-area: username-area;
+    margin: auto;
 }
 
 .nameInputGrid {
@@ -70,7 +72,8 @@ input {
 }
 
 .chatNameGrid {
-    grid-area: username-area;
+    grid-area: chat-name-area;
+    margin: auto;
 }
 
 .chatInputGrid {
@@ -79,8 +82,9 @@ input {
 
 .connectGrid {
     grid-area: connect-area;
-    width: 60%;
-    margin: auto;
+    width: 100%;
+    height: 80%;
+    margin:auto;
 }
 
 .messagesGrid {
@@ -98,19 +102,16 @@ input {
     overflow: auto;
 }
 
-.chatNameGrid {
-    grid-area: chat-name-area;
-}
-
 .recentlyUsedChatsGrid {
     grid-area: recent-chats-area;
 }
 
 .sendGrid {
     grid-area: send-area;
-    width: 94%;
-    margin-right: 0;
+    width: 90%;
     margin-left: auto;
+    margin-right: auto;
+    margin-top: 1%;
     border: 1px solid black;
     border-radius: 2px;
     resize: none;
@@ -118,9 +119,9 @@ input {
 
 .sendButtonGrid {
     grid-area: send-button-area;
-    width: 65%;
-    margin-right: auto;
-    margin-left: 0;
+    width: 90%;
+    height: 100%;
+    margin: auto;
 }
 
 .availableChat {
@@ -129,8 +130,8 @@ input {
     /* border-radius: 2px; */
     /* cursor: pointer; */
     margin-bottom: 1%;
-    display: block;
-    margin-inline: auto;
+    width: 100%;
+    height: 15%;
 }
 
 .chatUser {
@@ -138,8 +139,9 @@ input {
     /* border: 1px solid rgba(0, 0, 0, 0.8); */
     /* border-radius: 2px; */
     margin-bottom: 1%;
-    display: block;
-    margin-inline: auto;
+    /* display: block; */
+    width: 100%;
+    height: 10%;
 }
 
 .message {
