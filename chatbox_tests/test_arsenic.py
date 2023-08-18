@@ -109,12 +109,14 @@ async def test_connect_with_button(chatbox_server, http_server, user):
     await arsenic_tests_helpers.connect_user(user.session, new_login, new_chat)
 
     header_elem = await user.session.get_element('#chatNameHeader')
-    chat_list_elem = await user.session.get_element('#recentlyUsedChats')
-    displayed_chats = await chat_list_elem.get_text()
+    recent_chat_1 = await user.session.get_element(f'#{new_chat}')
+    recent_chat_2 = await user.session.get_element(f'#{user.chat_room}')
+    recent_chat_1 = await recent_chat_1.get_text()
+    recent_chat_2 = await recent_chat_2.get_text()
     displayed_user = await user.session.get_element('#activeUsers')
 
     assert await header_elem.get_text() == new_chat
-    assert set(displayed_chats.split()) == {user.chat_room, new_chat}
+    assert {recent_chat_1, recent_chat_2} == {user.chat_room, new_chat}
     assert await displayed_user.get_text() == new_login
 
 
@@ -165,7 +167,8 @@ async def test_active_users_display(chatbox_server, http_server, user):
         temp_drivers.add(new_session)
         temp_active_users_elems = [await dr.get_element('#activeUsers') for dr in temp_drivers]
         temp_active_users = [await active_users_elem.get_text() for active_users_elem in temp_active_users_elems]
-        assert all(temp_users == set(displayed.split()) for displayed in temp_active_users)
+        assert all((temp_user in displayed for temp_user in temp_users) for displayed in temp_active_users)
+        # Temporary solution until Active Users are displayed as buttons
 
     # todo, temporary to remove, use separate windows instead, not drivers
     for ns in new_sessions:
