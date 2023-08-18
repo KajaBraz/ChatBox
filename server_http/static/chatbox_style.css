@@ -6,6 +6,7 @@ body {
 button {
     border: 1px solid black;
     border-radius: 2px;
+    height: 25px;
 }
 
 input {
@@ -13,12 +14,12 @@ input {
     border-radius: 2px;
     resize: none;
     width: 100%;
-    height: 90%;
+    height: 25px;
+    margin-bottom: 1%;
 }
 
 .gridContainer {
     display: grid;
-    height: 100%;
     grid-template-columns: 0.5fr 3fr 0.5fr;
     grid-template-areas:
         ".................  .................  ................."
@@ -60,6 +61,8 @@ input {
 
 .chatNameHeaderGrid {
     grid-area: header-area;
+    margin-top: 1%;
+    margin-bottom: 3%;
 }
 
 .nameInputGrid {
@@ -73,17 +76,17 @@ input {
 .connectGrid {
     grid-area: connect-area;
     width: 100%;
-    height: 80%;
-    margin: auto;
+    margin-bottom: 23;
+    cursor: pointer;
 }
 
 .messagesGrid {
     grid-area: messages-area;
     width: 90%;
+    height: 500px;
     /* width: 800px; */
     /* height: 500px; */
     /* height: 80vh; */
-    height: 100%;
     margin: auto;
     border: 1px solid black;
     background-color: white;
@@ -99,9 +102,11 @@ input {
 .sendGrid {
     grid-area: send-area;
     width: 90%;
+    height: 60px;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 1%;
+    margin-top: 0.5%;
+    margin-bottom: 0.2%;
     border: 1px solid black;
     border-radius: 2px;
     resize: none;
@@ -110,18 +115,17 @@ input {
 .sendButtonGrid {
     grid-area: send-button-area;
     width: 90%;
-    height: 100%;
     margin: auto;
+    cursor: pointer;
 }
 
 .availableChat {
     /* background-color: rgba(87, 87, 87, 0.445); */
     /* border: 1px solid rgba(0, 0, 0, 0.8); */
     /* border-radius: 2px; */
-    /* cursor: pointer; */
+    cursor: pointer;
     margin-bottom: 1%;
     width: 100%;
-    height: 15%;
 }
 
 .chatUser {
@@ -131,7 +135,6 @@ input {
     margin-bottom: 1%;
     /* display: block; */
     width: 100%;
-    height: 10%;
 }
 
 .message {
