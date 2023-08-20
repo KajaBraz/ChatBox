@@ -248,7 +248,7 @@ function update_user_list(new_users_array, active_users_element, class_name) {
         let short_name = retrieve_display_login(user_name);
         console.log("updating:", user_name);
         if (!chat_participants.has(user_name)) {
-            var child_div = add_element(short_name, active_users_element, class_name, null, "button");
+            var child_div = add_element(short_name, active_users_element, class_name, null);
             child_div.id = user_name;
             chat_participants.add(user_name);
         }
