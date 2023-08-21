@@ -85,6 +85,8 @@ jobs:
           fi
 
       - name: Push
-        uses: ad-m/github-push-action@github-clone-counts
+        uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          force_with_lease: true
+          
