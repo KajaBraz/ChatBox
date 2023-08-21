@@ -84,13 +84,9 @@ jobs:
             git commit -m "create clone count badge"
           fi
 
-      - name: Checkout to counts branch
-        uses: actions/checkout@v2
-        with:
-          ref: github-clone-counts
-
-      - name: Push
+      - name: Push to branch
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: github-clone-counts
           force_with_lease: true
