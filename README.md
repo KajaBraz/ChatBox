@@ -1,7 +1,7 @@
 # ChatBox
 **Status:**
 ![Build Status](https://github.com/KajaBraz/ChatBox/actions/workflows/pythonapp.yml/badge.svg)
-
+              
 **Activity:** 
 [![GitHub Clones](https://img.shields.io/badge/dynamic/json?color=yellow&label=clone+count&query=count&url=https://gist.githubusercontent.com/KajaBraz/6c721046f14e080ef8e2a0038b4036b0/raw/clone.json)](https://github.com/MShawon/github-clone-count-badge)
 ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/KajaBraz/ChatBox?label=commits+count&color=orange)
@@ -27,6 +27,5 @@ An example ChatBox view:
 [![Ashutosh's github activity graph](https://github-readme-activity-graph.vercel.app/graph?username=JakubBraz&theme=github-compact&height=200)](https://github.com/ashutosh00710/github-readme-activity-graph)
 
 ## Contact
-[LinkedIn Jakub](https://www.linkedin.com/in/jakub-braz/?lipi=urn%3Ali%3Apage%3Ad_flagship3_people_connections%3BTCOUKjkiTlyjKidFY0zBag%3D%3D)
-
-[LinkedIn Kaja](https://www.linkedin.com/in/kajabraz/)
+[![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white&label=Jakub)](https://www.linkedin.com/in/jakub-braz)
+[![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white&label=Kaja)](https://www.linkedin.com/in/kajabraz)
