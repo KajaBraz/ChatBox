@@ -1,29 +1,63 @@
+:root {
+    /*
+    #9
+    --chatbox-color-light: white;
+    --chatbox-color-medium: #C6E377;
+    --chatbox-color-dark: #729D39;
+    --chatbox-color-text:
+    #10
+    --chatbox-color-light: #FBFAD3;
+    --chatbox-color-medium: #C6E377;
+    --chatbox-color-dark: #36622B;
+    --chatbox-color-text:
+    #11
+    --chatbox-color-light: #FCECDD;
+    --chatbox-color-medium: #FFC288;
+    --chatbox-color-dark: #FF6701;
+    --chatbox-color-text:
+    #12
+    --chatbox-color-light: #EAE7B1;
+    --chatbox-color-medium: #A6BB8D;
+    --chatbox-color-dark: #3C6255;
+    --chatbox-color-text:
+    #13
+    --chatbox-color-light: #FEFFDE;
+    --chatbox-color-medium: #DDFFBC;
+    --chatbox-color-dark: #91C788;
+    --chatbox-color-text: black;    
+    #14
+    --chatbox-color-light: #FEFFDE;
+    --chatbox-color-medium: #DDFFBC;
+    --chatbox-color-dark: #52734D;
+    --chatbox-color-text: #FEFFDE;
+    #15
+    --chatbox-color-light: #CBE4DE;
+    --chatbox-color-medium: #0E8388;
+    --chatbox-color-dark: #2E4F4F;
+    --chatbox-color-text: #CBE4DE;
+    #16
+    --chatbox-color-light: #f8e4ca;
+    --chatbox-color-medium: #ffce7a;
+    --chatbox-color-dark: #fd8b28;
+    --chatbox-color-text: black;
+    */
+}
+
 body {
-    /* background-color: rgb(250, 250, 196) ; */
-    /* background-color: #B3FFAE; #4 */
-    /* background-color: #FFD369; #5 */
-    /* background-color: rgb(249, 199, 79); #6 */
-    /* background-color: #91C8E4; #7 */
-    /* background-color: #FFCB74; #8 */
+    background-color: var(--chatbox-color-medium);
 }
 
 button {
-    /* background-color: #FF6464; #4 */
-    /* background-color: #393E46; #5 */
-    /* background-color: rgb(39, 125, 161); #6 */
-    /* color: #EEEEEE; #5 */
-    /* background-color: #4682A9; #7 */
-    /* background-color: #EA907A; #8 */
+    background-color: var(--chatbox-color-dark);
+    color: var(--chatbox-color-text);
     border: 1px solid black;
     border-radius: 2px;
     height: 25px;
 }
 
 input {
-    /* background-color: #F8FFDB; #4 */
-    /* background-color: #EEEEEE; #5 */
-    /* border: 1px solid black; #7 */
-    /* background-color: #F4F6FF; #8 */
+    border: 1px solid black;
+    background-color: var(--chatbox-color-light);
     border-radius: 2px;
     resize: none;
     width: 100%;
@@ -102,9 +136,7 @@ input {
     /* height: 80vh; */
     margin: auto;
     border: 1px solid black;
-    /* background-color: #F8FFDB; */
-    /* background-color: #EEEEEE; #5 */
-    /* background-color: #F4F6FF; #8 */
+    background-color: var(--chatbox-color-light);
     border-radius: 2px;
     resize: none;
     overflow: auto;
@@ -116,8 +148,7 @@ input {
 
 .sendGrid {
     grid-area: send-area;
-    /* background-color: #EEEEEE; #5 */
-    /* background-color: #F4F6FF; #8 */
+    background-color: var(--chatbox-color-light);
     width: 90%;
     height: 60px;
     margin-left: auto;
@@ -146,13 +177,9 @@ input {
 }
 
 .chatUser {
-    /* background-color: FF6464; #4 */
-    /* background-color: #393E46; #5 */
-    /* background-color: rgb(39, 125, 161); #6 */
-    /* background-color: #4682A9; #7 */
-    /* background-color: #EA907A; #8 */
+    background-color: var(--chatbox-color-dark);
+    color: var(--chatbox-color-text);
     border: 1px solid black;
-    /* color: #EEEEEE; #5 */
     border-radius: 2px;
     margin-bottom: 1%;
     /* display: block; */
