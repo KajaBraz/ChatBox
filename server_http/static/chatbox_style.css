@@ -2,49 +2,103 @@
     /*
     #9
     --chatbox-color-light: white;
-    --chatbox-color-medium: #C6E377;
+    --chatbox-color-mid-1: #C6E377;
     --chatbox-color-dark: #729D39;
     --chatbox-color-text:
     #10
     --chatbox-color-light: #FBFAD3;
-    --chatbox-color-medium: #C6E377;
+    --chatbox-color-mid-1: #C6E377;
     --chatbox-color-dark: #36622B;
     --chatbox-color-text:
     #11
     --chatbox-color-light: #FCECDD;
-    --chatbox-color-medium: #FFC288;
+    --chatbox-color-mid-1: #FFC288;
     --chatbox-color-dark: #FF6701;
     --chatbox-color-text:
     #12
     --chatbox-color-light: #EAE7B1;
-    --chatbox-color-medium: #A6BB8D;
+    --chatbox-color-mid-1: #A6BB8D;
     --chatbox-color-dark: #3C6255;
     --chatbox-color-text:
     #13
     --chatbox-color-light: #FEFFDE;
-    --chatbox-color-medium: #DDFFBC;
+    --chatbox-color-mid-1: #DDFFBC;
     --chatbox-color-dark: #91C788;
     --chatbox-color-text: black;    
     #14
     --chatbox-color-light: #FEFFDE;
-    --chatbox-color-medium: #DDFFBC;
+    --chatbox-color-mid-1: #DDFFBC;
     --chatbox-color-dark: #52734D;
     --chatbox-color-text: #FEFFDE;
     #15
     --chatbox-color-light: #CBE4DE;
-    --chatbox-color-medium: #0E8388;
+    --chatbox-color-mid-1: #0E8388;
     --chatbox-color-dark: #2E4F4F;
     --chatbox-color-text: #CBE4DE;
     #16
     --chatbox-color-light: #f8e4ca;
-    --chatbox-color-medium: #ffce7a;
+    --chatbox-color-mid-1: #ffce7a;
     --chatbox-color-dark: #fd8b28;
+    --chatbox-color-text: black;
+    #17
+    --chatbox-color-light: white;
+    --chatbox-color-mid-1: rgb(239, 236, 236);
+    --chatbox-color-mid-2: rgb(239, 236, 236);
+    --chatbox-color-dark: rgba(142, 139, 135, 0.422);
+    --chatbox-color-text: black;
+    #18
+    --chatbox-color-light: #F4F4F2;
+    --chatbox-color-mid-1: #E8E8E8;
+    --chatbox-color-mid-2: #E8E8E8;
+    --chatbox-color-dark: #BBBFCA;
+    --chatbox-color-text: black;
+    #19
+    --chatbox-color-light: rgb(249, 240, 228);
+    --chatbox-color-mid-1: rgba(250, 213, 164, 0.372);
+    --chatbox-color-mid-2: rgba(250, 213, 164, 0.372);
+    --chatbox-color-dark: rgba(250, 213, 164, 0.534);
+    --chatbox-color-text: black;
+    #20
+    --chatbox-color-light: #FFFFFF;
+    --chatbox-color-mid-1: #F9F6F7;
+    --chatbox-color-mid-2: #FFE8D6;
+    --chatbox-color-dark: #FF971D;
+    --chatbox-color-text: black;
+    #21
+    --chatbox-color-light: #FFFDF6;
+    --chatbox-color-mid-1: #FAF6E9;
+    --chatbox-color-mid-2: #FAF6E9;
+    --chatbox-color-dark: #ECE8D9;
+    --chatbox-color-text: black;
+    #22
+    --chatbox-color-light: #F9F9F9;
+    --chatbox-color-mid-1: #DED5C4;
+    --chatbox-color-mid-2: #DED5C4;
+    --chatbox-color-dark: #beb8ac;
+    --chatbox-color-text: black;
+    #23
+    --chatbox-color-light: #F7EDDB;
+    --chatbox-color-mid-1: #DAE2B6;
+    --chatbox-color-mid-2: #DAE2B6;
+    --chatbox-color-dark: #CCD6A6;
+    --chatbox-color-text: black;
+    #24
+    --chatbox-color-light: #F9F2D7;
+    --chatbox-color-mid-1: #F2DEA8;
+    --chatbox-color-mid-2: #F2DEA8;
+    --chatbox-color-dark: #d3c692;
+    --chatbox-color-text: black;
+    #25
+    --chatbox-color-light: #F0E5D3;
+    --chatbox-color-mid-1: #F0E5CA;
+    --chatbox-color-mid-2: #F0E5CA;
+    --chatbox-color-dark: #DFD5A5;
     --chatbox-color-text: black;
     */
 }
 
 body {
-    background-color: var(--chatbox-color-medium);
+    background-color: var(--chatbox-color-mid-2);
 }
 
 button {
@@ -193,6 +247,7 @@ input {
     padding: 2%;
     padding-top: 1%;
     padding-bottom: 1%;
+    background-color: var(--chatbox-color-mid-1);
     border: 1px solid rgba(0, 0, 0, 0.8);
     border-radius: 2px;
     clear: both;
