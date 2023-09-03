@@ -1,5 +1,12 @@
 :root {
     /*
+    #4
+    --chatbox-color-light: #EEEEEE;
+    --chatbox-color-mid-1: #FFD369;
+    --chatbox-color-mid-2: #FFD369;
+    --chatbox-color-dark: #393E46;
+    --chatbox-color-text-button: #EEEEEE;
+    --chatbox-color-text-message: black;
     #9
     --chatbox-color-light: white;
     --chatbox-color-mid-1: #C6E377;
@@ -30,6 +37,13 @@
     --chatbox-color-mid-1: #DDFFBC;
     --chatbox-color-dark: #52734D;
     --chatbox-color-text: #FEFFDE;
+    #14.1
+    --chatbox-color-light: #FEFFDE;
+    --chatbox-color-mid-1: #DDFFBC;
+    --chatbox-color-mid-2: #DDFFBC;
+    --chatbox-color-dark: #4c6b47;
+    --chatbox-color-text-button: #FEFFDE;
+    --chatbox-color-text-message: black;
     #15
     --chatbox-color-light: #CBE4DE;
     --chatbox-color-mid-1: #0E8388;
@@ -115,11 +129,25 @@
     --chatbox-color-dark: #5e5a37;
     --chatbox-color-text-button: #f2eab0;
     --chatbox-color-text-message: #5e5a37;
+    #28.1
+    --chatbox-color-light: #f2eab0;
+    --chatbox-color-mid-1: #E5D352;
+    --chatbox-color-mid-2: #E5D352;
+    --chatbox-color-dark: #36341f;
+    --chatbox-color-text-button: #f2eab0;
+    --chatbox-color-text-message: #5e5a37;
     #29
     --chatbox-color-light: #F5F3BB;
     --chatbox-color-mid-1: #F5F3BB;
     --chatbox-color-mid-2: #F08A4B;
     --chatbox-color-dark: #3D3B3C;
+    --chatbox-color-text-button: #F5F3BB;
+    --chatbox-color-text-message: black;
+    #29.2
+    --chatbox-color-light: #F5F3BB;
+    --chatbox-color-mid-1: #F5F3BB;
+    --chatbox-color-mid-2: #F08A4B;
+    --chatbox-color-dark: #323031;
     --chatbox-color-text-button: #F5F3BB;
     --chatbox-color-text-message: black;
     #30
@@ -136,6 +164,13 @@
     --chatbox-color-dark: #7b7846;
     --chatbox-color-text-button: black;
     --chatbox-color-text-message: black;
+    #31.1
+    --chatbox-color-light: #F5F3BB;
+    --chatbox-color-mid-1: #f0c14b;
+    --chatbox-color-mid-2: #f0c14b;
+    --chatbox-color-dark: #444423;
+    --chatbox-color-text-button: #F5F3BB;
+    --chatbox-color-text-message: black;
     #32
     --chatbox-color-light: #F5F3BB;
     --chatbox-color-mid-1: #f3a44f;
@@ -143,11 +178,47 @@
     --chatbox-color-dark: rgb(154, 94, 29);
     --chatbox-color-text-button: black;
     --chatbox-color-text-message: black;
+    #32.1
+    --chatbox-color-light: #F5F3BB;
+    --chatbox-color-mid-1: #f3a44f;
+    --chatbox-color-mid-2: #f3a44f;
+    --chatbox-color-dark: rgb(71, 45, 17);
+    --chatbox-color-text-button: #F5F3BB;
+    --chatbox-color-text-message: black;
+    #33 (modified #22)
+    --chatbox-color-light: #F9F9F9;
+    --chatbox-color-mid-1: #DED5C4;
+    --chatbox-color-mid-2: #DED5C4;
+    --chatbox-color-dark: #645f57;
+    --chatbox-color-text-button: #DED5C4;
+    --chatbox-color-text-message: black;
+    #34 (modified #24)
+    --chatbox-color-light: #F9F2D7;
+    --chatbox-color-mid-1: #F2DEA8;
+    --chatbox-color-mid-2: #F2DEA8;
+    --chatbox-color-dark: #716a4f;
+    --chatbox-color-text-button: #F9F2D7;
+    --chatbox-color-text-message: black;
+    #35 (modified #21)
+    --chatbox-color-light: #FFFDF6;
+    --chatbox-color-mid-1: #FAF6E9;
+    --chatbox-color-mid-2: #FAF6E9;
+    --chatbox-color-dark: #797569;
+    --chatbox-color-text-button: #FAF6E9;
+    --chatbox-color-text-message: black;
     */
+
+    --page-margin-left: 15%;
+    --page-margin-right: 15%;
 }
 
 body {
     background-color: var(--chatbox-color-mid-2);
+    margin: 0%;
+    max-height: 100%;
+    max-width: 100%;
+    overflow-y: hidden;
+    overflow-x: hidden;
 }
 
 button {
@@ -163,18 +234,18 @@ input {
     background-color: var(--chatbox-color-light);
     border-radius: 2px;
     resize: none;
-    width: 100%;
+    width: 80%;
     height: 25px;
     margin-bottom: 1%;
 }
 
 .gridContainer {
     display: grid;
-    grid-template-columns: 0.5fr 3fr 0.5fr;
+    grid-template-columns: 0.5fr 2fr 0.5fr;
     grid-template-areas:
+        "header-area        header-area        header-area      "
+        "header-area        header-area        header-area      "
         ".................  .................  ................."
-        ".................  header-area        ................."
-        ".................  header-area        ................."
         "name-input-area    messages-area      user-list-area   "
         "chat-input-area    messages-area      user-list-area   "
         "connect-area       messages-area      user-list-area   "
@@ -192,42 +263,54 @@ input {
         ".................  messages-area      ................."
         ".................  messages-area      ................."
         ".................  messages-area      ................."
-        ".................  messages-area      ................."
-        ".................  messages-area      ................."
-        ".................  messages-area      ................."
         ".................  send-area          ................"
         ".................  send-area          ................."
         ".................  send-area          ................."
         ".................  send-button-area   ................."
         ".................  .................  .................";
-    padding-left: 5%;
-    padding-right: 5%;
     text-align: center;
-}
-
-.chatUsers {
-    grid-area: user-list-area;
 }
 
 .chatNameHeaderGrid {
     grid-area: header-area;
-    margin-top: 1%;
-    margin-bottom: 3%;
+    width: 100%;
+    margin: 0%;
+    margin-left: 0%;
+    margin-bottom: 2%;
+    padding: 2%;
+    background-color: var(--chatbox-color-dark);
+    /* color: var(--chatbox-color-light); */
+    /* color: var(--chatbox-color-mid-1); */
+    color: var(--chatbox-color-mid-2);
 }
 
 .nameInputGrid {
     grid-area: name-input-area;
+    margin-left: var(--page-margin-left);
 }
 
 .chatInputGrid {
     grid-area: chat-input-area;
+    margin-left: var(--page-margin-left);
+
 }
 
 .connectGrid {
     grid-area: connect-area;
-    width: 100%;
-    margin-bottom: 23;
+    margin-left: var(--page-margin-left);
+    width: 80%;
     cursor: pointer;
+}
+
+.recentlyUsedChatsGrid {
+    grid-area: recent-chats-area;
+    margin-left: var(--page-margin-left);
+    width: 80%;
+}
+
+.chatUsers {
+    grid-area: user-list-area;
+    margin-right: var(--page-margin-right);
 }
 
 .messagesGrid {
@@ -245,19 +328,13 @@ input {
     overflow: auto;
 }
 
-.recentlyUsedChatsGrid {
-    grid-area: recent-chats-area;
-}
-
 .sendGrid {
     grid-area: send-area;
     background-color: var(--chatbox-color-light);
     width: 90%;
-    height: 60px;
+    height: 50px;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 0.5%;
-    margin-bottom: 0.2%;
     border: 1px solid black;
     border-radius: 2px;
     resize: none;
