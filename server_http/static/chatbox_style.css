@@ -1,8 +1,17 @@
 :root {
     /*
-    #4
+    https://coolors.co/292f36-4ecdc4-f7fff7-ff6b6b-ffe66d
+    https://coolors.co/292f36-4ecdc4-f7fff7-ff6b6b-ffe66d
+    #5.1
     --chatbox-color-light: #EEEEEE;
     --chatbox-color-mid-1: #FFD369;
+    --chatbox-color-mid-2: #FFD369;
+    --chatbox-color-dark: #393E46;
+    --chatbox-color-text-button: #EEEEEE;
+    --chatbox-color-text-message: black;
+    #5.2
+    --chatbox-color-light: #ffffff;
+    --chatbox-color-mid-1: #EEEEEE;
     --chatbox-color-mid-2: #FFD369;
     --chatbox-color-dark: #393E46;
     --chatbox-color-text-button: #EEEEEE;
@@ -205,6 +214,34 @@
     --chatbox-color-mid-2: #FAF6E9;
     --chatbox-color-dark: #797569;
     --chatbox-color-text-button: #FAF6E9;
+    --chatbox-color-text-message: black;
+    #36
+    --chatbox-color-light: #F8F1F1;
+    --chatbox-color-mid-1: #E8AA42;
+    --chatbox-color-mid-2: #E8AA42;
+    --chatbox-color-dark: #025464;
+    --chatbox-color-text-button: #F8F1F1;
+    --chatbox-color-text-message: black;
+    #37
+    --chatbox-color-light: #FFF1CF;
+    --chatbox-color-mid-1: #FFD369;
+    --chatbox-color-mid-2: #E8AA42;
+    --chatbox-color-dark: #263F44;
+    --chatbox-color-text-button: #FFF1CF;
+    --chatbox-color-text-message: black;
+    #38
+    --chatbox-color-light: #FAF0CA;
+    --chatbox-color-mid-1: #F4D35E;
+    --chatbox-color-mid-2: #F4D35E;
+    --chatbox-color-dark: #0D3B66;
+    --chatbox-color-text-button: #FAF0CA;
+    --chatbox-color-text-message: black;
+    #40
+    --chatbox-color-light: #F7F7FF;
+    --chatbox-color-mid-1: #FFE66D;
+    --chatbox-color-mid-2: #FFE66D;
+    --chatbox-color-dark: #364156;
+    --chatbox-color-text-button: #DCFFFD;
     --chatbox-color-text-message: black;
     */
 
