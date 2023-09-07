@@ -247,6 +247,7 @@
 
     --page-margin-left: 15%;
     --page-margin-right: 15%;
+    --rounded-border-val: 2px;
 }
 
 body {
@@ -256,20 +257,22 @@ body {
     max-width: 100%;
     overflow-y: hidden;
     overflow-x: hidden;
+    /* font-family:sans-serif; */
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
 button {
     background-color: var(--chatbox-color-dark);
     color: var(--chatbox-color-text-button);
     border: 1px solid black;
-    border-radius: 2px;
+    border-radius: var(--rounded-border-val);
     height: 25px;
 }
 
 input {
     border: 1px solid black;
     background-color: var(--chatbox-color-light);
-    border-radius: 2px;
+    border-radius: var(--rounded-border-val);
     resize: none;
     width: 80%;
     height: 25px;
@@ -360,7 +363,7 @@ input {
     margin: auto;
     border: 1px solid black;
     background-color: var(--chatbox-color-light);
-    border-radius: 2px;
+    border-radius: var(--rounded-border-val);
     resize: none;
     overflow: auto;
 }
@@ -373,7 +376,7 @@ input {
     margin-left: auto;
     margin-right: auto;
     border: 1px solid black;
-    border-radius: 2px;
+    border-radius: var(--rounded-border-val);
     resize: none;
 }
 
@@ -387,7 +390,7 @@ input {
 .availableChat {
     /* background-color: rgba(87, 87, 87, 0.445); */
     /* border: 1px solid rgba(0, 0, 0, 0.8); */
-    /* border-radius: 2px; */
+    /* border-radius: var(--rounded-border-val); */
     cursor: pointer;
     margin-bottom: 1%;
     width: 100%;
@@ -397,7 +400,7 @@ input {
     background-color: var(--chatbox-color-dark);
     color: var(--chatbox-color-text-button);
     border: 1px solid black;
-    border-radius: 2px;
+    border-radius: var(--rounded-border-val);
     margin-bottom: 1%;
     /* display: block; */
     width: 100%;
@@ -412,11 +415,12 @@ input {
     padding-bottom: 1%;
     background-color: var(--chatbox-color-mid-1);
     border: 1px solid rgba(0, 0, 0, 0.8);
-    border-radius: 2px;
+    border-radius: var(--rounded-border-val);
     clear: both;
     font-size: large;
     word-wrap: break-word;
     box-shadow: 4px 4px 4px gray;
+    font-size: small;
 }
 
 .messageUnread {
