@@ -468,7 +468,7 @@ function activate_actions_on_entering_chat() {
     add_chat(chat);
     console.log(login, chat);
 
-    connect_button.innerHTML = "Connected";
+    disable_button();
 }
 
 
@@ -476,6 +476,21 @@ function copy_chat_url() {
     let chat_url = window.location.href;
     navigator.clipboard.writeText(chat_url);
 }
+
+
+function disable_button(text = "Connected") {
+    connect_button.innerHTML = text;
+    connect_button.style.opacity = 0.5;
+    connect_button.disabled = true;
+}
+
+
+function enable_button(text = "Connect") {
+    connect_button.innerHTML = text;
+    connect_button.style.opacity = 1;
+    connect_button.disabled = false;
+}
+
 
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
@@ -557,18 +572,18 @@ chat_destination_element.onkeydown = (e) => {
 
 my_name_element.oninput = () => {
     if (my_name_element.value === login.slice(0, -id_length)) {
-        connect_button.innerHTML = "Connected";
+        disable_button();
     } else {
-        connect_button.innerHTML = "Connect";
+        enable_button();
     }
 }
 
 
 chat_destination_element.oninput = () => {
     if (chat_destination_element.value === chat) {
-        connect_button.innerHTML = "Connected";
+        disable_button();
     } else {
-        connect_button.innerHTML = "Connect";
+        enable_button();
     }
 }
 
