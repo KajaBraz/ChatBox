@@ -15,7 +15,7 @@ from src import helper_functions, chatbox_websocket_server, enums
 class User:
     def __init__(self):
         self.chat_room = helper_functions.generate_random_string(10)
-        self.user_name = helper_functions.generate_random_string(10)
+        self.user_name = ''
         self.session: arsenic.Session = None
         self.timeout = 20
 
@@ -52,6 +52,7 @@ async def http_server():
 async def user():
     client = User()
     client.session = await arsenic_tests_helpers.creaate_session(client.chat_room, True)
+    client.user_name = await client.session.execute_script('return document.querySelector("#login").value')
 
     yield client
     await arsenic.stop_session(client.session)
@@ -330,3 +331,57 @@ async def test_copy_to_clipboard(chatbox_server, http_server, user):
     # VERIFY COPIED TEXT
     pasted_message = await user.session.execute_script('return document.querySelector("#newMessage").value')
     assert pasted_message == f'http://localhost:5000/chat/{user.chat_room}'
+
+
+@pytest.mark.asyncio
+async def test_connect_button(chatbox_server, http_server, user):
+    # VERIFY BUTTON ON CONNECTION
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is False
+    assert button_text == 'Connected'
+
+    # CHANGE USER NAME
+    login_elem = await user.session.get_element('#login')
+    await login_elem.send_keys('a')
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is True
+    assert button_text == 'Connect'
+
+    # BRING BACK USER NAME
+    await login_elem.clear()
+    await login_elem.send_keys(user.user_name)
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is False
+    assert button_text == 'Connected'
+
+    # CHANGE CHAT NAME
+    chat_elem = await user.session.get_element('#findChat')
+    await chat_elem.send_keys('a')
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is True
+    assert button_text == 'Connect'
+
+    # BRING BACK CHAT NAME
+    await chat_elem.clear()
+    await chat_elem.send_keys(user.chat_room)
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is False
+    assert button_text == 'Connected'
