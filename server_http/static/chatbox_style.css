@@ -154,7 +154,7 @@ input {
 }
 
 .messageUnread {
-    background-color: chartreuse;
+    background-color: var(--chatbox-color-mid-2);
 }
 
 .nameInputGrid {
