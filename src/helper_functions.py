@@ -14,15 +14,12 @@ def date_time_to_millis(t: datetime) -> int:
 
 
 def check_url(url_input: str) -> bool:
-    range1 = range(48, 58)
-    range2 = range(65, 91)
-    range3 = range(97, 123)
-    if url_input.count('/') != 2:
+    if url_input[0] != '/' or url_input.count('/', 1) != 1:
         return False
-    updated_input = url_input.replace('/', '')
-    for ch in updated_input:
-        o = ord(ch)
-        if (o not in range1) and (o not in range2) and (o not in range3):
+    used_chrs = set(url_input)
+    used_chrs.remove('/')
+    for char in used_chrs:
+        if not (char.isalnum() or char in {'-', '_'}):
             return False
     return True
 

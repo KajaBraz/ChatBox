@@ -120,6 +120,11 @@ input {
     text-align: center;
 }
 
+.incorrectInput {
+    background-color: rgba(255, 0, 0, 0.525);
+    border: 3px solid red;
+}
+
 .message {
     background-color: var(--chatbox-color-light);
     border: 1px solid rgba(0, 0, 0, 0.8);

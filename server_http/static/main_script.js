@@ -492,6 +492,35 @@ function enable_button(text = "Connect") {
 }
 
 
+function validate_input(text) {
+    var char_code;
+    for (let i = 0; i < text.length; i++) {
+        char_code = text.charCodeAt(i);
+        console.log('CODE', text[i], char_code);
+        if (!(
+            (char_code > 47 && char_code < 58) || // numeric (0-9)
+            (char_code > 64 && char_code < 91) || // upper alpha (A-Z)
+            (char_code > 96 && char_code < 123) || // lower alpha (a-z)
+            (char_code == 45 || char_code == 95) // dash (-) and underscore (_)
+        )) {
+            return false;
+        }
+    };
+    return true;
+}
+
+
+function mark_incorrect_input(box) {
+    box.classList.add(INCORRECT_INPUT_CLASS);
+    console.log('INCORRECT')
+}
+
+
+function mark_correct_input(box) {
+    box.classList.remove(INCORRECT_INPUT_CLASS);
+    console.log('  CORRECT')
+}
+
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
 var all_messages_element = document.getElementById("receivedMessages");
@@ -523,6 +552,7 @@ const RECENT_CHATS_STORAGE = "chatbox_stored_recent_chats";
 const MAX_MSGS_ON_PAGE_NUM = 20;
 const TAB_TITLE = 'ChatBox'
 const audio = document.getElementById('audioSheep');
+const INCORRECT_INPUT_CLASS = "incorrectInput";
 
 
 window.onload = function () {
@@ -556,16 +586,30 @@ connect_button.onclick = () => {
 }
 
 
-my_name_element.onkeydown = (e) => {
-    if (e.code == 'Enter') {
-        window.location.href = `${window.location.origin}/chat/${chat_destination_element.value}`;
+my_name_element.onkeyup = (e) => {
+    let typed_input = my_name_element.value;
+    let valid = validate_input(typed_input);
+    if (valid) {
+        mark_correct_input(my_name_element);
+        if (e.code == 'Enter') {
+            window.location.href = `${window.location.origin}/chat/${chat_destination_element.value}`;
+        }
+    } else {
+        mark_incorrect_input(my_name_element);
     }
 }
 
 
-chat_destination_element.onkeydown = (e) => {
-    if (e.code == 'Enter') {
-        chat_change(chat_destination_element.value);
+chat_destination_element.onkeyup = (e) => {
+    let typed_input = chat_destination_element.value;
+    let valid = validate_input(typed_input);
+    if (valid) {
+        mark_correct_input(chat_destination_element);
+        if (e.code == 'Enter') {
+            chat_change(typed_input);
+        }
+    } else {
+        mark_incorrect_input(chat_destination_element);
     }
 }
 
