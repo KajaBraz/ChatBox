@@ -492,7 +492,7 @@ function enable_button(text = "Connect") {
 }
 
 
-function validate_input(text) {
+function check_input_characters(text) {
     var char_code;
     for (let i = 0; i < text.length; i++) {
         char_code = text.charCodeAt(i);
@@ -507,6 +507,19 @@ function validate_input(text) {
         }
     };
     return true;
+}
+
+
+function check_input_length(text, max_length) {
+    if (text.length >= max_length) {
+        return false;
+    }
+    return true;
+}
+
+
+function validate_input(text, max_length) {
+    return check_input_length(text, max_length) && check_input_characters(text);
 }
 
 
@@ -550,10 +563,10 @@ const ACTIVE_CHAT_STORAGE = "chatbox_stored_active_chat";
 const ACTIVE_USER_STORAGE = "chatbox_stored_active_user";
 const RECENT_CHATS_STORAGE = "chatbox_stored_recent_chats";
 const MAX_MSGS_ON_PAGE_NUM = 20;
-const TAB_TITLE = 'ChatBox'
+const TAB_TITLE = 'ChatBox';
 const audio = document.getElementById('audioSheep');
 const INCORRECT_INPUT_CLASS = "incorrectInput";
-
+const MAX_INPUT_LENGTH = 20;
 
 window.onload = function () {
     console.log("onload");
@@ -588,28 +601,32 @@ connect_button.onclick = () => {
 
 my_name_element.onkeyup = (e) => {
     let typed_input = my_name_element.value;
-    let valid = validate_input(typed_input);
+    let valid = validate_input(typed_input, MAX_INPUT_LENGTH);
     if (valid) {
         mark_correct_input(my_name_element);
+        enable_button();
         if (e.code == 'Enter') {
             window.location.href = `${window.location.origin}/chat/${chat_destination_element.value}`;
         }
     } else {
         mark_incorrect_input(my_name_element);
+        disable_button();
     }
 }
 
 
 chat_destination_element.onkeyup = (e) => {
     let typed_input = chat_destination_element.value;
-    let valid = validate_input(typed_input);
+    let valid = validate_input(typed_input, MAX_INPUT_LENGTH);
     if (valid) {
         mark_correct_input(chat_destination_element);
+        enable_button();
         if (e.code == 'Enter') {
             chat_change(typed_input);
         }
     } else {
         mark_incorrect_input(chat_destination_element);
+        disable_button();
     }
 }
 
