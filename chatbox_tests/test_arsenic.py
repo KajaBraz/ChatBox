@@ -15,7 +15,7 @@ from src import helper_functions, chatbox_websocket_server, enums
 class User:
     def __init__(self):
         self.chat_room = helper_functions.generate_random_string(10)
-        self.user_name = helper_functions.generate_random_string(10)
+        self.user_name = ''
         self.session: arsenic.Session = None
         self.timeout = 20
 
@@ -52,6 +52,7 @@ async def http_server():
 async def user():
     client = User()
     client.session = await arsenic_tests_helpers.creaate_session(client.chat_room, True)
+    client.user_name = await client.session.execute_script('return document.querySelector("#login").value')
 
     yield client
     await arsenic.stop_session(client.session)
@@ -109,12 +110,14 @@ async def test_connect_with_button(chatbox_server, http_server, user):
     await arsenic_tests_helpers.connect_user(user.session, new_login, new_chat)
 
     header_elem = await user.session.get_element('#chatNameHeader')
-    chat_list_elem = await user.session.get_element('#recentlyUsedChats')
-    displayed_chats = await chat_list_elem.get_text()
+    recent_chat_1 = await user.session.get_element(f'#{new_chat}')
+    recent_chat_2 = await user.session.get_element(f'#{user.chat_room}')
+    recent_chat_1 = await recent_chat_1.get_text()
+    recent_chat_2 = await recent_chat_2.get_text()
     displayed_user = await user.session.get_element('#activeUsers')
 
     assert await header_elem.get_text() == new_chat
-    assert set(displayed_chats.split()) == {user.chat_room, new_chat}
+    assert {recent_chat_1, recent_chat_2} == {user.chat_room, new_chat}
     assert await displayed_user.get_text() == new_login
 
 
@@ -165,7 +168,8 @@ async def test_active_users_display(chatbox_server, http_server, user):
         temp_drivers.add(new_session)
         temp_active_users_elems = [await dr.get_element('#activeUsers') for dr in temp_drivers]
         temp_active_users = [await active_users_elem.get_text() for active_users_elem in temp_active_users_elems]
-        assert all(temp_users == set(displayed.split()) for displayed in temp_active_users)
+        assert all((temp_user in displayed for temp_user in temp_users) for displayed in temp_active_users)
+        # Temporary solution until Active Users are displayed as buttons
 
     # todo, temporary to remove, use separate windows instead, not drivers
     for ns in new_sessions:
@@ -296,7 +300,7 @@ async def test_send_and_open_link(chatbox_server, http_server, user):
     await send_button.click()
 
     # CLICK LINKS
-    messages = await user.session.get_elements('.messageText')
+    messages = await user.session.get_elements('a')
     await messages[-1].click()
     await messages[-2].click()
 
@@ -327,3 +331,57 @@ async def test_copy_to_clipboard(chatbox_server, http_server, user):
     # VERIFY COPIED TEXT
     pasted_message = await user.session.execute_script('return document.querySelector("#newMessage").value')
     assert pasted_message == f'http://localhost:5000/chat/{user.chat_room}'
+
+
+@pytest.mark.asyncio
+async def test_connect_button(chatbox_server, http_server, user):
+    # VERIFY BUTTON ON CONNECTION
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is False
+    assert button_text == 'Connected'
+
+    # CHANGE USER NAME
+    login_elem = await user.session.get_element('#login')
+    await login_elem.send_keys('a')
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is True
+    assert button_text == 'Connect'
+
+    # BRING BACK USER NAME
+    await login_elem.clear()
+    await login_elem.send_keys(user.user_name)
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is False
+    assert button_text == 'Connected'
+
+    # CHANGE CHAT NAME
+    chat_elem = await user.session.get_element('#findChat')
+    await chat_elem.send_keys('a')
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is True
+    assert button_text == 'Connect'
+
+    # BRING BACK CHAT NAME
+    await chat_elem.clear()
+    await chat_elem.send_keys(user.chat_room)
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is False
+    assert button_text == 'Connected'
