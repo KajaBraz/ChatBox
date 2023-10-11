@@ -4,7 +4,8 @@
 | **STATUS** | ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/KajaBraz/ChatBox/.github%2Fworkflows%2Fpythonapp.yml) |
 | **LINK** | ![Static Badge](https://img.shields.io/badge/Access_ChatBox-Here-red?link=http://77.255.180.88:13297/) |
 | **LINK** | ![Static Badge](https://img.shields.io/badge/Access_ChatBox-Here-FFE66D?link=http://77.255.180.88:13297/) |
-![Static Badge](https://img.shields.io/badge/left-right-red.svg?link_&link_=http%3A%2F%2F77.255.180.88%3A13297%2F)
+![Static Badge](https://img.shields.io/badge/left-right-red.svg?link=http%3A%2F%2F77.255.180.88%3A13297%2F)
+<img alt="Static Badge" src="https://img.shields.io/badge/left-right-red.svg?link=http%3A%2F%2F77.255.180.88%3A13297%2F">
 | **TRAFFIC** | [![GitHub Clones](https://img.shields.io/badge/dynamic/json?color=pink&label=clone+count&query=count&url=https://gist.githubusercontent.com/KajaBraz/6c721046f14e080ef8e2a0038b4036b0/raw/clone.json)](https://github.com/MShawon/github-clone-count-badge) |
 | **ACTIVITY** | ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/KajaBraz/ChatBox?label=commits+count&color=orange) ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/y/KajaBraz/ChatBox/master?label=commits+frequency&color=orange) |
 | **ISSUES** | ![GitHub issues](https://img.shields.io/github/issues-raw/KajaBraz/ChatBox?color=brown) ![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/KajaBraz/ChatBox.svg?color=brown) |
