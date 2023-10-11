@@ -2,7 +2,7 @@
 | | |
 |:--------|:------|
 | **STATUS** | ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/KajaBraz/ChatBox/.github%2Fworkflows%2Fpythonapp.yml) |
-| **LINK** | ![Static Badge](https://img.shields.io/badge/left-right-red?link=link=http://77.255.180.88:13297/) |
+| **LINK** | ![Static Badge](https://img.shields.io/badge/left-right-red?link=http://77.255.180.88:13297/) |
 | **LINK** | ![Static Badge](https://img.shields.io/badge/Access_ChatBox-Here-FFE66D?link=http://77.255.180.88:13297/) |
 | **TRAFFIC** | [![GitHub Clones](https://img.shields.io/badge/dynamic/json?color=pink&label=clone+count&query=count&url=https://gist.githubusercontent.com/KajaBraz/6c721046f14e080ef8e2a0038b4036b0/raw/clone.json)](https://github.com/MShawon/github-clone-count-badge) |
 | **ACTIVITY** | ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/KajaBraz/ChatBox?label=commits+count&color=orange) ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/y/KajaBraz/ChatBox/master?label=commits+frequency&color=orange) |
