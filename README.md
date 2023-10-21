@@ -17,7 +17,7 @@ The chats are open and can be viewed by all the users who enter them.
 
 An example ChatBox view:
 
-![image](https://user-images.githubusercontent.com/58611238/122130476-f9899a80-ce37-11eb-8361-a4328a864315.png)
+![obraz](https://github.com/KajaBraz/ChatBox/assets/58611238/24835cc4-49df-4666-9f4d-facb1d87f23e)
 
 ## Latest Contributions Timeline
 [![Ashutosh's github activity graph](https://github-readme-activity-graph.vercel.app/graph?username=KajaBraz&theme=github-compact&height=200)](https://github.com/ashutosh00710/github-readme-activity-graph)
