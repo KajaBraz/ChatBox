@@ -534,6 +534,41 @@ function mark_correct_input(box) {
     console.log('  CORRECT')
 }
 
+
+function is_unchanged(typed_login, typed_chat) {
+    return typed_login === login.slice(0, -id_length) && typed_chat === chat;
+}
+
+
+function inspect_inputs_updates(typed_login, typed_chat, login_elem, chat_elem, key_event) {
+    if (is_unchanged(typed_login, typed_chat)) {
+        disable_button();
+
+    } else {
+        let valid_login = validate_input(typed_login, MAX_INPUT_LENGTH);
+        let valid_chat = validate_input(typed_chat, MAX_INPUT_LENGTH);
+
+        if (valid_login && valid_chat) {
+            mark_correct_input(login_elem);
+            mark_correct_input(chat_elem);
+            enable_button();
+
+            if (key_event.code == 'Enter') {
+                window.location.href = `${window.location.origin}/chat/${chat_elem.value}`;
+            }
+
+        } else if (!valid_login) {
+            mark_incorrect_input(login_elem);
+            disable_button('Connect');
+
+        } else if (!valid_chat) {
+            mark_incorrect_input(chat_elem);
+            disable_button('Connect');
+        }
+    }
+}
+
+
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
 var all_messages_element = document.getElementById("receivedMessages");
@@ -568,6 +603,7 @@ const audio = document.getElementById('audioSheep');
 const INCORRECT_INPUT_CLASS = "incorrectInput";
 const MAX_INPUT_LENGTH = 20;
 
+
 window.onload = function () {
     console.log("onload");
     let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
@@ -600,52 +636,18 @@ connect_button.onclick = () => {
 
 
 my_name_element.onkeyup = (e) => {
-    let typed_input = my_name_element.value;
-    let valid = validate_input(typed_input, MAX_INPUT_LENGTH);
-    if (valid) {
-        mark_correct_input(my_name_element);
-        enable_button();
-        if (e.code == 'Enter') {
-            window.location.href = `${window.location.origin}/chat/${chat_destination_element.value}`;
-        }
-    } else {
-        mark_incorrect_input(my_name_element);
-        disable_button();
-    }
+    let typed_login = my_name_element.value;
+    let typed_chat = chat_destination_element.value;
+
+    inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
 }
 
 
 chat_destination_element.onkeyup = (e) => {
-    let typed_input = chat_destination_element.value;
-    let valid = validate_input(typed_input, MAX_INPUT_LENGTH);
-    if (valid) {
-        mark_correct_input(chat_destination_element);
-        enable_button();
-        if (e.code == 'Enter') {
-            chat_change(typed_input);
-        }
-    } else {
-        mark_incorrect_input(chat_destination_element);
-        disable_button();
-    }
-}
+    let typed_login = my_name_element.value;
+    let typed_chat = chat_destination_element.value;
 
-
-my_name_element.oninput = () => {
-    if (my_name_element.value === login.slice(0, -id_length)) {
-        disable_button();
-    } else {
-        enable_button();
-    }
-}
-
-
-chat_destination_element.oninput = () => {
-    if (chat_destination_element.value === chat) {
-        disable_button();
-    } else {
-        enable_button();
-    }
+    inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
 }
 
 
