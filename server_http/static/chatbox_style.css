@@ -39,7 +39,6 @@ input {
     height: 25px;
     margin-bottom: 1%;
     resize: none;
-    width: 80%;
 }
 
 .availableChat {
@@ -51,7 +50,7 @@ input {
 .chatInputGrid {
     grid-area: chat-input-area;
     margin-left: var(--chatbox-page-margin-left);
-
+    width: 80%;
 }
 
 .chatNameHeaderGrid {
@@ -86,6 +85,16 @@ input {
     cursor: pointer;
     margin-left: var(--chatbox-page-margin-left);
     width: 80%;
+}
+
+.divAuthor {
+    float: left;
+    text-align: left;
+}
+
+.divTimestamp {
+    color: var(--chatbox-color-text-message);
+    text-align: right;
 }
 
 .gridContainer {
@@ -165,6 +174,7 @@ input {
 .nameInputGrid {
     grid-area: name-input-area;
     margin-left: var(--chatbox-page-margin-left);
+    width: 80%;
 }
 
 .recentlyUsedChatsGrid {
@@ -192,6 +202,24 @@ input {
     width: 90%;
 }
 
+.tooltip .tooltiptext {
+    background-color: var(--chatbox-color-dark);
+    border: 1px dashed var(--chatbox-color-mid-2);
+    border-radius: var(--chatbox-border-radius);
+    color: var(--chatbox-color-light);
+    font-size: small;
+    padding: 1%;
+    position: absolute;
+    text-align: left;
+    visibility: hidden;
+    white-space: pre-line;
+    z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
 #chatNameHeader {
     display: inline;
 }
@@ -202,12 +230,7 @@ input {
     vertical-align: auto;
 }
 
-.divAuthor {
-    float: left;
-    text-align: left;
-}
-
-.divTimestamp {
-    color: var(--chatbox-color-text-message);
-    text-align: right;
+#findChat,
+#login {
+    width: 90%;
 }
