@@ -544,6 +544,9 @@ function inspect_inputs_updates(typed_login, typed_chat, login_elem, chat_elem, 
     if (is_unchanged(typed_login, typed_chat)) {
         disable_button();
 
+    } else if (typed_login.length === 0 || typed_chat.length === 0) {
+        disable_button('Connect');
+
     } else {
         let valid_login = validate_input(typed_login, MAX_INPUT_LENGTH);
         let valid_chat = validate_input(typed_chat, MAX_INPUT_LENGTH);
@@ -557,12 +560,19 @@ function inspect_inputs_updates(typed_login, typed_chat, login_elem, chat_elem, 
                 window.location.href = `${window.location.origin}/chat/${chat_elem.value}`;
             }
 
+        } else if (!valid_login && !valid_chat) {
+            mark_incorrect_input(login_elem);
+            mark_incorrect_input(chat_elem);
+            disable_button('Connect');
+
         } else if (!valid_login) {
             mark_incorrect_input(login_elem);
+            mark_correct_input(chat_elem);
             disable_button('Connect');
 
         } else if (!valid_chat) {
             mark_incorrect_input(chat_elem);
+            mark_correct_input(login_elem);
             disable_button('Connect');
         }
     }
