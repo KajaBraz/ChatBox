@@ -511,7 +511,7 @@ function check_input_characters(text) {
 
 
 function check_input_length(text, max_length) {
-    if (text.length >= max_length) {
+    if (text.length > max_length) {
         return false;
     }
     return true;

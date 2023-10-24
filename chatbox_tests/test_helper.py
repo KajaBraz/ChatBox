@@ -1,5 +1,5 @@
 from src.enums import JsonFields, MessageTypes
-from src.helper_functions import check_url, check_message_json, check_previous_messages_json
+from src.helper_functions import check_connection_url, check_message_json, check_previous_messages_json
 from src.my_json import to_json
 
 
@@ -12,8 +12,8 @@ def test_check_url():
                   '/MyChat/my login0olCnoRHyfTxvAh3TD0q', '/my chat/my login0olCnoRHyfTxvAh3TD0q',
                   '/pokój/mylogin0olCnoRHyfTxvAh3TD0q', 'mychat/mylogin0olCnoRHyfTxvAh3TD0q',
                   '/myChat/myLogin/0olCnoRHyfTxvAh3TD0q']
-    assert all([check_url(url) for url in correct_urls])
-    assert not any([check_url(url) for url in wrong_urls])
+    assert all([check_connection_url(url) for url in correct_urls])
+    assert not any([check_connection_url(url) for url in wrong_urls])
 
 
 def test_check_message_json():
