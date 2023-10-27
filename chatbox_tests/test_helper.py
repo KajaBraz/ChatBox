@@ -1,5 +1,5 @@
 from src.enums import JsonFields, MessageTypes
-from src.helper_functions import check_connection_url, check_message_json, check_previous_messages_json
+from src.helper_functions import check_connection_url, check_message_json, check_previous_messages_json, check_input
 from src.my_json import to_json
 
 
@@ -154,3 +154,20 @@ def test_check_previous_messages_json():
     assert not check_previous_messages_json(to_json(message13))
     assert not check_previous_messages_json(to_json(message14))
     assert not check_previous_messages_json(to_json(message15))
+
+
+def test_check_input():
+    # GIVEN
+    valid_inputs = ['davinci', 'DaVinci', 'da_vinci', 'Da-Vinci', 'davinci_15', 'fofò', 'tribù', 'verità', 'lunedì',
+                    'ventitré']
+    invalid_inputs = ['', 'Da Vinci', 'da vinci', 'DaVinci.', 'da#vinci', 'da@vinci', 'da(vinci)', 'da&vinci',
+                      'da_vinci!', 'da/vinci', 'davinci?', 'da[vinci]', 'da{vinci}', 'da|vinci', '-', '_', 'da+vinci',
+                      'da*vinci', '"davinci"', "fofo'", "lunedi'"]
+
+    # WHEN
+    check_valid = [check_input(valid) for valid in valid_inputs]
+    check_invalid = [check_input(invalid) for invalid in invalid_inputs]
+
+    # THEN
+    assert all(check_valid)
+    assert not any(check_invalid)
