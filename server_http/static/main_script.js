@@ -493,6 +493,12 @@ function enable_button(text = "Connect") {
 
 
 function check_input_characters(text) {
+    text = text.replaceAll('-', '').replaceAll('_', '');
+
+    if (text.length === 0) {
+        return false;
+    }
+
     var char_code;
     for (let i = 0; i < text.length; i++) {
         char_code = text.charCodeAt(i);
@@ -500,8 +506,7 @@ function check_input_characters(text) {
         if (!(
             (char_code > 47 && char_code < 58) || // numeric (0-9)
             (char_code > 64 && char_code < 91) || // upper alpha (A-Z)
-            (char_code > 96 && char_code < 123) || // lower alpha (a-z)
-            (char_code == 45 || char_code == 95) // dash (-) and underscore (_)
+            (char_code > 96 && char_code < 123)   // lower alpha (a-z)
         )) {
             return false;
         }
@@ -525,13 +530,11 @@ function validate_input(text, max_length) {
 
 function mark_incorrect_input(box) {
     box.classList.add(INCORRECT_INPUT_CLASS);
-    console.log('INCORRECT')
 }
 
 
 function mark_correct_input(box) {
     box.classList.remove(INCORRECT_INPUT_CLASS);
-    console.log('  CORRECT')
 }
 
 
@@ -542,10 +545,18 @@ function is_unchanged(typed_login, typed_chat) {
 
 function inspect_inputs_updates(typed_login, typed_chat, login_elem, chat_elem, key_event) {
     if (is_unchanged(typed_login, typed_chat)) {
+        mark_correct_input(login_elem);
+        mark_correct_input(chat_elem);
         disable_button();
 
     } else if (typed_login.length === 0 || typed_chat.length === 0) {
         disable_button('Connect');
+        if (typed_login.length === 0) {
+            mark_correct_input(login_elem);
+        }
+        if (typed_chat.length === 0) {
+            mark_correct_input(chat_elem);
+        }
 
     } else {
         let valid_login = validate_input(typed_login, MAX_INPUT_LENGTH);
