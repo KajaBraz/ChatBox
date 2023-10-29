@@ -499,21 +499,31 @@ function check_input_characters(text) {
         return false;
     }
 
-    var char_code;
-    for (let i = 0; i < text.length; i++) {
-        char_code = text.charCodeAt(i);
-        console.log('CODE', text[i], char_code);
-        if (!(
-            (char_code > 47 && char_code < 58) || // numeric (0-9)
-            (char_code > 64 && char_code < 91) || // upper alpha (A-Z)
-            (char_code > 96 && char_code < 123)   // lower alpha (a-z)
-        )) {
-            return false;
-        }
-    };
+    return Array.from(text).every(is_alnum);
+}
+
+function is_alnum(char) {
+    if (!is_simple_alnum(char)) {
+        return check_diacritics(char);
+    }
     return true;
 }
 
+function is_simple_alnum(char) {
+    let char_code = char.charCodeAt(0);
+    if ((char_code > 47 && char_code < 58) || // numeric (0-9)
+        (char_code > 64 && char_code < 91) || // upper alpha (A-Z)
+        (char_code > 96 && char_code < 123)   // lower alpha (a-z)
+    ) {
+        return true;
+    }
+    return false;
+}
+
+function check_diacritics(char) {
+    let decomposed = Array.from(char.normalize('NFD'));
+    return is_simple_alnum(decomposed[0]);
+}
 
 function check_input_length(text, max_length) {
     if (text.length > max_length) {

@@ -390,8 +390,7 @@ async def test_connect_button(chatbox_server, http_server, user):
 async def test_invalid_input_verification(chatbox_server, http_server, user):
     invalid_inputs = ['Da Vinci', 'da vinci', 'DaVinci.', 'da#vinci', 'da@vinci', 'da(vinci)', 'da&vinci', 'da_vinci!',
                       'da/vinci', 'davinci?', 'da[vinci]', 'da{vinci}', 'da|vinci', '-', '_', 'da+vinci', 'da*vinci',
-                      '"davinci"', 'fofò', 'tribù', 'verità', 'lunedì', 'ventitré', "fofo'", "lunedi'", 'ą', '#3', '5!',
-                      '1$', '2~3', 'cç', 'dþ', 'nň', 'uŰ', '012345678901234567890']
+                      '"davinci"', "fofo'", "lunedi'", '#3', '5!', '1$', '2~3', 'dþ', '012345678901234567890']
     input_elements_ids = ['login', 'findChat']
 
     for input_element in input_elements_ids:
@@ -422,7 +421,8 @@ async def test_invalid_input_verification(chatbox_server, http_server, user):
 
 @pytest.mark.asyncio
 async def test_valid_inputs(chatbox_server, http_server, user):
-    valid_inputs = ['davinci', 'DaVinci', 'da_vinci', 'Da-Vinci', 'davinci_15', '100', '2-1', '01234567890123456789']
+    valid_inputs = ['davinci', 'DaVinci', 'da_vinci', 'Da-Vinci', 'davinci_15', 'fofò', 'tribù', 'verità', 'lunedì',
+                    'ventitré', 'ą', '100', '2-1', 'cç', 'nň', 'uŰ', '01234567890123456789']
     input_elements_ids = ['login', 'findChat']
 
     for input_element in input_elements_ids:
