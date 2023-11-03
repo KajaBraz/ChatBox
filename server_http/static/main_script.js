@@ -448,10 +448,14 @@ function adjust_displayed_messages() {
 
 
 function update_save_login() {
-    let id = generate_random_string(id_length);
-    let username = my_name_element.value + id;
-    localStorage.setItem(ACTIVE_USER_STORAGE, username);
-    return username;
+    let typed_login = my_name_element.value;
+    if (validate_input(typed_login)) {
+        let id = generate_random_string(id_length);
+        let username = typed_login + id;
+        localStorage.setItem(ACTIVE_USER_STORAGE, username);
+        return (true, username);
+    }
+    return (false, username);
 }
 
 
@@ -461,8 +465,12 @@ function activate_actions_on_entering_chat() {
         login = stored_user_name;
         console.log('equal logins');
     } else {
-        login = update_save_login();
+        let login_update = update_save_login();
+        if (login_update[0] === true) {
+            login = login_update[1];
+        }
     }
+
     enter_chat(chat_destination_element.value)
     connect(login, chat);
     add_chat(chat);
