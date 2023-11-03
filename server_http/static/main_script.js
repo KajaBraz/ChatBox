@@ -272,7 +272,9 @@ function chat_change(new_chat) {
 
 function leave_chat(old_chat) {
     store_last_msgs_ids();
-    localStorage.setItem(ACTIVE_CHAT_STORAGE, old_chat);
+    if (validate_input(old_chat) === true) {
+        localStorage.setItem(ACTIVE_CHAT_STORAGE, old_chat);
+    }
     localStorage.setItem(RECENT_CHATS_STORAGE, active_recent_chats);
 }
 
@@ -460,7 +462,7 @@ function update_save_login() {
 
 
 function activate_actions_on_entering_chat() {
-    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
+    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE); // DUPLICATES ONLOAD
     if (stored_user_name && my_name_element.value === retrieve_display_login(stored_user_name)) {
         login = stored_user_name;
         console.log('equal logins');
@@ -471,7 +473,12 @@ function activate_actions_on_entering_chat() {
         }
     }
 
-    enter_chat(chat_destination_element.value)
+    if (validate_input(chat_destination_element.value)) {
+        enter_chat(chat_destination_element.value)
+    } else {
+        enter_chat(DEFAULT_CHAT_NAME);
+    }
+
     connect(login, chat);
     add_chat(chat);
     console.log(login, chat);
@@ -641,11 +648,12 @@ const TAB_TITLE = 'ChatBox';
 const audio = document.getElementById('audioSheep');
 const INCORRECT_INPUT_CLASS = "incorrectInput";
 const MAX_INPUT_LENGTH = 20;
+const DEFAULT_CHAT_NAME = "WelcomeInChatBox";
 
 
 window.onload = function () {
     console.log("onload");
-    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
+    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE); // DUPLICATES activate_actions_on_entering_chat
     let short_name;
     if (stored_user_name) {
         short_name = retrieve_display_login(stored_user_name);
