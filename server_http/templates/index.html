@@ -12,8 +12,34 @@
 <body>
     <div class="gridContainer">
 
-        <input class="nameInputGrid" id="login" placeholder="Your Name">
-        <input class="chatInputGrid" id="findChat" placeholder="Chat Name" value="{{ requestedChatName }}">
+        <div class="nameInputGrid">
+            <input id="login" placeholder="Your Name">
+            <i class="tooltip" id="loginNameInfo">&#9432;
+                <span class="tooltipText">Username restrictions:
+                    - at least 1 character long
+                    - at most 20 characters long
+                    - can contain Latin characters (lowercase / uppercase) and numbers
+                    - can contain underscores (_) and dashes (-)
+                    - cannot contain spaces
+                    - cannot contain any other special characters
+                </span>
+            </i>
+        </div>
+
+        <div class="chatInputGrid">
+            <input id="findChat" placeholder="Chat Name" value="{{ requestedChatName }}">
+            <i class="tooltip" id="chatNameInfo">&#9432;
+                <span class="tooltipText">Chat name restrictions:
+                    - at least 1 character long
+                    - at most 20 characters long
+                    - can contain Latin characters (lowercase / uppercase) and numbers
+                    - can contain underscores (_) and dashes (-)
+                    - cannot contain spaces
+                    - cannot contain any other special characters
+                </span>
+            </i>
+        </div>
+
         <button class="connectGrid" id="connectButton">Connect</button>
 
         <div class="recentlyUsedChatsGrid">

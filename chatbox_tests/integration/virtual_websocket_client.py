@@ -1,6 +1,7 @@
 import websockets
 
-from src.enums import JsonFields, MessageTypes
+from src import helper_functions
+from src.enums import JsonFields, MessageTypes, Constants
 from src.my_json import to_json, from_json
 
 
@@ -13,7 +14,7 @@ class VirtualClient:
         self.address = address
         self.port = port
         self.chat_name = chat_name
-        self.user_name = user_name
+        self.user_name = user_name + helper_functions.generate_random_string(Constants.LOGIN_ID_SUFFIX_LENGTH)
 
     async def connect(self):
         url = f'ws://{self.address}:{self.port}/{self.chat_name}/{self.user_name}'

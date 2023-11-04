@@ -5,7 +5,7 @@ import re
 import string
 from datetime import datetime
 
-from src.enums import JsonFields, MessageTypes
+from src.enums import JsonFields, MessageTypes, Constants
 from src.my_json import from_json
 
 
@@ -13,18 +13,12 @@ def date_time_to_millis(t: datetime) -> int:
     return int(t.timestamp() * 1000)
 
 
-def check_url(url_input: str) -> bool:
-    range1 = range(48, 58)
-    range2 = range(65, 91)
-    range3 = range(97, 123)
-    if url_input.count('/') != 2:
+def check_connection_url(url_input: str) -> bool:
+    url_components = url_input[1:].split('/')
+    if url_input[0] != '/' or len(url_components) != 2 or len(url_components[1]) <= Constants.LOGIN_ID_SUFFIX_LENGTH:
         return False
-    updated_input = url_input.replace('/', '')
-    for ch in updated_input:
-        o = ord(ch)
-        if (o not in range1) and (o not in range2) and (o not in range3):
-            return False
-    return True
+    chat, login = url_components[0], url_components[1][:-Constants.LOGIN_ID_SUFFIX_LENGTH]
+    return check_input(chat) and check_input(login)
 
 
 def check_message_json(json_message: str) -> bool:
@@ -68,6 +62,17 @@ def check_more_previous_messages_json(json_message: str) -> bool:
                 dict_message[JsonFields.MESSAGE_SENDER] != ''):
             return True
     return False
+
+
+def check_input(received_input: str) -> bool:
+    if not 0 < len(received_input) <= Constants.MAX_INPUT_LENGTH:
+        return False
+
+    received_input = received_input.replace('_', '').replace('-', '')
+
+    if not received_input.isalnum():
+        return False
+    return True
 
 
 def set_logger(logger_name, to_console=True):

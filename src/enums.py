@@ -8,7 +8,7 @@ class JsonFields(object):
 
 
 class MessageTypes(object):
-    MESSAGE = "message"
+    MESSAGE = "message" 
     PREVIOUS_MESSAGES = "previous_messages"
     MORE_PREVIOUS_MESSAGES = "more_previous_messages"
     USERS_UPDATE = "users_update"
@@ -17,3 +17,5 @@ class MessageTypes(object):
 class Constants:
     DEFAULT_NO_DATABASE_MESSAGE_ID = -1
     DEFAULT_CHAT_NAME = 'WelcomeInChatBox'
+    LOGIN_ID_SUFFIX_LENGTH = 20
+    MAX_INPUT_LENGTH = 20

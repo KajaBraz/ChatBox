@@ -1,7 +1,6 @@
 import asyncio
 import multiprocessing
 import os.path
-import time
 
 import arsenic
 import pytest
@@ -385,3 +384,90 @@ async def test_connect_button(chatbox_server, http_server, user):
 
     assert await connect_button.is_enabled() is False
     assert button_text == 'Connected'
+
+
+@pytest.mark.asyncio
+async def test_invalid_input_verification(chatbox_server, http_server, user):
+    invalid_inputs = ['Da Vinci', 'da vinci', 'DaVinci.', 'da#vinci', 'da@vinci', 'da(vinci)', 'da&vinci', 'da_vinci!',
+                      'da/vinci', 'davinci?', 'da[vinci]', 'da{vinci}', 'da|vinci', '-', '_', 'da+vinci', 'da*vinci',
+                      '"davinci"', "fofo'", "lunedi'", '#3', '5!', '1$', '2~3', 'dþ', '012345678901234567890']
+    input_elements_ids = ['login', 'findChat']
+
+    for input_element in input_elements_ids:
+        # ENSURE THE LOOP STARTS WITH CORRECT VALUES
+        login = await user.session.get_element('#login')
+        chat = await user.session.get_element('#findChat')
+        await login.clear()
+        await chat.clear()
+        await login.send_keys('abc')
+        await chat.send_keys('abc')
+
+        for invalid_input in invalid_inputs:
+            # SET INPUT
+            elem = await user.session.get_element(f'#{input_element}')
+            await elem.clear()
+            await elem.send_keys(invalid_input)
+
+            # GET DETAILS
+            class_name = await elem.get_attribute('class')
+            connect_button = await user.session.get_element('#connectButton')
+            button_text = await connect_button.get_text()
+
+            # VERIFY
+            assert class_name == 'incorrectInput'
+            assert await connect_button.is_enabled() is False
+            assert button_text == 'Connect'
+
+
+@pytest.mark.asyncio
+async def test_valid_inputs(chatbox_server, http_server, user):
+    valid_inputs = ['davinci', 'DaVinci', 'da_vinci', 'Da-Vinci', 'davinci_15', 'fofò', 'tribù', 'verità', 'lunedì',
+                    'ventitré', 'ą', '100', '2-1', 'cç', 'nň', 'uŰ', '01234567890123456789']
+    input_elements_ids = ['login', 'findChat']
+
+    for input_element in input_elements_ids:
+        for valid_input in valid_inputs:
+            # SET INPUT
+            elem = await user.session.get_element(f'#{input_element}')
+            await elem.clear()
+            await elem.send_keys(valid_input)
+
+            # GET DETAILS
+            class_name = await elem.get_attribute('class')
+            connect_button = await user.session.get_element('#connectButton')
+            button_text = await connect_button.get_text()
+
+            # VERIFY
+            assert class_name is None
+            assert await connect_button.is_enabled() is True
+            assert button_text == 'Connect'
+
+
+@pytest.mark.asyncio
+async def test_blank_username_input(chatbox_server, http_server, user):
+    # CLEAR LOGIN INPUT
+    login_elem = await user.session.get_element('#login')
+    await login_elem.clear()
+
+    # GET ELEMENTS
+    class_name = await login_elem.get_attribute('class')
+    connect_button = await user.session.get_element('#connectButton')
+
+    # VERIFY
+    assert class_name is None
+    assert await connect_button.is_enabled() is False
+
+
+@pytest.mark.asyncio
+async def test_blank_chatname_input(chatbox_server, http_server, user):
+    # CLEAR CHAT NAME INPUT
+    chat_elem = await user.session.get_element('#findChat')
+    await chat_elem.clear()
+
+    # GET ELEMENTS
+    class_name = await chat_elem.get_attribute('class')
+    connect_button = await user.session.get_element('#connectButton')
+
+    # VERIFY
+    assert class_name is None
+    assert await connect_button.is_enabled() is False
