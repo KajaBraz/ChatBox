@@ -462,17 +462,6 @@ function update_save_login() {
 
 
 function activate_actions_on_entering_chat() {
-    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE); // DUPLICATES ONLOAD
-    if (stored_user_name && my_name_element.value === retrieve_display_login(stored_user_name)) {
-        login = stored_user_name;
-        console.log('equal logins');
-    } else {
-        let login_update = update_save_login();
-        if (login_update[0] === true) {
-            login = login_update[1];
-        }
-    }
-
     if (validate_input(chat_destination_element.value)) {
         enter_chat(chat_destination_element.value)
     } else {
@@ -652,15 +641,21 @@ const DEFAULT_CHAT_NAME = "WelcomeInChatBox";
 
 
 window.onload = function () {
-    console.log("onload");
-    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE); // DUPLICATES activate_actions_on_entering_chat
+    let full_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
     let short_name;
-    if (stored_user_name) {
-        short_name = retrieve_display_login(stored_user_name);
+    let user_id;
+
+    if (full_user_name) {
+        short_name = retrieve_display_login(full_user_name);
     } else {
         short_name = generate_random_string(5);
+        user_id = generate_random_string(id_length);
+        full_user_name = short_name + user_id
     }
+
     my_name_element.value = short_name;
+    login = full_user_name;
+
     retrieve_recent_chats();
     activate_actions_on_entering_chat();
 }
