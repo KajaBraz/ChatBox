@@ -272,7 +272,9 @@ function chat_change(new_chat) {
 
 function leave_chat(old_chat) {
     store_last_msgs_ids();
-    localStorage.setItem(ACTIVE_CHAT_STORAGE, old_chat);
+    if (validate_input(old_chat) === true) {
+        localStorage.setItem(ACTIVE_CHAT_STORAGE, old_chat);
+    }
     localStorage.setItem(RECENT_CHATS_STORAGE, active_recent_chats);
 }
 
@@ -448,22 +450,24 @@ function adjust_displayed_messages() {
 
 
 function update_save_login() {
-    let id = generate_random_string(id_length);
-    let username = my_name_element.value + id;
-    localStorage.setItem(ACTIVE_USER_STORAGE, username);
-    return username;
+    let typed_login = my_name_element.value;
+    if (validate_input(typed_login)) {
+        let id = generate_random_string(id_length);
+        let username = typed_login + id;
+        localStorage.setItem(ACTIVE_USER_STORAGE, username);
+        return (true, username);
+    }
+    return (false, username);
 }
 
 
 function activate_actions_on_entering_chat() {
-    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
-    if (stored_user_name && my_name_element.value === retrieve_display_login(stored_user_name)) {
-        login = stored_user_name;
-        console.log('equal logins');
+    if (validate_input(chat_destination_element.value)) {
+        enter_chat(chat_destination_element.value)
     } else {
-        login = update_save_login();
+        enter_chat(DEFAULT_CHAT_NAME);
     }
-    enter_chat(chat_destination_element.value)
+
     connect(login, chat);
     add_chat(chat);
     console.log(login, chat);
@@ -633,18 +637,25 @@ const TAB_TITLE = 'ChatBox';
 const audio = document.getElementById('audioSheep');
 const INCORRECT_INPUT_CLASS = "incorrectInput";
 const MAX_INPUT_LENGTH = 20;
+const DEFAULT_CHAT_NAME = "WelcomeInChatBox";
 
 
 window.onload = function () {
-    console.log("onload");
-    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
+    let full_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
     let short_name;
-    if (stored_user_name) {
-        short_name = retrieve_display_login(stored_user_name);
+    let user_id;
+
+    if (full_user_name) {
+        short_name = retrieve_display_login(full_user_name);
     } else {
         short_name = generate_random_string(5);
+        user_id = generate_random_string(id_length);
+        full_user_name = short_name + user_id
     }
+
     my_name_element.value = short_name;
+    login = full_user_name;
+
     retrieve_recent_chats();
     activate_actions_on_entering_chat();
 }
