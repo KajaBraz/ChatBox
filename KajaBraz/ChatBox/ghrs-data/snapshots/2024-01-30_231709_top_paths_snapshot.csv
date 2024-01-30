@@ -1,0 +1,10 @@
+url_path,views_total,views_unique
+/KajaBraz/ChatBox/tree/master/server_http,5,1
+/KajaBraz/ChatBox,4,4
+/KajaBraz/ChatBox/tree/master/src,3,1
+/KajaBraz/ChatBox/blob/master/server_http/endpoints.py,2,1
+/KajaBraz/ChatBox/blob/master/src/chatbox_websocket_server.py,2,1
+/KajaBraz/ChatBox/blob/master/src/host_server.py,2,1
+/KajaBraz/ChatBox/blob/master/src/message.py,2,1
+/KajaBraz/ChatBox/tree/master/server_http/static,2,1
+/KajaBraz/ChatBox/tree/master/server_http/templates,2,1
