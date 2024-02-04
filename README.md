@@ -3,10 +3,12 @@
 |:--------|:------|
 | **STATUS** | ![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/KajaBraz/ChatBox/.github%2Fworkflows%2Fpythonapp.yml) |
 | **LINK** | [![Static Badge](https://img.shields.io/badge/access_ChatBox-HERE-FFE66D)](http://77.255.181.134:13297/) |
-| **TRAFFIC** | [![GitHub Clones](https://img.shields.io/badge/dynamic/json?color=pink&label=clone+count&query=count&url=https://gist.githubusercontent.com/KajaBraz/6c721046f14e080ef8e2a0038b4036b0/raw/clone.json)](https://github.com/MShawon/github-clone-count-badge) |
+| **TRAFFIC** | [![Hits](https://hits.sh/github.com/silentsoft/hits.svg?view=today-total&color=pink&label=daily+/+total+views)](https://github.com/KajaBraz/ChatBox) [![GitHub Clones](https://img.shields.io/badge/dynamic/json?color=pink&label=clones&query=count&url=https://gist.githubusercontent.com/KajaBraz/6c721046f14e080ef8e2a0038b4036b0/raw/clone.json)](https://github.com/MShawon/github-clone-count-badge) |
 | **ACTIVITY** | ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/KajaBraz/ChatBox?label=commits+count&color=orange) ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/y/KajaBraz/ChatBox/master?label=commits+frequency&color=orange) |
 | **ISSUES** | ![GitHub issues](https://img.shields.io/github/issues-raw/KajaBraz/ChatBox?color=brown) ![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/KajaBraz/ChatBox.svg?color=brown) |
 | **SIZE** | ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/KajaBraz/ChatBox?color=blue) ![GitHub repo size](https://img.shields.io/github/repo-size/KajaBraz/ChatBox?color=blue) |
+
+
 
 ## Description
 Client-Server Messaging Application written in Python (server side) and JavaScript (client side) with the use of websockets for sending/receiving messages, Flask for serving http requests, and SQLAlchemy (PostgreSQL) for storing/handling the database.
