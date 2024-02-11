@@ -20,6 +20,7 @@ body {
     max-width: 100%;
     overflow-y: hidden;
     overflow-x: hidden;
+    text-align: center;
 }
 
 button {
