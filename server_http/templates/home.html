@@ -7,6 +7,7 @@
 </head>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='chatbox_style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='chatbox_home_style.css') }}">
 
 <body>
 
@@ -15,7 +16,7 @@
         <h2>Web Messagging App</h2>
     </div>
 
-    <div id="welcomeChat">
+    <div class="welcomeChatContainer">
         <div id="welcomeChatinfo">Say hello to other users in general chat:</div>
         <h3>
             <a id="welcomeChatLink" href="http://77.255.181.134:13297/chat/WelcomeInChatBox">WelcomeInChatBox</a>
@@ -24,9 +25,10 @@
 
     <br>
 
-    <div id="customChatContainer">
+    <div class="customChatContainer">
         <div id="customChatInfo">If you want to join other chats or create a new one</div>
-        <div class="nameInputGrid">
+
+        <div>
             <input id="login" placeholder="Your Name">
             <i class="tooltip" id="loginNameInfo">&#9432;
                 <span class="tooltipText">Username restrictions:
@@ -40,7 +42,7 @@
             </i>
         </div>
 
-        <div class="chatInputGrid">
+        <div>
             <input id="findChat" placeholder="Chat Name" value="{{ requestedChatName }}">
             <i class="tooltip" id="chatNameInfo">&#9432;
                 <span class="tooltipText">Chat name restrictions:
@@ -55,9 +57,10 @@
         </div>
     </div>
 
-    <button class="connectGrid" id="connectButton">Connect</button>
+    <button id="connectButton">Connect</button>
 
-    <script src="{{ url_for('static', filename='main_script.js') }}"></script>
+    <script src="{{ url_for('static', filename='home_script.js') }}"></script>
+    <script src="{{ url_for('static', filename='common_functions.js') }}"></script>
 
 </body>
 

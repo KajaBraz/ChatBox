@@ -1,0 +1,21 @@
+/* .homeGridContainer {
+    display: grid;
+    grid-template-columns: 0.5fr 2fr 0.5fr;
+    grid-template-areas:
+        "header-area        header-area        header-area      "
+        ".................  .................  ................."
+        "general-chat-area  general-chat-area  general-chat-area"
+        "custom-chat-area.  custom-chat-area.  custom-chat-area."
+        "connect-area.....  connect-area.....  connect-area....."
+        ".................  .................  .................";
+} */
+
+.customChatContainer {
+    width: 60%;
+    margin: auto;
+}
+
+#connectButton {
+    cursor: pointer;
+    width: 20%;
+}

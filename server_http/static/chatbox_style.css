@@ -48,6 +48,7 @@ input {
     width: 100%;
 }
 
+/* to be removed when connection part is removed from index.html */
 .chatInputGrid {
     grid-area: chat-input-area;
     margin-left: var(--chatbox-page-margin-left);
@@ -81,6 +82,7 @@ input {
     margin-right: var(--chatbox-page-margin-right);
 }
 
+/* to be removed when connection part is removed from index.html */
 .connectGrid {
     grid-area: connect-area;
     cursor: pointer;
@@ -172,6 +174,7 @@ input {
     background-color: var(--chatbox-color-mid-2);
 }
 
+/* to be removed when connection part is removed from index.html */
 .nameInputGrid {
     grid-area: name-input-area;
     margin-left: var(--chatbox-page-margin-left);
