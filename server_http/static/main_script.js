@@ -434,7 +434,7 @@ function adjust_displayed_messages() {
 function update_save_login() {
     let typed_login = my_name_element.value;
     if (validate_input(typed_login)) {
-        let id = generate_random_string(id_length);
+        let id = generate_random_string(ID_LENGTH);
         let username = typed_login + id;
         localStorage.setItem(ACTIVE_USER_STORAGE, username);
         return (true, username);
@@ -478,7 +478,6 @@ var login = "";
 var chat = "";
 var server_address = "localhost:11000";
 var webSocket = null;
-var id_length = 20;
 var active_recent_chats = [];
 var recently_used_chats = [];
 var unread_messages_ids = [];
@@ -487,17 +486,7 @@ var last_msg_ids_dict = {};
 var last_seen_message_id = -1;
 var new_msgs_count = 0;
 
-
-const LAST_MSG_IDS_STORAGE = "chatbox_stored_last_msg_ids";
-const ACTIVE_CHAT_STORAGE = "chatbox_stored_active_chat";
-const ACTIVE_USER_STORAGE = "chatbox_stored_active_user";
-const RECENT_CHATS_STORAGE = "chatbox_stored_recent_chats";
-const MAX_MSGS_ON_PAGE_NUM = 20;
-const TAB_TITLE = 'ChatBox';
 const audio = document.getElementById('audioSheep');
-const INCORRECT_INPUT_CLASS = "incorrectInput";
-const MAX_INPUT_LENGTH = 20;
-const DEFAULT_CHAT_NAME = "WelcomeInChatBox";
 
 
 window.onload = function () {
@@ -510,7 +499,7 @@ window.onload = function () {
         console.log("***NAME***", full_user_name)
     } else {
         short_name = generate_random_string(5);
-        user_id = generate_random_string(id_length);
+        user_id = generate_random_string(ID_LENGTH);
         full_user_name = short_name + user_id
         console.log("***NO NAME***", full_user_name)
     }

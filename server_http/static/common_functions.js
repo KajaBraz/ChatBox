@@ -10,20 +10,20 @@ function generate_random_string(n) {
 
 
 function retrieve_display_login(user_name) {
-    let name = user_name.slice(0, -id_length);
+    let name = user_name.slice(0, -ID_LENGTH);
     console.log("retrieving user name:", name);
     return name;
 }
 
 
-function disable_button(text = "Connected") {
+function disable_button(text = BUTTON_CONNECTED) {
     connect_button.innerHTML = text;
     connect_button.style.opacity = 0.5;
     connect_button.disabled = true;
 }
 
 
-function enable_button(text = "Connect") {
+function enable_button(text = BUTTON_CONNECT) {
     connect_button.innerHTML = text;
     connect_button.style.opacity = 1;
     connect_button.disabled = false;
@@ -88,7 +88,7 @@ function mark_correct_input(box) {
 
 function is_unchanged(typed_login, typed_chat) {
     console.log('***is_unchanged***', typeof (typed_login), typeof (typed_chat));
-    return typed_login.slice(0, -id_length) && typed_chat === chat;
+    return typed_login.slice(0, -ID_LENGTH) && typed_chat === chat;
 }
 
 
@@ -99,7 +99,7 @@ function inspect_inputs_updates(typed_login, typed_chat, login_elem, chat_elem, 
         disable_button();
 
     } else if (typed_login.length === 0 || typed_chat.length === 0) {
-        disable_button('Connect');
+        disable_button(BUTTON_CONNECT);
         if (typed_login.length === 0) {
             mark_correct_input(login_elem);
         }
@@ -123,17 +123,17 @@ function inspect_inputs_updates(typed_login, typed_chat, login_elem, chat_elem, 
         } else if (!valid_login && !valid_chat) {
             mark_incorrect_input(login_elem);
             mark_incorrect_input(chat_elem);
-            disable_button('Connect');
+            disable_button(BUTTON_CONNECT);
 
         } else if (!valid_login) {
             mark_incorrect_input(login_elem);
             mark_correct_input(chat_elem);
-            disable_button('Connect');
+            disable_button(BUTTON_CONNECT);
 
         } else if (!valid_chat) {
             mark_incorrect_input(chat_elem);
             mark_correct_input(login_elem);
-            disable_button('Connect');
+            disable_button(BUTTON_CONNECT);
         }
     }
 }

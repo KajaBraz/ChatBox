@@ -1,13 +1,6 @@
-const ACTIVE_USER_STORAGE = "chatbox_stored_active_user";
-const ACTIVE_CHAT_STORAGE = "chatbox_stored_active_chat";
-const INCORRECT_INPUT_CLASS = "incorrectInput";
-const MAX_INPUT_LENGTH = 20;
-const DEFAULT_CHAT_NAME = "WelcomeInChatBox";
-
 var my_name_element = document.getElementById("login");
 var connect_button = document.getElementById("connectButton");
 var chat_destination_element = document.getElementById("findChat");
-var id_length = 20;
 
 
 function join_chat() {
@@ -15,7 +8,7 @@ function join_chat() {
     let typed_login = my_name_element.value;
 
     if (validate_input(typed_login)) {
-        let id = generate_random_string(id_length);
+        let id = generate_random_string(ID_LENGTH);
         let username = typed_login + id;
         localStorage.setItem(ACTIVE_USER_STORAGE, username);
     }
