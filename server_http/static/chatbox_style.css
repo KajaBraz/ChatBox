@@ -38,7 +38,6 @@ input {
     border-radius: var(--chatbox-border-radius);
     font-family: var(--chatbox-font);
     height: 25px;
-    margin-bottom: 1%;
     resize: none;
 }
 
@@ -60,9 +59,8 @@ input {
     color: var(--chatbox-color-mid-2);
     grid-area: header-area;
     margin: 0%;
-    margin-bottom: 2%;
-    margin-left: 0%;
-    padding: 2%;
+    padding-bottom: 2%;
+    padding-top: 2%;
     width: 100%;
 }
 
@@ -236,5 +234,6 @@ input {
 
 #findChat,
 #login {
-    width: 90%;
+    margin-top: 1%;
+    width: 40%;
 }

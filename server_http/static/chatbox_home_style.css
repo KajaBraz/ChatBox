@@ -11,11 +11,15 @@
 } */
 
 .customChatContainer {
-    width: 60%;
     margin: auto;
+}
+
+.welcomeChatContainer {
+    padding: 2%;
 }
 
 #connectButton {
     cursor: pointer;
+    margin-top: 1%;
     width: 20%;
 }
