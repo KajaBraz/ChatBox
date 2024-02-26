@@ -15,19 +15,6 @@ function append_div_messages(append_insert_func, my_name, timestamp, message, me
 }
 
 
-function add_element(text, parent, class_name, as_first = false, tag = 'div') {
-    var elem = document.createElement(tag);
-    elem.className = class_name;
-    elem.innerHTML = text;
-    if (!as_first) {
-        parent.appendChild(elem);
-    } else {
-        parent.insertBefore(elem, parent.firstChild);
-    }
-    return elem;
-}
-
-
 function handle_receive(message, message_box_element, class_name) {
     var m = JSON.parse(message);
     if (m["message_type"] == "message") {
@@ -523,6 +510,7 @@ window.onunload = function () {
 }
 
 
+
 connect_button.onclick = () => {
     console.log("clicking connect");
     chat_change(chat_destination_element.value);
@@ -534,6 +522,10 @@ my_name_element.onkeyup = (e) => {
     let typed_chat = chat_destination_element.value;
 
     inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
+
+    if (e.code === 'Enter') {
+        chat_change(chat_destination_element.value);
+    }
 }
 
 
@@ -542,6 +534,10 @@ chat_destination_element.onkeyup = (e) => {
     let typed_chat = chat_destination_element.value;
 
     inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
+
+        if (e.code === 'Enter') {
+        chat_change(chat_destination_element.value);
+    }
 }
 
 
