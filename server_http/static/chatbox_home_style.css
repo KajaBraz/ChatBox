@@ -10,12 +10,22 @@
         ".................  .................  .................";
 } */
 
+hr {
+    color: var(--chatbox-color-dark);
+    margin-top: 3%;
+    width: 80%;
+}
+
 .customChatContainer {
     margin: auto;
 }
 
-.welcomeChatContainer {
-    padding: 2%;
+.homeSection {
+    padding-top: 2%;
+}
+
+.recentChat {
+    margin: 0.2%;
 }
 
 #connectButton {

@@ -16,9 +16,10 @@ body {
     background-color: var(--chatbox-color-mid-2);
     font-family: var(--chatbox-font);
     margin: 0%;
+    margin-bottom: 1%;
     max-height: 100%;
     max-width: 100%;
-    overflow-y: hidden;
+    /* overflow-y: hidden; */
     overflow-x: hidden;
     text-align: center;
 }

@@ -1,3 +1,15 @@
+function add_element(text, parent, class_name, as_first = false, tag = 'div') {
+    var elem = document.createElement(tag);
+    elem.className = class_name;
+    elem.innerHTML = text;
+    if (!as_first) {
+        parent.appendChild(elem);
+    } else {
+        parent.insertBefore(elem, parent.firstChild);
+    }
+    return elem;
+}
+
 function generate_random_string(n) {
     var s = "qwertyuioopasdfghjklzxcvbnmWERTYUIOPASDFGHJKLZXCVBNM1234567890";
     var id = '';
@@ -117,7 +129,7 @@ function inspect_inputs_updates(typed_login, typed_chat, login_elem, chat_elem, 
             enable_button();
 
             if (key_event.code == 'Enter') {
-                window.location.href = `${window.location.origin}/chat/${chat_elem.value}`;
+                window.location.href = open_chat_page(chat_elem.value);
             }
 
         } else if (!valid_login && !valid_chat) {
@@ -135,5 +147,11 @@ function inspect_inputs_updates(typed_login, typed_chat, login_elem, chat_elem, 
             mark_correct_input(login_elem);
             disable_button(BUTTON_CONNECT);
         }
+    }
+}
+
+function open_chat_page(destination_chat) {
+    if (validate_input(destination_chat)) {
+        window.location.href = `${window.location.origin}/chat/${destination_chat}`;
     }
 }
