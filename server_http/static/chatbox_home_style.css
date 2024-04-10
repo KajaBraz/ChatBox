@@ -25,6 +25,7 @@ hr {
 }
 
 .recentChat {
+    cursor: pointer;
     margin: 0.2%;
 }
 
