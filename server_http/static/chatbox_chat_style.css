@@ -10,16 +10,6 @@
     width: 80%;
 }
 
-.chatNameHeaderGrid {
-    background-color: var(--chatbox-color-dark);
-    color: var(--chatbox-color-mid-2);
-    grid-area: header-area;
-    margin: 0%;
-    padding-bottom: 2%;
-    padding-top: 2%;
-    width: 100%;
-}
-
 .chatUser {
     background-color: var(--chatbox-color-dark);
     border: var(--chatbox-border-box);
