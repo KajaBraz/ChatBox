@@ -99,17 +99,14 @@ function mark_correct_input(box) {
 
 
 function is_unchanged(typed_login, typed_chat) {
-    console.log('***is_unchanged***', typeof (typed_login), typeof (typed_chat));
-    return typed_login.slice(0, -ID_LENGTH) && typed_chat === chat;
+    return typed_login == login.slice(0, -ID_LENGTH) && typed_chat === chat;
 }
-
 
 function inspect_inputs_updates(typed_login, typed_chat, login_elem, chat_elem, key_event) {
     if (is_unchanged(typed_login, typed_chat)) {
         mark_correct_input(login_elem);
         mark_correct_input(chat_elem);
         disable_button();
-
     } else if (typed_login.length === 0 || typed_chat.length === 0) {
         disable_button(BUTTON_CONNECT);
         if (typed_login.length === 0) {
