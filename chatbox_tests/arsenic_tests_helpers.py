@@ -1,4 +1,5 @@
 import arsenic
+from arsenic import keys
 
 from server_http.endpoints import app
 
@@ -27,6 +28,11 @@ async def connect_user(session: arsenic.Session, username: str, chat: str = '') 
 async def get_login_input_value(session: arsenic.Session) -> str:
     typed_login = await session.execute_script('return document.querySelector("#login").value')
     return typed_login
+
+
+async def remove_typed_text(elem):
+    await elem.send_keys(f'{keys.CONTROL}a')
+    await elem.send_keys(keys.BACKSPACE)
 
 
 def run_http_server():

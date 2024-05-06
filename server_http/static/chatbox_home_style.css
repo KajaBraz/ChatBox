@@ -1,0 +1,36 @@
+/* .homeGridContainer {
+    display: grid;
+    grid-template-columns: 0.5fr 2fr 0.5fr;
+    grid-template-areas:
+        "header-area        header-area        header-area      "
+        ".................  .................  ................."
+        "general-chat-area  general-chat-area  general-chat-area"
+        "custom-chat-area.  custom-chat-area.  custom-chat-area."
+        "connect-area.....  connect-area.....  connect-area....."
+        ".................  .................  .................";
+} */
+
+hr {
+    color: var(--chatbox-color-dark);
+    margin-top: 3%;
+    width: 80%;
+}
+
+.customChatContainer {
+    margin: auto;
+}
+
+.homeSection {
+    padding-top: 2%;
+}
+
+.recentChat {
+    cursor: pointer;
+    margin: 0.2%;
+}
+
+#connectButton {
+    cursor: pointer;
+    margin-top: 1%;
+    width: 20%;
+}
