@@ -15,8 +15,10 @@ The chat rooms can be created and accessed in the browser (http://77.255.181.134
 
 The chats are open and can be viewed by all the users who enter them.
 
-An example ChatBox view:
+Home page view:
+![321419975-5a90acd6-2d8d-49d7-a227-3e7a444497be](https://github.com/KajaBraz/ChatBox/assets/58611238/42a4a2d2-1147-46a0-8420-9cb6e77d2c81)
 
+An example chat view:
 ![obraz](https://github.com/KajaBraz/ChatBox/assets/58611238/24835cc4-49df-4666-9f4d-facb1d87f23e)
 
 ## Contact
