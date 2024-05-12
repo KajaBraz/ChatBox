@@ -1,7 +1,6 @@
 import asyncio
 import multiprocessing
 import os.path
-import time
 from typing import Union
 
 import arsenic
@@ -71,9 +70,17 @@ async def test_open_chatbox_home_link(chatbox_server, http_server):
     for url in ['localhost:5000/', 'localhost:5000/home']:
         await session.get(url)
         header_elem = await session.get_element('#chatBoxTitle')
+        chat_elem = await session.get_element('#findChat')
+        typed_chat = await chat_elem.get_attribute('value')
+        typed_login = await arsenic_tests_helpers.get_login_input_value(session)
+        connect_button = await session.get_element('#connectButton')
+        button_text = await connect_button.get_text()
 
-        assert page_title in await header_elem.get_text()
-        assert page_subtitle in await header_elem.get_text()
+        assert await header_elem.get_text() == f'{page_title}\n{page_subtitle}'
+        assert typed_chat != ''
+        assert typed_login != ''
+        assert await connect_button.is_enabled() is True
+        assert button_text == 'Connect'
 
     await arsenic.stop_session(session)
 

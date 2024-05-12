@@ -108,7 +108,7 @@ function connect(user_name, chat_name) {
     }
     let short_name = retrieve_display_login(user_name);
     if (not_blank(short_name) && not_blank(chat_name)) {
-        var url = `ws://${server_address}/${chat_name}/${user_name}`;
+        var url = `ws://${SERVER_ADDRESS}/${chat_name}/${user_name}`;
         console.log("url", url);
         webSocket = new WebSocket(url);
 
@@ -463,7 +463,6 @@ var share_button = document.querySelector("#clipboard");
 
 var login = "";
 var chat = "";
-var server_address = "localhost:11000";
 var webSocket = null;
 var active_recent_chats = [];
 var recently_used_chats = [];
@@ -510,7 +509,6 @@ window.onunload = function () {
 }
 
 
-
 connect_button.onclick = () => {
     console.log("clicking connect");
     chat_change(chat_destination_element.value);
@@ -535,7 +533,7 @@ chat_destination_element.onkeyup = (e) => {
 
     inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
 
-        if (e.code === 'Enter') {
+    if (e.code === 'Enter') {
         chat_change(chat_destination_element.value);
     }
 }

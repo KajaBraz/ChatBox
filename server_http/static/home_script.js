@@ -1,6 +1,6 @@
 var my_name_element = document.getElementById("login");
-var connect_button = document.getElementById("connectButton");
 var chat_destination_element = document.getElementById("findChat");
+var connect_button = document.getElementById("connectButton");
 
 
 function store_input() {
@@ -64,23 +64,23 @@ function update_stored_chats(new_chat) {
 window.onload = function () {
     let full_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
     let short_name;
+    let user_id;
 
     if (full_user_name) {
         short_name = retrieve_display_login(full_user_name);
+    } else {
+        short_name = generate_random_string(5);
+        user_id = generate_random_string(ID_LENGTH);
+        full_user_name = short_name + user_id
     }
 
     my_name_element.value = short_name;
+    chat_destination_element.value = chat = DEFAULT_CHAT_NAME;
 
-    disable_button(BUTTON_CONNECT);
+    login = full_user_name;
+
+    enable_button(BUTTON_CONNECT);
     retrieve_stored_recent_chats();
-}
-
-
-document.onkeyup = (e) => {
-    if (e.code === 'Enter') {
-        store_input()
-        open_chat_page(chat_destination_element.value);
-    }
 }
 
 
@@ -95,6 +95,14 @@ my_name_element.onkeyup = (e) => {
     let typed_chat = chat_destination_element.value;
 
     inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
+
+    if (is_unchanged(typed_login, typed_chat)) {
+        enable_button(BUTTON_CONNECT);
+    }
+    if (e.code === 'Enter') {
+        store_input()
+        open_chat_page(chat_destination_element.value);
+    }
 }
 
 
@@ -103,4 +111,11 @@ chat_destination_element.onkeyup = (e) => {
     let typed_chat = chat_destination_element.value;
 
     inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
+
+    if (is_unchanged(typed_login, typed_chat)) {
+        enable_button(BUTTON_CONNECT);
+    }
+    if (e.code === 'Enter') {
+        open_chat_page(chat_destination_element.value);
+    }
 }
