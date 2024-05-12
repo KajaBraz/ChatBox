@@ -73,10 +73,12 @@ class Server:
         try:
             self.log.info(f'{websocket} - waiting for messages')
             self.log.info(f'{websocket} - PATH {path}')
-            if not helper_functions.check_url(path):
+            if not helper_functions.check_connection_url(path):
                 await websocket.close(code=4000, reason='wrong login or chat name')
-                self.log.info(f'websocket closed, wrong login or chat name')
+                self.log.info(f'websocket closed, invalid websocket url ({path})')
                 return
+
+            self.log.info(f'websocket open, valid websocket url ({path})')
 
             path_items = path.split('/')
             login, chat_name = path_items[-1], path_items[-2]

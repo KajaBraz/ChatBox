@@ -1,7 +1,7 @@
 import asyncio
 import multiprocessing
 import os.path
-import time
+from typing import Union
 
 import arsenic
 import pytest
@@ -15,8 +15,9 @@ from src import helper_functions, chatbox_websocket_server, enums
 class User:
     def __init__(self):
         self.chat_room = helper_functions.generate_random_string(10)
-        self.user_name = helper_functions.generate_random_string(10)
-        self.session: arsenic.Session = None
+        self.user_name = ''
+        self.session: Union[arsenic.Session, None] = None
+        self.headless = True
         self.timeout = 20
 
 
@@ -51,41 +52,63 @@ async def http_server():
 @pytest_asyncio.fixture
 async def user():
     client = User()
-    client.session = await arsenic_tests_helpers.creaate_session(client.chat_room, True)
+    client.session = await arsenic_tests_helpers.create_session(client.chat_room, client.headless)
+    client.user_name = await arsenic_tests_helpers.get_login_input_value(client.session)
 
     yield client
-    await arsenic.stop_session(client.session)
+    if client.session:
+        await arsenic.stop_session(client.session)
 
 
 @pytest.mark.asyncio
-async def test_open_chatbox_default_link(chatbox_server, http_server):
-    default_chat_name = enums.Constants.DEFAULT_CHAT_NAME
-    session1 = await arsenic.start_session(arsenic.services.Geckodriver(),
-                                           arsenic.browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}}))
-    session2 = await arsenic.start_session(arsenic.services.Geckodriver(),
-                                           arsenic.browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}}))
-    await session1.get(f'localhost:5000/')
-    await session2.get(f'localhost:5000/chat/')
+async def test_open_chatbox_home_link(chatbox_server, http_server):
+    session = await arsenic.start_session(arsenic.services.Geckodriver(),
+                                          arsenic.browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}}))
+    page_title = 'ChatBox'
+    page_subtitle = 'Web Messagging App'
 
-    for session in [session1, session2]:
-        await session.wait_for_element(20, '.gridContainer')
+    for url in ['localhost:5000/', 'localhost:5000/home']:
+        await session.get(url)
+        header_elem = await session.get_element('#chatBoxTitle')
         chat_elem = await session.get_element('#findChat')
-        displayed_url = await session.get_url()
-        header_elem = await session.get_element('#chatNameHeader')
-        chat_list_elem = await session.get_element('#recentlyUsedChats')
-        displayed_chat = await chat_list_elem.get_element(f'#{default_chat_name}')
-        active_users = await session.get_element('#activeUsers')
-        login = await session.execute_script('return document.querySelector("#login").value')
+        typed_chat = await chat_elem.get_attribute('value')
+        typed_login = await arsenic_tests_helpers.get_login_input_value(session)
+        connect_button = await session.get_element('#connectButton')
+        button_text = await connect_button.get_text()
 
-        assert await chat_elem.get_attribute('value') == default_chat_name
-        assert await header_elem.get_text() == default_chat_name
-        assert await displayed_chat.get_text() == default_chat_name
-        assert default_chat_name not in displayed_url
-        assert login != ''
-        assert login in await active_users.get_text()
+        assert await header_elem.get_text() == f'{page_title}\n{page_subtitle}'
+        assert typed_chat != ''
+        assert typed_login != ''
+        assert await connect_button.is_enabled() is True
+        assert button_text == 'Connect'
 
-    await arsenic.stop_session(session1)
-    await arsenic.stop_session(session2)
+    await arsenic.stop_session(session)
+
+
+@pytest.mark.asyncio
+async def test_open_chatbox_default_chat_link(chatbox_server, http_server):
+    default_chat_name = enums.Constants.DEFAULT_CHAT_NAME
+    session = await arsenic.start_session(arsenic.services.Geckodriver(),
+                                          arsenic.browsers.Firefox(**{'moz:firefoxOptions': {'args': ['-headless']}}))
+    await session.get('localhost:5000/chat/')
+
+    await session.wait_for_element(20, '.gridContainer')
+    chat_elem = await session.get_element('#findChat')
+    displayed_url = await session.get_url()
+    header_elem = await session.get_element('#chatNameHeader')
+    chat_list_elem = await session.get_element('#recentlyUsedChats')
+    displayed_chat = await chat_list_elem.get_element(f'#{default_chat_name}')
+    active_users = await session.get_element('#activeUsers')
+    login = await arsenic_tests_helpers.get_login_input_value(session)
+
+    assert await chat_elem.get_attribute('value') == default_chat_name
+    assert await header_elem.get_text() == default_chat_name
+    assert await displayed_chat.get_text() == default_chat_name
+    assert default_chat_name not in displayed_url
+    assert login != ''
+    assert login in await active_users.get_text()
+
+    await arsenic.stop_session(session)
 
 
 @pytest.mark.asyncio
@@ -109,12 +132,14 @@ async def test_connect_with_button(chatbox_server, http_server, user):
     await arsenic_tests_helpers.connect_user(user.session, new_login, new_chat)
 
     header_elem = await user.session.get_element('#chatNameHeader')
-    chat_list_elem = await user.session.get_element('#recentlyUsedChats')
-    displayed_chats = await chat_list_elem.get_text()
+    recent_chat_1 = await user.session.get_element(f'#{new_chat}')
+    recent_chat_2 = await user.session.get_element(f'#{user.chat_room}')
+    recent_chat_1 = await recent_chat_1.get_text()
+    recent_chat_2 = await recent_chat_2.get_text()
     displayed_user = await user.session.get_element('#activeUsers')
 
     assert await header_elem.get_text() == new_chat
-    assert set(displayed_chats.split()) == {user.chat_room, new_chat}
+    assert {recent_chat_1, recent_chat_2} == {user.chat_room, new_chat}
     assert await displayed_user.get_text() == new_login
 
 
@@ -157,7 +182,7 @@ async def test_active_users_display(chatbox_server, http_server, user):
     temp_drivers = {user.session}
 
     for new_user in new_users:
-        new_session = await arsenic_tests_helpers.creaate_session(user.chat_room)
+        new_session = await arsenic_tests_helpers.create_session(user.chat_room, user.headless)
         await arsenic_tests_helpers.connect_user(new_session, new_user)
         # todo refactor connect_user and make user/chat optional
         new_sessions.add(new_session)
@@ -165,7 +190,8 @@ async def test_active_users_display(chatbox_server, http_server, user):
         temp_drivers.add(new_session)
         temp_active_users_elems = [await dr.get_element('#activeUsers') for dr in temp_drivers]
         temp_active_users = [await active_users_elem.get_text() for active_users_elem in temp_active_users_elems]
-        assert all(temp_users == set(displayed.split()) for displayed in temp_active_users)
+        assert all((temp_user in displayed for temp_user in temp_users) for displayed in temp_active_users)
+        # Temporary solution until Active Users are displayed as buttons
 
     # todo, temporary to remove, use separate windows instead, not drivers
     for ns in new_sessions:
@@ -176,7 +202,7 @@ async def test_active_users_display(chatbox_server, http_server, user):
 async def test_messages_position(chatbox_server, http_server, user):
     # CONNECT USER 2
     user2 = helper_functions.generate_random_string(5)
-    new_session = await arsenic_tests_helpers.creaate_session()
+    new_session = await arsenic_tests_helpers.create_session(headless=user.headless)
     await arsenic_tests_helpers.connect_user(new_session, user2, user.chat_room)
 
     # PREPARE MESSAGES USER1
@@ -245,7 +271,10 @@ async def test_previous_messages(chatbox_server, http_server, user):
     displayed_messaged_on_connection = [await m.get_text() for m in displayed_messaged_on_connection]
 
     assert messages[-messages_displayed_on_connection:] == displayed_messaged_on_connection
+
     await user.session.execute_script("receivedMessages.scrollTo(0, -receivedMessages.offsetHeight)")
+    await user.session.wait_for_element(user.timeout, '[id="5"]')
+
     displayed_messaged_on_connection_after_scoll = await received_messages_box.get_elements('.messageText')
     displayed_messaged_on_connection_after_scoll = [await m.get_text() for m in
                                                     displayed_messaged_on_connection_after_scoll]
@@ -296,7 +325,7 @@ async def test_send_and_open_link(chatbox_server, http_server, user):
     await send_button.click()
 
     # CLICK LINKS
-    messages = await user.session.get_elements('.messageText')
+    messages = await user.session.get_elements('a')
     await messages[-1].click()
     await messages[-2].click()
 
@@ -327,3 +356,218 @@ async def test_copy_to_clipboard(chatbox_server, http_server, user):
     # VERIFY COPIED TEXT
     pasted_message = await user.session.execute_script('return document.querySelector("#newMessage").value')
     assert pasted_message == f'http://localhost:5000/chat/{user.chat_room}'
+
+
+@pytest.mark.asyncio
+async def test_connect_button(chatbox_server, http_server, user):
+    # VERIFY BUTTON ON CONNECTION
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is False
+    assert button_text == 'Connected'
+
+    # CHANGE USER NAME
+    login_elem = await user.session.get_element('#login')
+    await login_elem.send_keys('a')
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is True
+    assert button_text == 'Connect'
+
+    # DELETE USER NAME
+    await arsenic_tests_helpers.remove_typed_text(login_elem)
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is False
+    assert button_text == 'Connect'
+
+    # BRING BACK USER NAME
+    await login_elem.send_keys(user.user_name)
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is False
+    assert button_text == 'Connected'
+
+    # CHANGE CHAT NAME
+    chat_elem = await user.session.get_element('#findChat')
+    await chat_elem.send_keys('a')
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is True
+    assert button_text == 'Connect'
+
+    # DELETE CHAT NAME
+    await arsenic_tests_helpers.remove_typed_text(chat_elem)
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is False
+    assert button_text == 'Connect'
+
+    # BRING BACK CHAT NAME
+    await chat_elem.send_keys(user.chat_room)
+
+    # VERIFY BUTTON
+    connect_button = await user.session.get_element('#connectButton')
+    button_text = await connect_button.get_text()
+
+    assert await connect_button.is_enabled() is False
+    assert button_text == 'Connected'
+
+
+@pytest.mark.asyncio
+async def test_invalid_input_verification(chatbox_server, http_server, user):
+    invalid_inputs = ['Da Vinci', 'da vinci', 'DaVinci.', 'da#vinci', 'da@vinci', 'da(vinci)', 'da&vinci', 'da_vinci!',
+                      'da/vinci', 'davinci?', 'da[vinci]', 'da{vinci}', 'da|vinci', '-', '_', 'da+vinci', 'da*vinci',
+                      '"davinci"', "fofo'", "lunedi'", '#3', '5!', '1$', '2~3', 'dþ', '012345678901234567890']
+    input_elements_ids = ['login', 'findChat']
+
+    for input_element in input_elements_ids:
+        # ENSURE THE LOOP STARTS WITH CORRECT VALUES
+        login = await user.session.get_element('#login')
+        chat = await user.session.get_element('#findChat')
+        await login.clear()
+        await chat.clear()
+        await login.send_keys('abc')
+        await chat.send_keys('abc')
+
+        for invalid_input in invalid_inputs:
+            # SET INPUT
+            elem = await user.session.get_element(f'#{input_element}')
+            await elem.clear()
+            await elem.send_keys(invalid_input)
+
+            # GET DETAILS
+            class_name = await elem.get_attribute('class')
+            connect_button = await user.session.get_element('#connectButton')
+            button_text = await connect_button.get_text()
+
+            # VERIFY
+            assert class_name == 'incorrectInput'
+            assert await connect_button.is_enabled() is False
+            assert button_text == 'Connect'
+
+
+@pytest.mark.asyncio
+async def test_valid_inputs(chatbox_server, http_server, user):
+    valid_inputs = ['davinci', 'DaVinci', 'da_vinci', 'Da-Vinci', 'davinci_15', 'fofò', 'tribù', 'verità', 'lunedì',
+                    'ventitré', 'ą', '100', '2-1', 'cç', 'nň', 'uŰ', '01234567890123456789']
+    input_elements_ids = ['login', 'findChat']
+
+    for input_element in input_elements_ids:
+        for valid_input in valid_inputs:
+            # SET INPUT
+            elem = await user.session.get_element(f'#{input_element}')
+            await elem.clear()
+            await elem.send_keys(valid_input)
+
+            # GET DETAILS
+            class_name = await elem.get_attribute('class')
+            connect_button = await user.session.get_element('#connectButton')
+            button_text = await connect_button.get_text()
+
+            # VERIFY
+            assert class_name is None
+            assert await connect_button.is_enabled() is True
+            assert button_text == 'Connect'
+
+
+@pytest.mark.asyncio
+async def test_blank_username_input(chatbox_server, http_server, user):
+    # CLEAR LOGIN INPUT
+    login_elem = await user.session.get_element('#login')
+    await login_elem.clear()
+
+    # GET ELEMENTS
+    class_name = await login_elem.get_attribute('class')
+    connect_button = await user.session.get_element('#connectButton')
+
+    # VERIFY
+    assert class_name is None
+    assert await connect_button.is_enabled() is False
+
+
+@pytest.mark.asyncio
+async def test_blank_chatname_input(chatbox_server, http_server, user):
+    # CLEAR CHAT NAME INPUT
+    chat_elem = await user.session.get_element('#findChat')
+    await chat_elem.clear()
+
+    # GET ELEMENTS
+    class_name = await chat_elem.get_attribute('class')
+    connect_button = await user.session.get_element('#connectButton')
+
+    # VERIFY
+    assert class_name is None
+    assert await connect_button.is_enabled() is False
+
+
+@pytest.mark.asyncio
+async def test_leave_chat_without_login_and_chat(chatbox_server, http_server, user):
+    # CLEAR LOGIN AND CHAT NAME INPUTS
+    login_elem = await user.session.get_element('#login')
+    await login_elem.clear()
+
+    chat_elem = await user.session.get_element('#findChat')
+    await chat_elem.clear()
+
+    # # CLOSE PAGE
+    await arsenic.stop_session(user.session)
+    user.session = None
+
+    # OPEN NEW PAGE AND CHECK DATA
+    new_session = await arsenic_tests_helpers.create_session(user.chat_room, user.headless)
+
+    # VERIFY INPUTS
+    login_input_value = await arsenic_tests_helpers.get_login_input_value(new_session)
+    chat_elem = await new_session.get_element('#findChat')
+    chat_input_value = await chat_elem.get_attribute('value')
+
+    assert login_input_value != ''
+    assert chat_input_value == user.chat_room
+
+    await arsenic.stop_session(new_session)
+
+
+@pytest.mark.asyncio
+async def test_leave_chat_with_invalid_inputs(chatbox_server, http_server, user):
+    # PROVIDE INCORRECT LOGIN AND CHAT NAME INPUTS
+    login_elem = await user.session.get_element('#login')
+    await login_elem.clear()
+    await login_elem.send_keys('This is wrong!')
+
+    chat_elem = await user.session.get_element('#findChat')
+    await chat_elem.clear()
+    await chat_elem.send_keys('This is wrong!')
+
+    # CLOSE PAGE
+    await arsenic.stop_session(user.session)
+    user.session = None
+
+    # OPEN NEW PAGE AND CHECK DATA
+    new_session = await arsenic_tests_helpers.create_session(user.chat_room, user.headless)
+
+    # VERIFY INPUTS
+    login_input_value = await arsenic_tests_helpers.get_login_input_value(new_session)
+    chat_elem = await new_session.get_element('#findChat')
+    chat_input_value = await chat_elem.get_attribute('value')
+
+    assert login_input_value != 'This is wrong!' and login_input_value != ''
+    assert chat_input_value != 'This is wrong!' and chat_input_value == user.chat_room
+
+    await arsenic.stop_session(new_session)

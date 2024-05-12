@@ -1,0 +1,77 @@
+:root {
+    --chatbox-border-box: 1px solid black;
+    --chatbox-border-radius: 2px;
+    --chatbox-color-dark: #141414;
+    --chatbox-color-light: #FAF6DD;
+    --chatbox-color-mid-1: #FCF2B4;
+    --chatbox-color-mid-2: #FFE66D;
+    --chatbox-color-text-button: #FCF2B4;
+    --chatbox-color-text-message: #141414;
+    --chatbox-font: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    --chatbox-page-margin-left: 15%;
+    --chatbox-page-margin-right: 15%;
+}
+
+body {
+    background-color: var(--chatbox-color-mid-2);
+    font-family: var(--chatbox-font);
+    margin: 0%;
+    margin-bottom: 1%;
+    max-height: 100%;
+    max-width: 100%;
+    /* overflow-y: hidden; */
+    overflow-x: hidden;
+    text-align: center;
+}
+
+button {
+    background-color: var(--chatbox-color-dark);
+    color: var(--chatbox-color-text-button);
+    border: var(--chatbox-border-box);
+    border-radius: var(--chatbox-border-radius);
+    font-family: var(--chatbox-font);
+    height: 25px;
+}
+
+input {
+    background-color: var(--chatbox-color-light);
+    border: var(--chatbox-border-box);
+    border-radius: var(--chatbox-border-radius);
+    font-family: var(--chatbox-font);
+    height: 25px;
+    resize: none;
+}
+
+.chatNameHeaderGrid {
+    background-color: var(--chatbox-color-dark);
+    color: var(--chatbox-color-mid-2);
+    grid-area: header-area;
+    margin: 0%;
+    margin-bottom: 1%;
+    padding-bottom: 2%;
+    padding-top: 2%;
+    width: 100%;
+}
+
+.incorrectInput {
+    background-color: rgba(255, 0, 0, 0.525);
+    border: 3px solid red;
+}
+
+.tooltip .tooltiptext {
+    background-color: var(--chatbox-color-dark);
+    border: 1px dashed var(--chatbox-color-mid-2);
+    border-radius: var(--chatbox-border-radius);
+    color: var(--chatbox-color-light);
+    font-size: small;
+    padding: 1%;
+    position: absolute;
+    text-align: left;
+    visibility: hidden;
+    white-space: pre-line;
+    z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}

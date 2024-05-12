@@ -5,25 +5,12 @@ function append_div_messages(append_insert_func, my_name, timestamp, message, me
     } else {
         div.style.float = "left";
     }
-    let message_header_div = add_div("", div, "messageHeader");
+    let message_header_div = add_element("", div, "messageHeader");
     let name = retrieve_display_login(my_name);
-    add_div(name, message_header_div, "divAuthor");
+    add_element(name, message_header_div, "divAuthor");
     let date = new Date(timestamp);
-    let timestamp_div = add_div(`${date.toLocaleDateString()} - ${date.toLocaleTimeString()}`, message_header_div, "divTimestamp");
-    let message_text_div = add_div(message, div, "messageText");
-    return div;
-}
-
-
-function add_div(text, parent, class_name, as_first = false) {
-    var div = document.createElement("div");
-    div.className = class_name;
-    div.innerHTML = text;
-    if (!as_first) {
-        parent.appendChild(div);
-    } else {
-        parent.insertBefore(div, parent.firstChild);
-    }
+    let timestamp_div = add_element(`${date.toLocaleDateString()} - ${date.toLocaleTimeString()}`, message_header_div, "divTimestamp");
+    let message_text_div = add_element(message, div, "messageText");
     return div;
 }
 
@@ -36,7 +23,7 @@ function handle_receive(message, message_box_element, class_name) {
         var message_text = detect_hyperlink(val["message"]);
         var timestamp = val["timestamp"];
         console.log('message val', message_text);
-        var new_message = append_div_messages(add_div, name, timestamp, message_text, message_box_element, class_name);
+        var new_message = append_div_messages(add_element, name, timestamp, message_text, message_box_element, class_name);
         new_message.id = val["id"];
         message_box_element.scrollTo(0, message_box_element.scrollHeight);
         if (class_name === "message messageUnread") {
@@ -55,7 +42,7 @@ function handle_receive(message, message_box_element, class_name) {
             var message_text = detect_hyperlink(single_message["message"]);
             var timestamp = single_message["timestamp"];
             var status = assign_read_unread_class(single_message["id"]);
-            var new_message = append_div_messages(add_div, name, timestamp, message_text, message_box_element, status);
+            var new_message = append_div_messages(add_element, name, timestamp, message_text, message_box_element, status);
             new_message.id = single_message["id"];
             message_box_element.scrollTo(0, message_box_element.scrollHeight);
             if (status === "message messageUnread") {
@@ -73,7 +60,7 @@ function handle_receive(message, message_box_element, class_name) {
             var message_text = detect_hyperlink(single_message["message"]);
             var timestamp = single_message["timestamp"];
             var status = assign_read_unread_class(single_message["id"]);
-            var new_message = append_div_messages(add_div, name, timestamp, message_text, message_box_element, status, true);
+            var new_message = append_div_messages(add_element, name, timestamp, message_text, message_box_element, status, true);
             new_message.id = single_message["id"];
             message_box_element.scrollTo(0, message_box_element.offsetHeight);
             if (status === "message messageUnread") {
@@ -114,24 +101,6 @@ function send_websocket(message_type, message, sender, chat_destination, websock
 }
 
 
-function generate_random_string(n) {
-    var s = "qwertyuioopasdfghjklzxcvbnmWERTYUIOPASDFGHJKLZXCVBNM1234567890";
-    var id = '';
-    for (let i = 0; i < n; i++) {
-        id += s[Math.floor(Math.random() * s.length)];
-    }
-    console.log(id);
-    return id;
-}
-
-
-function retrieve_display_login(user_name) {
-    let name = user_name.slice(0, -id_length);
-    console.log("retrieving user name:", name);
-    return name;
-}
-
-
 function connect(user_name, chat_name) {
     if (webSocket != null) {
         console.log('not nnull');
@@ -139,7 +108,7 @@ function connect(user_name, chat_name) {
     }
     let short_name = retrieve_display_login(user_name);
     if (not_blank(short_name) && not_blank(chat_name)) {
-        var url = `ws://${server_address}/${chat_name}/${user_name}`;
+        var url = `ws://${SERVER_ADDRESS}/${chat_name}/${user_name}`;
         console.log("url", url);
         webSocket = new WebSocket(url);
 
@@ -217,7 +186,7 @@ function add_chat(new_chat) {
         console.log(active_recent_chats);
         active_recent_chats.push(new_chat);
         // var new_div = add_div(new_chat, recent_chats, "availableChat");
-        var new_div = add_div(new_chat, recent_chats, "availableChat", true);
+        var new_div = add_element(new_chat, recent_chats, "availableChat", true, "button");
         new_div.id = new_chat;
         new_div.onclick = () => {
             chat_change(new_chat);
@@ -232,7 +201,7 @@ function add_chat(new_chat) {
         active_recent_chats.push(new_chat);
         remove_given_chat(active_recent_chats, new_chat);
         // var new_div = add_div(new_chat, recent_chats, "availableChat");
-        var new_div = add_div(new_chat, recent_chats, "availableChat", true);
+        var new_div = add_element(new_chat, recent_chats, "availableChat", true, "button");
         new_div.id = new_chat;
         new_div.onclick = () => {
             chat_change(new_chat);
@@ -248,7 +217,7 @@ function update_user_list(new_users_array, active_users_element, class_name) {
         let short_name = retrieve_display_login(user_name);
         console.log("updating:", user_name);
         if (!chat_participants.has(user_name)) {
-            var child_div = add_div(short_name, active_users_element, class_name);
+            var child_div = add_element(short_name, active_users_element, class_name, null);
             child_div.id = user_name;
             chat_participants.add(user_name);
         }
@@ -272,7 +241,9 @@ function chat_change(new_chat) {
 
 function leave_chat(old_chat) {
     store_last_msgs_ids();
-    localStorage.setItem(ACTIVE_CHAT_STORAGE, old_chat);
+    if (validate_input(old_chat) === true) {
+        localStorage.setItem(ACTIVE_CHAT_STORAGE, old_chat);
+    }
     localStorage.setItem(RECENT_CHATS_STORAGE, active_recent_chats);
 }
 
@@ -411,9 +382,9 @@ function prepare_image_message(img_as_file, my_name) {
         if (my_name === login) {
             img_elem.style.float = "right";
         }
-        let message_header_div = add_div("", img_elem, "messageHeader");
+        let message_header_div = add_element("", img_elem, "messageHeader");
         let name = retrieve_display_login(my_name);
-        add_div(name, message_header_div, "divAuthor");
+        add_element(name, message_header_div, "divAuthor");
         // let date = new Date(timestamp);
         // new_div = add_div(date.toLocaleDateString() + " - " + date.toLocaleTimeString(), message_header_div, "divTimestamp");
 
@@ -448,25 +419,29 @@ function adjust_displayed_messages() {
 
 
 function update_save_login() {
-    let id = generate_random_string(id_length);
-    let username = my_name_element.value + id;
-    localStorage.setItem(ACTIVE_USER_STORAGE, username);
-    return username;
+    let typed_login = my_name_element.value;
+    if (validate_input(typed_login)) {
+        let id = generate_random_string(ID_LENGTH);
+        let username = typed_login + id;
+        localStorage.setItem(ACTIVE_USER_STORAGE, username);
+        return (true, username);
+    }
+    return (false, username);
 }
 
 
 function activate_actions_on_entering_chat() {
-    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
-    if (stored_user_name && my_name_element.value === retrieve_display_login(stored_user_name)) {
-        login = stored_user_name;
-        console.log('equal logins');
+    if (validate_input(chat_destination_element.value)) {
+        enter_chat(chat_destination_element.value)
     } else {
-        login = update_save_login();
+        enter_chat(DEFAULT_CHAT_NAME);
     }
-    enter_chat(chat_destination_element.value)
+
     connect(login, chat);
     add_chat(chat);
     console.log(login, chat);
+
+    disable_connect_button();
 }
 
 
@@ -474,6 +449,7 @@ function copy_chat_url() {
     let chat_url = window.location.href;
     navigator.clipboard.writeText(chat_url);
 }
+
 
 var button_element = document.getElementById("sendMessageButton");
 var message_element = document.getElementById("newMessage");
@@ -487,9 +463,7 @@ var share_button = document.querySelector("#clipboard");
 
 var login = "";
 var chat = "";
-var server_address = "localhost:11000";
 var webSocket = null;
-var id_length = 20;
 var active_recent_chats = [];
 var recently_used_chats = [];
 var unread_messages_ids = [];
@@ -498,26 +472,27 @@ var last_msg_ids_dict = {};
 var last_seen_message_id = -1;
 var new_msgs_count = 0;
 
-
-const LAST_MSG_IDS_STORAGE = "chatbox_stored_last_msg_ids";
-const ACTIVE_CHAT_STORAGE = "chatbox_stored_active_chat";
-const ACTIVE_USER_STORAGE = "chatbox_stored_active_user";
-const RECENT_CHATS_STORAGE = "chatbox_stored_recent_chats";
-const MAX_MSGS_ON_PAGE_NUM = 20;
-const TAB_TITLE = 'ChatBox'
-const audio = new Audio("static/sheep-122256.mp3");
+const audio = document.getElementById('audioSheep');
 
 
 window.onload = function () {
-    console.log("onload");
-    let stored_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
+    let full_user_name = localStorage.getItem(ACTIVE_USER_STORAGE);
     let short_name;
-    if (stored_user_name) {
-        short_name = retrieve_display_login(stored_user_name);
+    let user_id;
+
+    if (full_user_name) {
+        short_name = retrieve_display_login(full_user_name);
+        console.log("***NAME***", full_user_name)
     } else {
         short_name = generate_random_string(5);
+        user_id = generate_random_string(ID_LENGTH);
+        full_user_name = short_name + user_id
+        console.log("***NO NAME***", full_user_name)
     }
+
     my_name_element.value = short_name;
+    login = full_user_name;
+
     retrieve_recent_chats();
     activate_actions_on_entering_chat();
 }
@@ -535,19 +510,30 @@ window.onunload = function () {
 
 
 connect_button.onclick = () => {
+    console.log("clicking connect");
     chat_change(chat_destination_element.value);
 }
 
 
-my_name_element.onkeydown = (e) => {
-    if (e.code == 'Enter') {
-        window.location.href = `${window.location.origin}/chat/${chat_destination_element.value}`;
+my_name_element.onkeyup = (e) => {
+    let typed_login = my_name_element.value;
+    let typed_chat = chat_destination_element.value;
+
+    let [_modified, _correct] = inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
+
+    if (e.code === 'Enter') {
+        chat_change(chat_destination_element.value);
     }
 }
 
 
-chat_destination_element.onkeydown = (e) => {
-    if (e.code == 'Enter') {
+chat_destination_element.onkeyup = (e) => {
+    let typed_login = my_name_element.value;
+    let typed_chat = chat_destination_element.value;
+
+    let [_modified, _correct] = inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
+
+    if (e.code === 'Enter') {
         chat_change(chat_destination_element.value);
     }
 }
