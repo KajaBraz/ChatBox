@@ -28,14 +28,14 @@ function retrieve_display_login(user_name) {
 }
 
 
-function disable_button(text = BUTTON_CONNECTED) {
+function disable_connect_button(text = BUTTON_CONNECTED) {
     connect_button.innerHTML = text;
     connect_button.style.opacity = 0.5;
     connect_button.disabled = true;
 }
 
 
-function enable_button(text = BUTTON_CONNECT) {
+function enable_connect_button(text = BUTTON_CONNECT) {
     connect_button.innerHTML = text;
     connect_button.style.opacity = 1;
     connect_button.disabled = false;
@@ -102,13 +102,25 @@ function is_unchanged(typed_login, typed_chat) {
     return typed_login == login.slice(0, -ID_LENGTH) && typed_chat === chat;
 }
 
+
 function inspect_inputs_updates(typed_login, typed_chat, login_elem, chat_elem, key_event) {
+    var modified_inputs;
+    var correct_inputs;
+
     if (is_unchanged(typed_login, typed_chat)) {
+        disable_connect_button();
         mark_correct_input(login_elem);
         mark_correct_input(chat_elem);
-        disable_button();
+
+        modified_inputs = false;
+        correct_inputs = true;
+
     } else if (typed_login.length === 0 || typed_chat.length === 0) {
-        disable_button(BUTTON_CONNECT);
+        disable_connect_button(BUTTON_CONNECT);
+
+        modified_inputs = true;
+        correct_inputs = false;
+
         if (typed_login.length === 0) {
             mark_correct_input(login_elem);
         }
@@ -120,32 +132,36 @@ function inspect_inputs_updates(typed_login, typed_chat, login_elem, chat_elem, 
         let valid_login = validate_input(typed_login, MAX_INPUT_LENGTH);
         let valid_chat = validate_input(typed_chat, MAX_INPUT_LENGTH);
 
+        modified_inputs = true;
+        correct_inputs = valid_login && valid_chat;
+
         if (valid_login && valid_chat) {
+            enable_connect_button();
             mark_correct_input(login_elem);
             mark_correct_input(chat_elem);
-            enable_button();
 
             if (key_event.code == 'Enter') {
                 window.location.href = open_chat_page(chat_elem.value);
             }
 
-        } else if (!valid_login && !valid_chat) {
-            mark_incorrect_input(login_elem);
-            mark_incorrect_input(chat_elem);
-            disable_button(BUTTON_CONNECT);
+        } else {
+            disable_connect_button(BUTTON_CONNECT);
 
-        } else if (!valid_login) {
-            mark_incorrect_input(login_elem);
-            mark_correct_input(chat_elem);
-            disable_button(BUTTON_CONNECT);
-
-        } else if (!valid_chat) {
-            mark_incorrect_input(chat_elem);
-            mark_correct_input(login_elem);
-            disable_button(BUTTON_CONNECT);
+            if (!valid_login && !valid_chat) {
+                mark_incorrect_input(login_elem);
+                mark_incorrect_input(chat_elem);
+            } else if (!valid_login) {
+                mark_incorrect_input(login_elem);
+                mark_correct_input(chat_elem);
+            } else if (!valid_chat) {
+                mark_incorrect_input(chat_elem);
+                mark_correct_input(login_elem);
+            }
         }
     }
+    return [modified_inputs, correct_inputs];
 }
+
 
 function open_chat_page(destination_chat) {
     if (validate_input(destination_chat)) {

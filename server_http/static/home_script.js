@@ -75,11 +75,12 @@ window.onload = function () {
     }
 
     my_name_element.value = short_name;
-    chat_destination_element.value = chat = DEFAULT_CHAT_NAME;
+    chat_destination_element.value = DEFAULT_CHAT_NAME;
+    chat = DEFAULT_CHAT_NAME;
 
     login = full_user_name;
 
-    enable_button(BUTTON_CONNECT);
+    enable_connect_button(BUTTON_CONNECT);
     retrieve_stored_recent_chats();
 }
 
@@ -94,10 +95,10 @@ my_name_element.onkeyup = (e) => {
     let typed_login = my_name_element.value;
     let typed_chat = chat_destination_element.value;
 
-    inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
+    let [_, is_correct] = inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
 
-    if (is_unchanged(typed_login, typed_chat)) {
-        enable_button(BUTTON_CONNECT);
+    if (is_correct) {
+        enable_connect_button();
     }
     if (e.code === 'Enter') {
         store_input()
@@ -110,10 +111,10 @@ chat_destination_element.onkeyup = (e) => {
     let typed_login = my_name_element.value;
     let typed_chat = chat_destination_element.value;
 
-    inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
+    let [_, is_correct] = inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
 
-    if (is_unchanged(typed_login, typed_chat)) {
-        enable_button(BUTTON_CONNECT);
+    if (is_correct) {
+        enable_connect_button();
     }
     if (e.code === 'Enter') {
         open_chat_page(chat_destination_element.value);

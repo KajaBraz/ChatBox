@@ -441,7 +441,7 @@ function activate_actions_on_entering_chat() {
     add_chat(chat);
     console.log(login, chat);
 
-    disable_button();
+    disable_connect_button();
 }
 
 
@@ -519,7 +519,7 @@ my_name_element.onkeyup = (e) => {
     let typed_login = my_name_element.value;
     let typed_chat = chat_destination_element.value;
 
-    inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
+    let [_modified, _correct] = inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
 
     if (e.code === 'Enter') {
         chat_change(chat_destination_element.value);
@@ -531,7 +531,7 @@ chat_destination_element.onkeyup = (e) => {
     let typed_login = my_name_element.value;
     let typed_chat = chat_destination_element.value;
 
-    inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
+    let [_modified, _correct] = inspect_inputs_updates(typed_login, typed_chat, my_name_element, chat_destination_element, e);
 
     if (e.code === 'Enter') {
         chat_change(chat_destination_element.value);
