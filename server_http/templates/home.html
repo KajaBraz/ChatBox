@@ -16,19 +16,8 @@
         <h2>Web Messagging App</h2>
     </div>
 
-    <div class="homeSection" id="welcomeChatContainer">
-        <h2>Say hello to other users in general chat:</h2>
-
-        <a id="welcomeChatLink" href="http://localhost:5000/chat/WelcomeInChatBox">
-            <button>WelcomeInChatBox</button>
-        </a>
-
-    </div>
-
-    <hr>
-
     <div class="homeSection" id="customChatContainer">
-        <h2>Join other chats or create a new one:</h2>
+        <h2>Choose your login and enter chat:</h2>
 
         <div>
             <input id="login" placeholder="Your Name">
@@ -45,7 +34,7 @@
         </div>
 
         <div>
-            <input id="findChat" placeholder="Chat Name" value="{{ requestedChatName }}">
+            <input id="findChat" placeholder="Chat Name">
             <i class="tooltip" id="chatNameInfo">&#9432;
                 <span class="tooltipText">Chat name restrictions:
                     - at least 1 character long
@@ -67,7 +56,7 @@
         <div id="recentChatsList"></div>
     </div>
 
-
+    <script src="{{ url_for('static', filename='config.js') }}"></script>
     <script src="{{ url_for('static', filename='constants.js') }}"></script>
     <script src="{{ url_for('static', filename='home_script.js') }}"></script>
     <script src="{{ url_for('static', filename='common_functions.js') }}"></script>
