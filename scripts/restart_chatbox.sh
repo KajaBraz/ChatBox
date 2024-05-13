@@ -38,7 +38,7 @@ sed -i "s/\"name\": .*/\"name\": \"0.0.0.0\",/" chatbox_config.json
 
 # Update Flask data
 echo -e "\nUpdate Flask data:"
-sed -i "s/app.run()/app.run(host='0.0.0.0', port='13297')" server_http/endpoints.py
+sed -i "s/app.run()/app.run(host='0.0.0.0', port='13297')/" server_http/endpoints.py
 
 # Move the logs file to the most recent folder in archive
 last_dir=$( ls -rt logs_archive | tail -n 1 )
