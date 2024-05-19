@@ -20,7 +20,7 @@ git pull
 
 # Get current ip address
 ip_address=$( curl ifconfig.me/ip )
-echo -e "\nGetting IP address: $ip_address"
+echo -e "\nGet IP address: $ip_address"
 
 # Update the server's address
 echo -e "\nUpdate server address:"
@@ -28,14 +28,11 @@ sed -i "s/SERVER_ADDRESS = .*/SERVER_ADDRESS = $ip_address/" server_http/static/
 sed -n 1p server_http/static/config.js
 
 # Update config data
-echo -e "\nUpdate config data:"
-sed -i "s/\"db_login\": .*/\"db_login\": \"$database_login\",/" chatbox_config.json
-sed -i "s/\"db_password\": .*/\"db_password\": \"$database_password\",/" chatbox_config.json
-sed -i "s/\"db_name\": .*/\"db_name\": \"$database_name\"/" chatbox_config.json
+echo -e "\nUpdate config data"
 sed -i "s/\"name\": .*/\"name\": \"0.0.0.0\",/" chatbox_config.json
 
 # Update Flask data
-echo -e "\nUpdate Flask data:"
+echo -e "\nUpdate Flask data"
 sed -i "s/app.run()/app.run(host='0.0.0.0', port='11000')/" server_http/endpoints.py
 
 # Move the logs file to the most recent folder in archive
@@ -44,7 +41,7 @@ echo -e "\nMove Chatbox server logs to logs_archive/$last_dir"
 mv logs.log logs_archive/$last_dir
 
 # Create new dir with name defined as parameter
-logs_dir="logs_archive/$logs_subdirectory"
+logs_dir="logs_archive/$new_logs_subdirectory"
 mkdir "$logs_dir"
 
 # Start http server and save log file in the above folder
