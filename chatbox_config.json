@@ -1,16 +1,16 @@
 {
   "_comment": "Set the configuration values and execute the following command, git update-index --skip-worktree FILE_PATH, so that git excludes your changes to this file. You can undo this action by running: git update-index --no-skip-worktree FILE_PATH",
   "database": {
-    "db_login": "postgres",
-    "db_password": "000",
-    "db_name": "chatbox2"
+    "db_login": "",
+    "db_password": "",
+    "db_name": ""
   },
   "logs": {
-    "log_file_name": "logs.log",
+    "log_file_name": "",
     "to_console": false
   },
   "address": {
-    "name": "localhost",
-    "port": 11000
+    "name": "",
+    "port": 0
   }
 }

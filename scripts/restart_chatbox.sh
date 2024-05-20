@@ -35,19 +35,16 @@ sed -i "s/\"name\": .*/\"name\": \"0.0.0.0\",/" chatbox_config.json
 echo -e "\nUpdate Flask data"
 sed -i "s/app.run()/app.run(host='0.0.0.0', port='11000')/" server_http/endpoints.py
 
-# Move the logs file to the most recent folder in archive
-last_dir=$( ls -rt logs_archive | tail -n 1 )
-echo -e "\nMove Chatbox server logs to logs_archive/$last_dir"
-mv logs.log logs_archive/$last_dir
+# Add marker line to differentiate new version in log files
+latest_commit=$( git log -n1 --pretty=format:%h )
+logs_path_chatbox=$(  grep "log_file_name" chatbox_config.json | awk -F[\"\"] '{print $4}' )
+echo -e "\n\n **** NEW VERSION **** \nRestart after commit: $latest_commit \n\n" >> $logs_path_http
+echo -e "\n\n **** NEW VERSION **** \nRestart after commit: $latest_commit \n\n" >> $logs_path_chatbox
 
-# Create new dir with name defined as parameter
-logs_dir="logs_archive/$new_logs_subdirectory"
-mkdir "$logs_dir"
-
-# Start http server and save log file in the above folder
-python -m server_http.endpoints >> $logs_dir/http_logs.logs 2>&1 &
-echo -e "\nServer http started. Logs are being saved in $logs_dir"
+# Start http server
+python -m server_http.endpoints >> $logs_path_http 2>&1 &
+echo -e "\nServer http started. Logs are being saved in $logs_path_http"
 
 # Start chatbox server
 python -m src.chatbox_websocket_server chatbox_config.json &
-echo -e "\nChatbox server started"
+echo -e "\nChatbox server started. Logs are being saved in $logs_path_chatbox"
