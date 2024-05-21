@@ -2,10 +2,28 @@
 
 source restart.config
 
-echo -e "\nRestart process started. Working in the following directory:"
-pwd .
+cur_dir = $( pwd )
 
-# Kill all python processes (should be http and chatbox servers)
+# Ensure working directory the repository's main folder
+if ! [[ Chatbox -ef $( basename $cur_dir ) ]];
+  then
+    echo "Incorrect working directory. Run the script from ChatBox main folder.";
+    echo "Restart process could not be completed. Try again.";
+    exit 1;
+else
+  echo -e "\nRestart process started. Working in the following directory: $cur_dir";
+fi
+
+# Save diff for reference
+echo -e "\nWrite diff.txt file (note that the files not scanned for updates will be missing here)"
+git diff > diff.txt
+
+# Instruct git not to scan the config files for updates (treat them as unchanged)
+echo -e "\nAvoid writing config files to the working directory"
+git update-index --skip-worktree chatbox_config.json
+git update-index --skip-worktree scripts/restart.config
+
+# Kill all python processes (two processes expected: http and chatbox servers)
 python_PIDs=$( pidof python )
 echo -e "\nKill sessions: $python_PIDs"
 kill $python_PIDs
