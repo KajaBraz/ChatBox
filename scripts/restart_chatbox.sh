@@ -2,7 +2,7 @@
 
 source restart.config
 
-cur_dir = $( pwd )
+cur_dir=$( pwd )
 
 # Ensure working directory the repository's main folder
 if ! [[ Chatbox -ef $( basename $cur_dir ) ]];
