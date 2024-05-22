@@ -1,24 +1,30 @@
 #!/usr/bin/env bash
 
-source scripts/restart_chatbox.config
+# Script which automates ChatBox deployment to production.
+# On its execution, the latest changes from the repository are pulled and both the http and Chatbox servers are restarted.
+# The script uses values defined in the following files: chatbox_config.json and scripts/restart_chatbox.config
+# Script has to be executed from the ChatBox main directory
 
 cur_dir=$( pwd )
 
-# Ensure working directory is the repository's main folder
-if ! [[ ChatBox -eq $( basename $cur_dir ) ]]; then
-  echo "\nIncorrect working directory ($cur_dir). Run the script from ChatBox main folder.";
+# Ensure working directory is the repository's main directory
+# Stop the execution if it is not
+if ! [[ ChatBox == $( basename $cur_dir ) ]]; then
+  echo "\nIncorrect working directory ($cur_dir). Run the script from ChatBox main directory.";
   echo "Restart process could not be completed. Try again.";
   exit 1;
-else
-  echo -e "\nRestart process started. Working in the following directory: $cur_dir";
 fi
 
+source scripts/restart_chatbox.config
+
+echo -e "\nRestart process started. Working in the following directory: $cur_dir";
+
 # Save diff for reference
-echo -e "\nWrite diff.txt file (note that the files not scanned for updates will be missing here)"
+echo -e "\nWrite diff.txt file (note that if there are any files not scanned for updates, they will be missing here)"
 git diff > diff.txt
 
-# Instruct git not to scan the config files for updates (treat them as unchanged)
-echo -e "\nAvoid writing config files to the working directory"
+# Instruct git not to scan the config files for updates (treat them as unchanged in order to preserve config values)
+# This is required in order to be able to execute "git restore" and "git pull" but will be undone afterwards
 git update-index --skip-worktree chatbox_config.json
 git update-index --skip-worktree scripts/restart_chatbox.config
 
@@ -28,13 +34,16 @@ echo -e "\nKill sessions: $python_PIDs"
 kill $python_PIDs
 
 # Restore all modified files
-git diff > diff.txt
 git restore .
 
 # Pull latest changes
 echo -e "\nPull latest changes"
 git pull
 echo -e "\n"
+
+# Undo ignoring config files (include previously excluded files in order to avoid potential confusion)
+git update-index --skip-worktree chatbox_config.json
+git update-index --skip-worktree scripts/restart_chatbox.config
 
 # Get current ip address
 ip_address=$( curl ifconfig.me/ip )
