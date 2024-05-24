@@ -82,7 +82,7 @@ def set_logger(logger_name, to_console=True):
     if to_console:
         logging.basicConfig(format=formatter, level=logging.INFO)
     else:
-        logging.basicConfig(filename='logs.log', format=formatter, level=logging.INFO)
+        logging.basicConfig(filename=logger_name, format=formatter, level=logging.INFO)
     return logging.getLogger(logger_name)
 
 
