@@ -6,7 +6,7 @@
     "db_name": "chatbox2"
   },
   "logs": {
-    "log_file_name": logs_chatbox.log"",
+    "log_file_name": "logs_chatbox.log",
     "to_console": false
   },
   "address": {
