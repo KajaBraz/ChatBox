@@ -51,7 +51,7 @@ echo -e "\nGet IP address: $ip_address"
 
 # Update the server's address
 echo -e "\nUpdate server address:"
-sed -i "s/SERVER_ADDRESS = .*/SERVER_ADDRESS = \"$ip_address:11000\"/" server_http/static/config.js
+sed -i "s/SERVER_ADDRESS = .*/SERVER_ADDRESS = \"$ip_address:11000\";/" server_http/static/config.js
 sed -n 1p server_http/static/config.js
 
 # Update config data
@@ -60,7 +60,7 @@ sed -i "s/\"name\": .*/\"name\": \"0.0.0.0\",/" chatbox_config.json
 
 # Update Flask data
 echo -e "\nUpdate Flask data"
-sed -i "s/app.run()/app.run(host='0.0.0.0', port='13297')/" server_http/endpoints.py
+sed -i "s/app.run()/app.run(host='0.0.0.0', port='$port')/" server_http/endpoints.py
 
 # Add marker line to differentiate new version in log files
 latest_commit=$( git log -n1 --pretty=format:%h )
@@ -70,11 +70,11 @@ echo -e "\n\n**** NEW VERSION ****\n\tRestart date:\t$cur_date\n\tLatest commit:
 echo -e "\n\n**** NEW VERSION ****\n\tRestart date:\t$cur_date\n\tLatest commit:\t$latest_commit\n\n" >> $logs_path_chatbox
 
 # Start http server
-python -m server_http.endpoints >> $logs_path_http 2>&1 &&
+python -m server_http.endpoints >> $logs_path_http 2>&1 &
 echo -e "\nServer http started. Logs are being saved in $logs_path_http"
 
 # Start chatbox server
-python -m src.chatbox_websocket_server chatbox_config.json 2>&1 &&
+python -m src.chatbox_websocket_server chatbox_config.json 2>&1 &
 echo -e "\nChatbox server started. Logs are being saved in $logs_path_chatbox"
 
-echo -e "\nChatbox restart complete. Link: $ip_address:13297"
+echo -e "\nChatbox restart complete. Link: $ip_address:$port"
