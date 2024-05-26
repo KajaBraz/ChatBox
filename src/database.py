@@ -1,6 +1,6 @@
-import pprint
 import random
 from datetime import datetime
+from typing import List
 
 import pandas as pd
 import sqlalchemy
@@ -61,6 +61,38 @@ class ChatBoxDatabase:
             for entry in entries:
                 print(entry)
 
+    def get_chat_names(self) -> List[str]:
+        """
+        Get unique chat names sorted by recent activity (newest first).
+        :return: List[str]
+        """
+        table = self.metadata.tables['messages']
+        stm = select([table.c.chat_name]).order_by(table.c.id.desc())
+        chat_names = self.connection.execute(stm)
+        chat_names_all = [entry[0] for entry in chat_names]
+        chat_names_unique = [chat_name for i, chat_name in enumerate(chat_names_all) if
+                             chat_name not in set(chat_names_all[:i])]
+        return chat_names_unique
+
+    def get_messages_in_chat(self, chat_name: str) -> List[str]:
+        """
+        Get all messages sent in a given chat sorted by recency (newest first).
+        :param chat_name: str
+        :return: List[str]
+        """
+        table = self.metadata.tables['messages']
+        stm = select([table.c.message]).where(table.c.chat_name == chat_name).order_by(table.c.id.desc())
+        messages = [entry[0] for entry in self.connection.execute(stm)]
+        return messages
+
+    def get_message_count(self, chat_name: str) -> int:
+        """
+        Get the number of messages sent in a given chat.
+        :param chat_name: str
+        :return: int
+        """
+        return len(self.get_messages_in_chat(chat_name))
+
     def get_historic_messages(self, start_period: str, end_period: str, str_to_search: str):
         """
         :param start_period: '%d/%m/%y' ex. '01/03/21 00:00:00'
@@ -103,13 +135,19 @@ class ChatBoxDatabase:
 if __name__ == '__main__':
     data = helper_functions.read_config('../chatbox_config.json')
     chatbox_database = ChatBoxDatabase(data)
-    chatbox_database.show_entries('users')
-    chatbox_database.show_entries('messages')
-    chatbox_database.add_user('anna_magnani', 'roma_citta_aperta')
-    chatbox_database.add_message('giordano_bruno', 'sapienza', 'il sapere e\' il potere', datetime.now())
-    mess = chatbox_database.get_historic_messages('07/03/21 00:00:00', '08/06/21 23:59:59', 'ciao')
-    pprint.pprint(mess)
-    pprint.pprint(chatbox_database.fetch_last_messages('zwierzaki', 10))
-    past_mess = chatbox_database.fetch_last_messages('zwierzogrod')
-    chatbox_database.print_df(past_mess, ['login', 'message', 'chat', 'data_time'])
+    # chatbox_database.show_entries('users')
+    # chatbox_database.show_entries('messages')
+    # chatbox_database.add_user('anna_magnani', 'roma_citta_aperta')
+    # chatbox_database.add_message('giordano_bruno', 'sapienza', 'il sapere e\' il potere', datetime.now())
+    # mess = chatbox_database.get_historic_messages('07/03/21 00:00:00', '08/06/21 23:59:59', 'ciao')
+    # pprint.pprint(mess)
+    # pprint.pprint(chatbox_database.fetch_last_messages('zwierzaki', 10))
+    # past_mess = chatbox_database.fetch_last_messages('zwierzogrod')
+    # chatbox_database.print_df(past_mess, ['login', 'message', 'chat', 'data_time'])
+    # unique_chat_names = chatbox_database.get_chat_names()
+    # print(unique_chat_names)
+    # all_messages_in_chat = chatbox_database.get_messages_in_chat('DivinaCommedia')
+    # print(all_messages_in_chat)
+    # message_count = chatbox_database.get_message_count('0')
+    # print(message_count)
     pass
