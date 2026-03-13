@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/KajaBraz/ChatBox,2,2
+/KajaBraz/ChatBox/issues,2,1
+/KajaBraz/ChatBox/blob/master/chatbox_tests/arsenic_tests_helpers.py,1,1
+/KajaBraz/ChatBox/blob/master/chatbox_tests/integration/test_integration.py,1,1
+/KajaBraz/ChatBox/blob/master/chatbox_tests/integration/virtual_websocket_client.py,1,1
+/KajaBraz/ChatBox/blob/master/chatbox_tests/mocked_database.py,1,1
+/KajaBraz/ChatBox/blob/master/server_http/endpoints.py,1,1
+/KajaBraz/ChatBox/tree/master,1,1
+/KajaBraz/ChatBox/tree/master/scripts,1,1
+/KajaBraz/ChatBox/tree/master/server_http,1,1
